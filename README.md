@@ -6,4 +6,4 @@ Development library for python IRT
 Python 3.7: Download [here](https://www.anaconda.com/distribution/)
 
 ## installation
-python setup.py install --prefix <Your Installation Path>
+python setup.py install --prefix [Your Installation Path]

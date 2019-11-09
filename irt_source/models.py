@@ -12,9 +12,7 @@ def rasch_model(abilities, difficulty):
         array of probabilities computed over abilities and difficulty
         [items, participants]
     """
-    kernel = abilities[None, :] - difficulty[:, None]
-    kernel *= -1.0
-    return 1.0 / (1.0 + np.exp(kernel))
+    return one_parameter_model(abilities, difficulty, 1.0)
 
 
 def one_parameter_model(abilities, difficulty, scale=1.7):

@@ -1,27 +1,30 @@
 import numpy as np
 
 
-def rasch_model(abilities, difficulty):
+def rasch_model(irtArray):
     """Computes the rasch_model sigmoid function.
 
     Args:
-        abilities: numpy array vector of participant abilities
-        difficulty: numpy array vector of item difficulties
+        irtArray:  IRT Array with the following properties
+            Abilities: array of participant abilities
+            Difficulty: array of item difficulties
 
     Returns:
         array of probabilities computed over abilities and difficulty
         [items, participants]
     """
-    return one_parameter_model(abilities, difficulty, 1.0)
+    kernel = irtArray['Difficulty'][:, None] - irtArray['Abilities'][None, :]
 
+    return 1.0 / (1.0 + np.exp(kernel))
 
-def one_parameter_model(abilities, difficulty, scale=1.7):
+def one_parameter_model(irtArray):
     """Computes the one parameter sigmoid function.
 
     Args:
-        abilities: numpy array vector of participant abilities
-        difficulty: numpy array vector of item difficulties
-        scale: scalar value adjusting the discrimination (default=1.7)
+        irtArray:  IRT Array with the following properties
+            Abilities: array of participant abilities
+            Difficulty: array of item difficulties
+            Discrimination: array of length 1 of item Discrimination
 
     Returns:
         array of probabilities
@@ -30,21 +33,22 @@ def one_parameter_model(abilities, difficulty, scale=1.7):
     Note:
         If scale is set to 1, then use rasch_model instead
     """
-    if np.ndim(scale) != 0:
-        raise AssertionError("Scale value can only be scalar.")
-    kernel = abilities[None, :] - difficulty[:, None]
-    kernel *= -1 * scale
+    if irtArray.shapes['Discrimination'] != 1:
+        raise AssertionError("Discrimination value can only be scalar.")
+    kernel = irtArray['Difficulty'][:, None] - irtArray['Abilities'][None, :]
+    kernel *= 1.7 * irtArray['Discrimination']
 
     return 1.0 / (1.0 + np.exp(kernel))
 
 
-def two_parameter_model(abilities, difficulty, scale):
+def two_parameter_model(irtArray):
     """Computes the two parameter sigmoid function.
 
     Args:
-        abilities: numpy array vector of participant abilities
-        difficulty: numpy array vector of item difficulties
-        scale: numpy array, vector of item discrimination parameters
+        irtArray:  IRT Array with the following properties
+            Abilities: array of participant abilities
+            Difficulty: array of item difficulties
+            Discrimination: array of item discriminations
 
     Returns:
         array of probabilities
@@ -53,22 +57,23 @@ def two_parameter_model(abilities, difficulty, scale):
     Note:
         difficulty length and discrimination length must be equal
     """
-    if scale.size != difficulty.size:
-        raise AssertionError("Scale sizes must be the same length as difficulty.")
-    kernel = abilities[None, :] - difficulty[:, None]
-    kernel *= scale[:, None] * -1
+    if irtArray.shapes['Discrimination'] != irtArray.shapes['Difficulty']:
+        raise AssertionError("Discrimination sizes must be the same length as difficulty.")
+    kernel = irtArray['Difficulty'][:, None] - irtArray['Abilities'][None, :]
+    kernel *= irtArray['Discrimination'][:, None]
 
-    return 1.0 / (1.0 + np.exp(-1 * kernel))
+    return 1.0 / (1.0 + np.exp(kernel))
 
 
-def three_parameter_model(abilites, difficulty, scale, guessing):
+def three_parameter_model(irtArray):
     """Computes the two parameter sigmoid function.
 
     Args:
-        abilities: numpy array vector of participant abilities
-        difficulty: numpy array vector of item difficulties
-        scale: numpy array, vector of item discrimination parameters
-        guessing: numpy array, vector of item guessing parameters
+        irtArray:  IRT Array with the following properties
+            Abilities: array of participant abilities
+            Difficulty: array of item difficulties
+            Discrimination: array of item discriminations
+            Guessing: array of item guessing parameters
 
     Returns:
         array of probabilities computed over abilities and difficulty
@@ -77,11 +82,13 @@ def three_parameter_model(abilites, difficulty, scale, guessing):
     Note:
         difficulty length and discrimination length must be equal
     """
-    if scale.size != guessing.size:
-        raise AssertionError("Scale value can only be scalar.")
+    if irtArray.shapes['Guessing'] != irtArray.shapes['Difficulty']::
+        raise AssertionError("Guessing sizes must be same length as difficulty.")
 
-    temp = two_parameter_model(abilites, difficulty, scale)
-    temp *= (1.0 - guessing[:, None])
-    temp += guessing[:, None]
+    guess = irtArray['Guessing'][:, None]
+
+    temp = two_parameter_model(irtArray)
+    temp *= (1.0 - guess)
+    temp += guess
 
     return temp

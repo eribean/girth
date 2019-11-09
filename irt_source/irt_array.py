@@ -23,7 +23,6 @@ class IRTArray(np.ndarray):
     def __new__(cls, input_array, metadata=None):
         if type(input_array) == list: # IRT Array from list of values
             start_index = 0
-            total_length = 0
             data_arrays = []
             metadata = default_metadata()
 

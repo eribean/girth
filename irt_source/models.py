@@ -82,7 +82,7 @@ def three_parameter_model(irtArray):
     Note:
         difficulty length and discrimination length must be equal
     """
-    if irtArray.shapes['Guessing'] != irtArray.shapes['Difficulty']::
+    if irtArray.shapes['Guessing'] != irtArray.shapes['Difficulty']:
         raise AssertionError("Guessing sizes must be same length as difficulty.")
 
     guess = irtArray['Guessing'][:, None]

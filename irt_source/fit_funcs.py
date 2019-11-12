@@ -1,8 +1,8 @@
 from sys import float_info
 from copy import deepcopy
 
-from numpy import numpy
-from scipy.optimize import optimize
+import numpy as np
+from scipy.optimize import basinhopping
 
 from irt_source import IRTArray
 from irt_source import (rasch_model, one_parameter_model, two_parameter_model,
@@ -98,9 +98,9 @@ class IRTModelFit(object):
 
         # Apply Constraints
         self.parameters['Difficulty'] -= self.parameters['Difficulty'].mean()
-
-        if self.model in ['2pl', '3pl']:
-            self.parameters['Discrimination'] /= self.parameters['Discrimination'].prod()
+        #
+        # if self.model in ['2pl', '3pl']:
+        #     self.parameters['Discrimination'] /= self.parameters['Discrimination'].prod()
 
     def __run__(self):
         """Performs the fit of the data."""

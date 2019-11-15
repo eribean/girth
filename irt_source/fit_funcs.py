@@ -15,7 +15,7 @@ IRTMODELS = {'rasch': rasch_model,
              '3pl': three_parameter_model}
 
 
-class IRTModelFit(object):
+class IRTBaseClass(object):
     """Class to fit the parameters for an IRT model.
 
     Args:
@@ -49,10 +49,46 @@ class IRTModelFit(object):
 
     def _expectation_step(self):
         """Maximizes abilities over given parameters"""
+        raise NotImplementedError('Expectation Step Undefined.')
+
+    def _maximization_step(self):
+        """Maximizes parameters over given abilities"""
+        raise NotImplementedError('Expectation Step Undefined.')
+
+    def __call__(self, iter=1):
+        """Performs the fit of the data."""
+        for _ in range(iter):
+            self._expectation_step()
+            self._maximization_step()
+
+        return self.parameters
+
+
+class MarginalMaximumLikelihood(IRTBaseClass):
+    """Implements the Marginal Maximum Likelihood solver for IRT Models."""
+    def __init__(self, measurement, model="Rasch"):
+        IRTBaseClass.__init__(self, measument, model)
+
+        self.unique_response, self.unique_counts = np.unique(measurement,
+                                                             axis=1,
+                                                             return_counts=True)
+
+    def _expectation_step(self):
+        pass
+
+    def _maximization_step(self):
+        pass
+
+
+class JointMaximumLikelihood(IRTBaseClass):
+    """Implements the Joint Maximum Likelihood solver for IRT models."""
+
+    def _expectation_step(self):
+        """Maximizes abilities over given parameters"""
         local_values = deepcopy(self.parameters)
 
         def local_min(abilities):
-            local_values['Abilities'] = abilities
+            local_values['Abilities'] =  abilities
             probabilities = self.probability_func(local_values)
             probabilities = np.where(self.measurement, probabilities,
                                      1.0 - probabilities)
@@ -82,6 +118,7 @@ class IRTModelFit(object):
         def local_min(estimation_parameters):
             for key in model_parameters:
                 local_values[key] = estimation_parameters[model_slices[key]]
+            local_values['Difficulty'] -= local_values['Difficulty'].mean()
 
             probabilities = self.probability_func(local_values)
             probabilities = np.where(self.measurement, probabilities,
@@ -101,6 +138,3 @@ class IRTModelFit(object):
         #
         # if self.model in ['2pl', '3pl']:
         #     self.parameters['Discrimination'] /= self.parameters['Discrimination'].prod()
-
-    def __run__(self):
-        """Performs the fit of the data."""

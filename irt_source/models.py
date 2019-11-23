@@ -36,7 +36,7 @@ def one_parameter_model(irtArray):
     if irtArray.shapes['Discrimination'] != 1:
         raise AssertionError("Discrimination value can only be scalar.")
     kernel = irtArray['Difficulty'][:, None] - irtArray['Abilities'][None, :]
-    kernel *= 1.7 * irtArray['Discrimination']
+    kernel *= irtArray['Discrimination']
 
     return 1.0 / (1.0 + np.exp(kernel))
 

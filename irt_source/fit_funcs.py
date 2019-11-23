@@ -65,7 +65,10 @@ class IRTBaseClass(object):
 
 
 class MarginalMaximumLikelihood(IRTBaseClass):
-    """Implements the Marginal Maximum Likelihood solver for IRT Models."""
+    """Implements the Marginal Maximum Likelihood solver for IRT Models.
+
+        Assumes abilities are normally distributed
+    """
     def __init__(self, measurement, model="Rasch"):
         IRTBaseClass.__init__(self, measument, model)
 

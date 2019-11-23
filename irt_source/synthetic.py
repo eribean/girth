@@ -1,5 +1,7 @@
 import numpy as np
 
+from irt_source import (rasch_model, one_parameter_model,
+                        two_parameter_model, three_parameter_model)
 
 
 class SyntheticIRT(object):
@@ -7,8 +9,9 @@ class SyntheticIRT(object):
 
     Args:
         Abilities: (sp.stats, args*)
-        Discrimination:
-
+        Difficulty: (sp.stats, args*)
+        Discrimination: (sp.stats, args*)
+        Guessing: (sp.stats, args*)
     """
 
     def __init__(self):

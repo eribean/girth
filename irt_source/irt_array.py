@@ -29,7 +29,7 @@ class IRTArray(np.ndarray):
             for name, other in input_array:
                 metadata['names'].append(name)
 
-                if type(other) == np.ndarray:
+                if type(other) in [np.ndarray, cls]:
                     data_arrays.append(other)
                     metadata['shape'].append(other.shape[0])
                     metadata['slice'].append(slice(start_index,

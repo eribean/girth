@@ -8,6 +8,9 @@ def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
         Creates synthetic IRT data to test parameters estimation
         functions.  Only for use with dichotomous outputs
 
+        Assumes the model
+            P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
+
         Args:
             difficulty: [array] of difficulty parameters
             discrimination:  [array | number] of discrimination parameters

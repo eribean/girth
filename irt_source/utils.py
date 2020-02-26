@@ -60,7 +60,8 @@ def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
     kernel *= discrimination[:, None, None]
     kernel *= (theta[None, None, :] - difficulty[:, None, None])
 
-    # Distribution
+    # Distribution assumption
+    # TODO: Make it a function pointer to allow various types
     gauss = 1.0 / np.sqrt(2 * np.pi) * np.exp(-np.square(theta) / 2)
 
     return  gauss[None, :] * (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
@@ -70,6 +71,9 @@ def irt_evaluation(difficulty, discrimination, thetas):
     """
         Evaluates an IRT model and returns the exact values.  This function
         supports only unidimemsional models
+
+        Assumes the model
+            P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
 
         Args:
             difficulty: [array] of difficulty parameters

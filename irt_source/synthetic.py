@@ -1,18 +1,29 @@
 import numpy as np
 
-from irt_source import (rasch_model, one_parameter_model,
-                        two_parameter_model, three_parameter_model)
+from irt_source.utils import irt_evaluation
 
-
-class SyntheticIRT(object):
-    """Class to create synthetic irt data.
-
-    Args:
-        Abilities: (sp.stats, args*)
-        Difficulty: (sp.stats, args*)
-        Discrimination: (sp.stats, args*)
-        Guessing: (sp.stats, args*)
+def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
+                                     seed=None):
     """
+        Creates synthetic IRT data to test parameters estimation
+        functions.  Only for use with dichotomous outputs
 
-    def __init__(self):
-        pass
+        Args:
+            difficulty: [array] of difficulty parameters
+            discrimination:  [array | number] of discrimination parameters
+            thetas: [array] of person abilities
+            seed: Optional setting to reproduce results
+
+        Returns:
+            dichotomous matrix of [difficulty.size x thetas.size] representing
+            synthetic data
+    """
+    if seed:
+        np.random.seed(seed)
+
+    continuous_output = irt_evaluation(difficulty, discrimination, thetas)
+
+    # convert to binary based on probability
+    random_compare = np.random.rand(*continuous_output.shape)
+
+    return random_compare <= continuous_output

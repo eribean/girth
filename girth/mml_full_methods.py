@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.optimize import fminbound, brentq, fmin_powell
 
-from irt_source import irt_evaluation
-from irt_source import _get_quadrature_points, _compute_partial_integral
-from irt_source import onepl_approx
+from girth import irt_evaluation
+from girth.utils import _get_quadrature_points, _compute_partial_integral
+from girth import onepl_approx
 
 
 def _rauch_full_abstract(dataset, discrimination=1, max_iter=25):

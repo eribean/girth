@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.optimize import fminbound, brentq
 
-from irt_source import irt_evaluation
-from irt_source import _get_quadrature_points, _compute_partial_integral
+from girth import irt_evaluation
+from girth.utils import _get_quadrature_points, _compute_partial_integral
 
 
 def rauch_separate(dataset, discrimination=1, max_iter=25):

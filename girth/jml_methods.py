@@ -1,6 +1,6 @@
 import numpy as np
 
-from mml_approximation_methods import rauch_approx
+from girth import rauch_approx
 
 
 def rauch_jml(dataset, discrimination=1, max_iter=25):
@@ -215,7 +215,8 @@ def twopl_jml(dataset, max_iter=25):
         #####################
         for ndx in range(n_items):
             def _alpha_beta_min(estimates):
-                otpt = 1.0 / (1.0 + np.exp((thetas - estimates[1]) * the_sign[ndx,:] * estimates[0]))
+                otpt = 1.0 / (1.0 + np.exp((thetas - estimates[1]) *
+                                            the_sign[ndx,:] * estimates[0]))
                 return -np.log(otpt).dot(counts)
 
             # Solves jointly for parameters using derivative free methods

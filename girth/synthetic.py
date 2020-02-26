@@ -1,6 +1,6 @@
 import numpy as np
 
-from irt_source.utils import irt_evaluation
+from girth import irt_evaluation
 
 def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
                                      seed=None):

@@ -1,9 +1,10 @@
 import numpy as np
+from scipy import integrate
 from scipy.optimize import fminbound, brentq, fmin_powell
 
 from girth import irt_evaluation
 from girth.utils import _get_quadrature_points, _compute_partial_integral
-from girth import onepl_approx
+from girth import rauch_approx, onepl_approx
 
 
 def _rauch_full_abstract(dataset, discrimination=1, max_iter=25):
@@ -33,7 +34,7 @@ def _rauch_full_abstract(dataset, discrimination=1, max_iter=25):
         return -np.log(otpt).dot(counts)
 
     # Get approximate guess to begin with
-    initial_guess = rauch_estimate(dataset, discrimination=discrimination)
+    initial_guess = rauch_approx(dataset, discrimination=discrimination)
 
     for iteration in range(max_iter):
         previous_guess = initial_guess.copy()
@@ -82,7 +83,7 @@ def rauch_full(dataset, discrimination=1, max_iter=25):
         Returns:
             array of discrimination estimates
     """
-    return _rauch_estimate_full_abstract(dataset, discrimination, max_iter)[0]
+    return _rauch_full_abstract(dataset, discrimination, max_iter)[0]
 
 
 def onepl_full(dataset, max_iter=25):
@@ -97,13 +98,13 @@ def onepl_full(dataset, max_iter=25):
     """
     # Use the rauch model and minimize over the singel discrimination paramter
     def min_func_local(estimate):
-        _, cost = _rauch_estimate_full_abstract(dataset, estimate, max_iter)
+        _, cost = _rauch_full_abstract(dataset, estimate, max_iter)
         return cost
 
     # Solve for the discrimination parameter
     discrimination = fminbound(min_func_local, 0.5, 4)
 
-    return discrimination, rauch_estimate_full(dataset, discrimination)
+    return discrimination, rauch_full(dataset, discrimination)
 
 
 def twopl_full(dataset, max_iter=25):

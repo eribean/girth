@@ -1,7 +1,8 @@
 import numpy as np
+from scipy import integrate
 from scipy.optimize import fminbound, brentq
 
-from girth import irt_evaluation
+from girth import irt_evaluation, rauch_approx
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 
 
@@ -77,7 +78,7 @@ def onepl_separate(dataset):
 
     # Inline definition of cost function to minimize
     def min_func(estimate):
-        difficulty = rauch_estimate_int(dataset, estimate)
+        difficulty = rauch_separate(dataset, estimate)
         otpt = integrate.fixed_quad(quadrature_function, -5, 5,
                                     (difficulty, estimate, unique_sets), n=61)[0]
         return -np.log(otpt).dot(counts)
@@ -85,7 +86,7 @@ def onepl_separate(dataset):
     # Perform the minimization
     discrimination = fminbound(min_func, 0.25, 10)
 
-    return discrimination, rauch_estimate_int(dataset, discrimination)
+    return discrimination, rauch_separate(dataset, discrimination)
 
 
 def twopl_separate(dataset, max_iter=25):
@@ -124,7 +125,7 @@ def twopl_separate(dataset, max_iter=25):
     # Inline definition of cost function to minimize
     def min_func(estimate, dataset, old_estimate, old_difficulty,
                  partial_int, the_sign):
-        new_difficulty = rauch_estimate_int(dataset, estimate)
+        new_difficulty = rauch_separate(dataset, estimate)
         otpt = integrate.fixed_quad(quadrature_function, -5, 5,
                                     (estimate, old_estimate,
                                      new_difficulty, old_difficulty,
@@ -133,7 +134,7 @@ def twopl_separate(dataset, max_iter=25):
 
     # Perform the minimization
     initial_guess = np.ones((dataset.shape[0],))
-    difficulties = rauch_estimate(dataset)
+    difficulties = rauch_approx(dataset)
 
     for iteration in range(max_iter):
         previous_guess = initial_guess.copy()
@@ -153,7 +154,7 @@ def twopl_separate(dataset, max_iter=25):
 
             # Solve for the discrimination parameters
             initial_guess[ndx] = fminbound(min_func_local, 0.25, 6, xtol=1e-3)
-            difficulties[ndx] = rauch_estimate_int(dataset[ndx].reshape(1, -1),
+            difficulties[ndx] = rauch_separate(dataset[ndx].reshape(1, -1),
                                                    initial_guess[ndx])
 
             # Update the partial integral based on the new found values

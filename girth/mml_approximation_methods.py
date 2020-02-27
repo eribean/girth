@@ -1,6 +1,9 @@
 import numpy as np
+
+from scipy import integrate
 from scipy.optimize import fminbound
 
+from girth.utils import _get_quadrature_points, _compute_partial_integral
 
 def rauch_approx(dataset, discrimination=1):
     """
@@ -94,7 +97,7 @@ def twopl_approx(dataset, max_iter=25):
     # Inline definition of cost function to minimize
     def min_func(estimate, dataset, old_estimate, old_difficulty,
                  partial_int, the_sign):
-        new_difficulty = rauch_estimate(dataset, estimate)
+        new_difficulty = rauch_approx(dataset, estimate)
         otpt = integrate.fixed_quad(quadrature_function, -5, 5,
                                     (estimate, old_estimate,
                                      new_difficulty, old_difficulty,
@@ -103,7 +106,7 @@ def twopl_approx(dataset, max_iter=25):
 
     # Perform the minimization
     initial_guess = np.ones((dataset.shape[0],))
-    difficulties = rauch_estimate(dataset)
+    difficulties = rauch_approx(dataset)
 
     for iteration in range(max_iter):
         previous_guess = initial_guess.copy()
@@ -121,7 +124,7 @@ def twopl_approx(dataset, max_iter=25):
                                 partial_int, the_sign[ndx])
 
             initial_guess[ndx] = fminbound(min_func_local, 0.25, 6, xtol=1e-3)
-            difficulties[ndx] = rauch_estimate(dataset[ndx].reshape(1, -1),
+            difficulties[ndx] = rauch_approx(dataset[ndx].reshape(1, -1),
                                                initial_guess[ndx])
 
             partial_int = quadrature_function(theta, initial_guess[ndx],

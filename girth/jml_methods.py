@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import fminbound, fmin_powell
 
 from girth import rauch_approx
 

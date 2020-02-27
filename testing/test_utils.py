@@ -97,6 +97,5 @@ class TestUtilitiesMethods(unittest.TestCase):
         self.assertAlmostEqual(value[0], expected.sum(), places=3)
 
 
-
 if __name__ == '__main__':
     unittest.main()

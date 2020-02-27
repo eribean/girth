@@ -16,6 +16,30 @@ Download [here](https://www.anaconda.com/distribution/)
 python setup.py install --prefix [Your Installation Path]
 
 
+## Usage
+```python
+import numpy as np
+
+from girth import create_synthetic_irt_dichotomous
+from girth import twopl_separate
+
+# Create Synthetic Data
+difficuly = np.linspace(-2.5, 2.5, 10)
+discrimination = np.random.rand(10) + 0.5
+theta = np.random.randn(500)
+
+syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination, theta)
+
+# Solve for parameters
+estimates = twopl_separate(syn_data)
+
+# Unpack estimates
+discrimination_estimates = estimates[0]
+difficulty_estimates = estimates[1]
+
+
+```
+
 ## Contact
 
 Ryan Sanchez

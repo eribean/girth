@@ -12,7 +12,7 @@ Scipy
 We use the anaconda environment which can be installed
 Download [here](https://www.anaconda.com/distribution/)
 
-## installation
+## Installation
 python setup.py install --prefix [Your Installation Path]
 
 
@@ -36,8 +36,11 @@ estimates = twopl_separate(syn_data)
 # Unpack estimates
 discrimination_estimates = estimates[0]
 difficulty_estimates = estimates[1]
+```
 
-
+## Unittests
+```
+nosetests --cover-package=girth testing/
 ```
 
 ## Contact

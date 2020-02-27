@@ -13,8 +13,9 @@ We use the anaconda environment which can be installed
 Download [here](https://www.anaconda.com/distribution/)
 
 ## Installation
-python setup.py install --prefix [Your Installation Path]
-
+```
+python setup.py install --prefix=path/to/your/installation
+```
 
 ## Usage
 ```python

@@ -24,8 +24,9 @@ class TestConditionalRasch(unittest.TestCase):
 
         np.testing.assert_allclose(expected_output, output)
 
+
     def test_conditional_regression_discrimination(self):
-        """Testing conditional rasch model."""
+        """Testing conditional rasch model with non-unity discrimination."""
         np.random.seed(142)
         difficuly = np.linspace(-1.5, 1.5, 5)
         discrimination = 1.7
@@ -39,8 +40,9 @@ class TestConditionalRasch(unittest.TestCase):
 
         np.testing.assert_allclose(expected_output, output)
 
+
     def test_conditional_close(self):
-        """Testing conditional rasch model."""
+        """Testing conditional rasch model for accuracy."""
         np.random.seed(574)
         difficuly = np.linspace(-1.5, 1.5, 5)
         discrimination = 1.2

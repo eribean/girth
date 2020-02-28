@@ -40,8 +40,15 @@ difficulty_estimates = estimates[1]
 ```
 
 ## Unittests
+
+**Without** coverage.py module
 ```
-nosetests --cover-package=girth testing/
+nosetests testing/
+```
+
+**With** coverage.py module
+```
+nosetests --with-coverage --cover-package=girth testing/
 ```
 
 ## Contact

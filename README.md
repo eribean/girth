@@ -3,11 +3,9 @@ The GIRTh package is intended to be a python module implementing a broad swath o
 
 ## Dependencies
 
-Python 3.7
-
-Numpy
-
-Scipy
+Python 3.7  
+Numpy  
+Scipy  
 
 We use the anaconda environment which can be installed
 Download [here](https://www.anaconda.com/distribution/)
@@ -53,5 +51,5 @@ nosetests --with-coverage --cover-package=girth testing/
 
 ## Contact
 
-Ryan Sanchez
+Ryan Sanchez  
 rsanchez44@gatech.edu

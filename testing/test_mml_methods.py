@@ -131,5 +131,78 @@ class TestMMLOnePLMethods(unittest.TestCase):
         self.assertLess(np.abs(output[1] - difficulty).max(), 0.2)
 
 
+class TestMMLTwoPLMethods(unittest.TestCase):
+
+    ### REGRESSION TESTS
+
+    """Setup synthetic data."""
+    def setUp(self):
+        """Setup synthetic data for tests."""
+        np.random.seed(247)
+        difficulty = np.linspace(-1.5, 1.5, 5)
+        discrimination = np.random.rand(5) + 0.5
+        thetas = np.random.randn(600)
+        syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
+                                                    thetas)
+        self.data = syn_data
+        self.discrimination = discrimination
+
+
+    def test_twopl_regression_approximate(self):
+        """Testing onepl approximation methods."""
+        syn_data = self.data.copy()
+        output = twopl_approx(syn_data)
+
+        expected_discrimination = np.array([0.99992967, 1.86001065, 1.36698371, 
+                                            0.53176185, 0.90445937])
+        expected_output = np.array([-1.26863512, -0.60677766, -0.07459365,  
+                                    0.75672082,  1.62766257])
+
+        np.testing.assert_allclose(expected_discrimination, output[0], rtol=1e-6)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+
+
+    def test_twopl_regression_separate(self):
+        """Testing onepl separate methods."""
+        syn_data = self.data.copy()
+        output = twopl_separate(syn_data)
+
+        expected_discrimination = np.array([0.99973958, 1.86359282, 1.35543477, 
+                                            0.52934393, 0.90911332])
+        expected_output = np.array([-1.31515501, -0.64828062, -0.07980151,  
+                                     0.77407585,  1.66774338])
+
+        np.testing.assert_allclose(expected_discrimination, output[0], rtol=1e-6)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+
+
+    def test_twopl_regression_full(self):
+        """Testing onepl full methods."""
+        syn_data = self.data.copy()
+        output = twopl_full(syn_data)
+
+        expected_discrimination = np.array([0.99976507, 1.86290853, 1.35540523, 
+                                            0.5293102 , 0.91224903])
+        expected_output = np.array([-1.31492755, -0.64812777, -0.08017468,  
+                                     0.77399901,  1.66321445])
+
+        np.testing.assert_allclose(expected_discrimination, output[0], rtol=1e-6)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+
+
+    def test_twopl_close(self):
+        """Testing rasch converging methods."""
+        np.random.seed(43)
+        difficulty = np.linspace(-1.25, 1.25, 10)
+        discrimination = 0.5 + np.random.rand(10)
+        thetas = np.random.randn(2000)
+        syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
+                                                    thetas)
+
+        output = twopl_separate(syn_data)
+        self.assertLess(np.abs(output[0] - discrimination).mean(), 0.1)
+        self.assertLess(np.abs(output[1] - difficulty).mean(), 0.1)        
+
+
 if __name__ == '__main__':
     unittest.main()

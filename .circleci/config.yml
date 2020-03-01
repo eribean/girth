@@ -13,9 +13,9 @@ jobs:
       - python/save-cache
       - run:
           command: |
-            pip install coverage
-            pip install nose
-            nosetests --with-coverage --cover-package=girth --cover-html testing/
+            pip install --user coverage
+            pip install --user nose
+            nosetests --with-coverage --cover-package=girth --cover-html --cover-html-dir=/home/circleci/project/htmlcov testing/
           name: Test
       - store_artifacts:
           path: htmlcov          

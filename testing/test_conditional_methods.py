@@ -4,6 +4,7 @@ import numpy as np
 
 from girth import rasch_conditional
 from girth import create_synthetic_irt_dichotomous
+from girth.conditional_methods import _symmetric_functions
 
 
 class TestConditionalRasch(unittest.TestCase):
@@ -52,6 +53,21 @@ class TestConditionalRasch(unittest.TestCase):
         output = rasch_conditional(syn_data, discrimination)
 
         np.testing.assert_array_almost_equal(difficuly, output, decimal=1)
+
+
+    def test_symmetric_function(self):
+        """Testing the generation of symmetric functions."""
+        betas = np.random.randn(10)
+
+        # Compare by checking against fft method
+        fft_size = betas.size + 1
+        fit = np.c_[np.ones_like(betas), np.exp(-betas)]
+        expected = np.fft.ifft(np.fft.fft(fit, fft_size, axis=1).prod(axis=0)).real
+
+        # Output of function
+        output = _symmetric_functions(betas)
+
+        np.testing.assert_almost_equal(output, expected)
 
 
 if __name__ == '__main__':

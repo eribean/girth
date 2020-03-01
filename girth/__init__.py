@@ -1,4 +1,4 @@
-from .utils import irt_evaluation
+from .utils import irt_evaluation, trim_response_set_and_counts
 from .synthetic import create_synthetic_irt_dichotomous
 from .mml_approximation_methods import rauch_approx, onepl_approx, twopl_approx
 from .mml_separate_methods import rauch_separate, onepl_separate, twopl_separate

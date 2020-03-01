@@ -19,7 +19,7 @@ def _get_quadrature_points(n, a, b):
             A local function of the based fixed_quad found in scipy, this is
             done for processing optimization
     """
-    x, w = roots_legendre(n)
+    x, _ = roots_legendre(n)
     x = np.real(x)
 
     # Legendre domain is [-1, 1], convert to [a, b]
@@ -65,6 +65,34 @@ def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
     gauss = 1.0 / np.sqrt(2 * np.pi) * np.exp(-np.square(theta) / 2)
 
     return  gauss[None, :] * (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
+
+
+def trim_response_set_and_counts(response_sets, counts):
+    """
+        Trims all true or all false responses from the response set/counts.
+
+        Requires np.unique to have already been run so that the first and
+        last response correspond to 0 / N
+
+        Args:
+            response_set:  (2D array) response set by persons obtained by running
+                            numpy.unique
+            counts:  counts associated with response set
+
+        Returns
+            response_set, counts updated to reflect removal of response patterns
+    """
+
+    # Remove the zero and full count values
+    if(response_sets[:, 0].sum() == 0):
+        response_sets = np.delete(response_sets, 0, axis=1)
+        counts = np.delete(counts, 0)
+
+    if(response_sets[:, -1].sum() == response_sets.shape[0]):
+        response_sets = np.delete(response_sets, -1, axis=1)
+        counts = np.delete(counts, -1)
+
+    return response_sets, counts
 
 
 def irt_evaluation(difficulty, discrimination, thetas):

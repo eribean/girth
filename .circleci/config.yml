@@ -15,11 +15,11 @@ jobs:
           command: |
             pip install --user coverage
             pip install --user nose
-            nosetests --with-coverage --cover-package=girth --cover-html --cover-html-dir=/home/circleci/project/htmlcov testing/
+            nosetests --with-coverage --cover-package=girth testing/
             bash <(curl -s https://codecov.io/bash)
           name: Test
-      - store_artifacts:
-          path: htmlcov          
+#       - store_artifacts:
+#           path: htmlcov          
 
 workflows:
   main:

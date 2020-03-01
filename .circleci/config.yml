@@ -12,7 +12,10 @@ jobs:
       - python/install-deps
       - python/save-cache
       - run:
-          command: nosetests --with-coverage --cover-package=girth --cover-html testing/
+          command: |
+            pip install coverage
+            pip install nose
+            nosetests --with-coverage --cover-package=girth --cover-html testing/
           name: Test
       - store_artifacts:
           path: htmlcov          

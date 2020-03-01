@@ -4,7 +4,7 @@ import numpy as np
 from scipy.special import roots_legendre
 from scipy import integrate
 
-from girth import irt_evaluation
+from girth import irt_evaluation, trim_response_set_and_counts
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 
 
@@ -95,6 +95,33 @@ class TestUtilitiesMethods(unittest.TestCase):
         expected = yy.sum() * 12 / 1001
 
         self.assertAlmostEqual(value[0], expected.sum(), places=3)
+
+    def test_trim_response_set(self):
+        """Testing trim of all yes/no values."""
+        dataset = np.random.rand(10, 300)
+        counts = np.random.rand(300)
+
+        # Pass through
+        new_set, new_counts = trim_response_set_and_counts(dataset, counts)
+        np.testing.assert_array_equal(dataset, new_set)
+        np.testing.assert_array_equal(counts, new_counts)
+
+        # Make first column zeros
+        dataset[:, 0] = 0
+        new_set, new_counts = trim_response_set_and_counts(dataset, counts)
+
+        np.testing.assert_array_equal(dataset[:, 1:], new_set)
+        np.testing.assert_array_equal(counts[1:], new_counts)
+
+        # Make last column all 1
+        dataset[:, -1] = 1
+        new_set, new_counts = trim_response_set_and_counts(dataset, counts)
+
+        np.testing.assert_array_equal(dataset[:, 1:-1], new_set)
+        np.testing.assert_array_equal(counts[1:-1], new_counts)
+
+
+
 
 
 if __name__ == '__main__':

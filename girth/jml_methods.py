@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import fminbound, fmin_powell
 
-from girth import rauch_approx
+from girth import trim_response_set_and_counts, rauch_approx
 
 
 def rauch_jml(dataset, discrimination=1, max_iter=25):
@@ -23,13 +23,7 @@ def rauch_jml(dataset, discrimination=1, max_iter=25):
     betas = rauch_approx(dataset, discrimination)
 
     # Remove the zero and full count values
-    if(unique_sets[:, 0].sum() == 0):
-        unique_sets = np.delete(unique_sets, 0, axis=1)
-        counts = np.delete(counts, 0)
-
-    if(unique_sets[:, -1].sum() == n_items):
-        unique_sets = np.delete(unique_sets, -1, axis=1)
-        counts = np.delete(counts, -1)
+    unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 
     n_takers = unique_sets.shape[1]
     the_sign = discrimination * (-1)**unique_sets
@@ -94,13 +88,7 @@ def onepl_jml(dataset, max_iter=25):
     betas = rauch_approx(dataset, discrimination)
 
     # Remove the zero and full count values
-    if(unique_sets[:, 0].sum() == 0):
-        unique_sets = np.delete(unique_sets, 0, axis=1)
-        counts = np.delete(counts, 0)
-
-    if(unique_sets[:, -1].sum() == n_items):
-        unique_sets = np.delete(unique_sets, -1, axis=1)
-        counts = np.delete(counts, -1)
+    unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 
     n_takers = unique_sets.shape[1]
     the_sign = (-1)**unique_sets
@@ -176,13 +164,7 @@ def twopl_jml(dataset, max_iter=25):
     betas = rauch_approx(dataset, discrimination)
 
     # Remove the zero and full count values
-    if(unique_sets[:, 0].sum() == 0):
-        unique_sets = np.delete(unique_sets, 0, axis=1)
-        counts = np.delete(counts, 0)
-
-    if(unique_sets[:, -1].sum() == n_items):
-        unique_sets = np.delete(unique_sets, -1, axis=1)
-        counts = np.delete(counts, -1)
+    unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 
     n_takers = unique_sets.shape[1]
     the_sign = (-1)**unique_sets

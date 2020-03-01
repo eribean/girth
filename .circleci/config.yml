@@ -12,8 +12,13 @@ jobs:
       - python/install-deps
       - python/save-cache
       - run:
-          command: ./manage.py test
+          command: |
+            pip install --user coverage
+            pip install --user nose
+            nosetests --with-coverage --cover-package=girth --cover-html --cover-html-dir=/home/circleci/project/htmlcov testing/
           name: Test
+      - store_artifacts:
+          path: htmlcov          
 
 workflows:
   main:

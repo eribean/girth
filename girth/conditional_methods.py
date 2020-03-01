@@ -2,6 +2,24 @@ import numpy as np
 
 from scipy.optimize import fminbound
 
+from girth import trim_response_set_and_counts
+
+
+def _symmetric_functions(betas):
+    """Computes the symmetric functions based on the betas
+
+        Indexes by score, left to right
+
+    """
+    polynomials = np.c_[np.ones_like(betas), np.exp(-betas)]
+
+    # This is an easy way to compute all the values at once,
+    # not necessarily the fastest
+    otpt = 1
+    for polynomial in polynomials:
+        otpt = np.convolve(otpt, polynomial)
+    return otpt
+
 
 def rasch_conditional(dataset, discrimination=1, max_iter=25):
     """
@@ -30,36 +48,15 @@ def rasch_conditional(dataset, discrimination=1, max_iter=25):
     identifying_mean = 0.0
 
     # Remove the zero and full count values
-    if(unique_sets[:, 0].sum() == 0):
-        unique_sets = np.delete(unique_sets, 0, axis=1)
-        counts = np.delete(counts, 0)
-
-    if(unique_sets[:, -1].sum() == n_items):
-        unique_sets = np.delete(unique_sets, -1, axis=1)
-        counts = np.delete(counts, -1)
+    unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 
     response_set_sums = unique_sets.sum(axis=0)
-
-    def _denominator(betas):
-        """Computes the symmetric functions based on the betas
-
-         Indexes by score, left to right
-
-        """
-        polynomials = np.c_[np.ones_like(betas), np.exp(-betas)]
-
-        # This is an easy way to compute all the values at once,
-        # not necessarily the fastest
-        otpt = 1
-        for polynomial in polynomials:
-            otpt = np.convolve(otpt, polynomial)
-        return otpt
 
     for iteration in range(max_iter):
         previous_betas = betas.copy()
 
         for ndx in range(n_items):
-            partial_conv = _denominator(np.delete(betas, ndx))
+            partial_conv = _symmetric_functions(np.delete(betas, ndx))
 
             def min_func(estimate):
                 betas[ndx] = estimate

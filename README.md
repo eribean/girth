@@ -1,3 +1,4 @@
+![CircleCI](https://circleci.com/gh/eribean/girth.svg?style=shield)
 ![codecov.io](https://codecov.io/gh/eribean/girth/coverage.svg?branch=master)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory Package

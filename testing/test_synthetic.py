@@ -21,7 +21,7 @@ class TestSynthetic(unittest.TestCase):
 
         value = create_synthetic_irt_dichotomous(np.array([1.2, -0.2, 1.3]),
                                                  1.31, np.linspace(-6, 6, 6),
-                                                 seed)
+                                                 seed=seed)
 
         np.testing.assert_array_equal(expected, value)
 

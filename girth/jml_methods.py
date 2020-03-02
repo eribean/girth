@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.optimize import fminbound, fmin_powell
 
-from girth import trim_response_set_and_counts, rauch_approx
+from girth import trim_response_set_and_counts, rasch_approx
 
 
-def rauch_jml(dataset, discrimination=1, max_iter=25):
+def rasch_jml(dataset, discrimination=1, max_iter=25):
     """
         Estimates difficulty parameters in an IRT model
 
@@ -20,7 +20,7 @@ def rauch_jml(dataset, discrimination=1, max_iter=25):
     n_items, _ = unique_sets.shape
 
     # Use easy model to seed guess
-    betas = rauch_approx(dataset, discrimination)
+    betas = rasch_approx(dataset, discrimination)
 
     # Remove the zero and full count values
     unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
@@ -85,7 +85,7 @@ def onepl_jml(dataset, max_iter=25):
 
     # Use easy model to seed guess
     discrimination = 1.0
-    betas = rauch_approx(dataset, discrimination)
+    betas = rasch_approx(dataset, discrimination)
 
     # Remove the zero and full count values
     unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
@@ -95,7 +95,6 @@ def onepl_jml(dataset, max_iter=25):
     thetas = np.zeros((n_takers,))
 
     for iteration in range(max_iter):
-        previous_betas = betas.copy()
         previous_discrimination = discrimination * 1.0
 
         #####################
@@ -161,7 +160,7 @@ def twopl_jml(dataset, max_iter=25):
 
     # Use easy model to seed guess
     discrimination = np.ones((n_items,))
-    betas = rauch_approx(dataset, discrimination)
+    betas = rasch_approx(dataset, discrimination)
 
     # Remove the zero and full count values
     unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)

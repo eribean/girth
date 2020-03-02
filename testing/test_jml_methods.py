@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from girth import create_synthetic_irt_dichotomous
-from girth import rauch_jml, onepl_jml, twopl_jml
+from girth import rasch_jml, onepl_jml, twopl_jml
 
 
 class TestJointMaximum(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestJointMaximum(unittest.TestCase):
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
                                                     thetas)
 
-        output = rauch_jml(syn_data)
+        output = rasch_jml(syn_data)
         expected_output = np.array([-1.61394095, -0.88286827,
                                      0.04830973,  0.77146166,  1.95939084])
 

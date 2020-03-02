@@ -62,10 +62,10 @@ def rasch_conditional(dataset, discrimination=1, max_iter=25):
                 betas[ndx] = estimate
                 full_convolution = np.convolve([1, np.exp(-estimate)], partial_conv)
 
-                numerator = np.exp(-np.sum(unique_sets * betas[:,None], axis=0))
                 denominator = full_convolution[response_set_sums]
 
-                return -np.log(numerator / denominator).dot(counts)
+                return (np.sum(unique_sets * betas[:,None], axis=0).dot(counts) + 
+                        np.log(denominator).dot(counts))
 
             # Solve for the difficulty parameter
             betas[ndx] = fminbound(min_func, -5, 5)

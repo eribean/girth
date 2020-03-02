@@ -5,6 +5,7 @@ from scipy.optimize import fminbound
 
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 
+
 def rasch_approx(dataset, discrimination=1):
     """
         Estimates the difficulty parameters via the approximation
@@ -39,21 +40,11 @@ def onepl_approx(dataset):
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = (-1)**unique_sets
 
-    # Inline definition of quadrature function
-    #TODO: Use partial integration methods to speed up processing
-    def quadrature_function(theta, difficulty, discrimination, response):
-        gauss = 1.0 / np.sqrt(2 * np.pi) * np.exp(-np.square(theta) / 2)
-        kernel = the_sign[:, :, None] * np.ones((1, 1, theta.size))
-        kernel *= discrimination
-        kernel *= (theta[None, None, :] - difficulty[:, None, None])
-
-        return  gauss[None, :] * (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
-
     # Inline definition of cost function to minimize
     def min_func(estimate):
         difficulty = np.sqrt(1 + estimate**2 / 3) * scalar / estimate
-        otpt = integrate.fixed_quad(quadrature_function, -5, 5,
-                                    (difficulty, estimate, unique_sets), n=61)[0]
+        otpt = integrate.fixed_quad(_compute_partial_integral, -5, 5,
+                                    (difficulty, estimate, the_sign), n=61)[0]
         return -np.log(otpt).dot(counts)
 
     # Perform the minimization

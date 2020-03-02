@@ -109,18 +109,23 @@ def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
 
 ## Private functions for polytomous outputs
 def _my_digitize(the_input):
-    """Private function to compute polytomous levels.
-       The input has been concatenated to use the
-       vectorize functions (value, thresholds)
+    """
+        Private function to compute polytomous levels.
+        The input has been concatenated to use the
+        vectorize functions (value, thresholds)       
     """
     return np.searchsorted(the_input[1:], the_input[0])
 
     
 def _graded_func(difficulty, discrimination, thetas, output):
-    """Private function to compute the probabilities for
-       the graded response model.  This is done in place
-       and does not return anything
-   """
+    """
+        Private function to compute the probabilities for
+        the graded response model.  This is done in place
+        and does not return anything
+    """
+    # This model is mased on the difference of standard
+    # logistic functions.
+    
     # Do first level
     output[0] = 1.0 - irt_evaluation(np.array([difficulty[0]]), 
                                      discrimination, thetas)
@@ -138,11 +143,22 @@ def _graded_func(difficulty, discrimination, thetas, output):
 
 
 def _credit_func(difficulty, discrimination, thetas, output):
-    """Private function to compute the probabilities for
-       the partial credit model.  This is done in place
-       and does not return anything
     """
-    pass
+        Private function to compute the probabilities for
+        the partial credit model.  This is done in place
+        and does not return anything
+    """    
+    # This model is based on exponentials and normalized to
+    # make sure the expected probablity is equal to one
+    output *= 0.0 # clear any previous values
+    output[1:, :] += thetas
+    output[1:, :] -= difficulty[:, None]
+    output *= discrimination
+    np.cumsum(output, axis=0, out=output)
+    np.exp(output, out=output)
+    
+    normalizing_term = 1.0 / np.sum(output, axis=0)
+    output *= normalizing_term
 
 
 def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,

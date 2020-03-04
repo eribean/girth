@@ -17,9 +17,9 @@ jobs:
             pip install --user nose
             nosetests --with-coverage --cover-package=girth testing/
             bash <(curl -s https://codecov.io/bash)
+          no_output_timeout: 2m
+
           name: Test
-#       - store_artifacts:
-#           path: htmlcov          
 
 workflows:
   main:

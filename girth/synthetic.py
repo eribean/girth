@@ -123,7 +123,7 @@ def _graded_func(difficulty, discrimination, thetas, output):
         the graded response model.  This is done in place
         and does not return anything
     """
-    # This model is mased on the difference of standard
+    # This model is based on the difference of standard
     # logistic functions.
     
     # Do first level
@@ -181,7 +181,11 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
             dichotomous matrix of [difficulty.size x thetas.size] representing
             synthetic data
     """
+    difficulty = np.atleast_2d(difficulty)
     n_items, n_levels = difficulty.shape
+
+    if n_levels == 1:
+        raise AssertionError("Polytomous items must have more than 1 threshold")
 
     if seed:
         np.random.seed(seed)
@@ -191,10 +195,8 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
         discrimination = np.full((n_items,), discrimination)
 
     # Get the model to use, will throw error if not supported
-    probability_func = {'grm': _graded_func, 'pcm': _credit_func}[model.lower()]
-        
-    if n_levels == 1:
-        raise AssertionError("Polytomous items must have more than 1 threshold")
+    probability_func = {'grm': _graded_func, 
+                        'pcm': _credit_func}[model.lower()]        
 
     # Initialize output for memory concerns        
     level_scratch = np.zeros((n_levels + 2, thetas.size))

@@ -6,14 +6,20 @@ The GIRTh package is intended to be a python module implementing a broad swath o
 
 ## Dependencies
 
-Python 3.7  
-Numpy  
-Scipy  
+* Python 3.7  
+* Numpy  
+* Scipy  
 
 We use the anaconda environment which can be installed
 Download [here](https://www.anaconda.com/distribution/)
 
 ## Installation
+Via pip
+```
+pip install girth --upgrade
+```
+
+From Source
 ```
 python setup.py install --prefix=path/to/your/installation
 ```
@@ -61,7 +67,7 @@ rsanchez44@gatech.edu
 
 MIT License
 
-Copyright (c) 2020 eribean
+Copyright (c) 2020 Ryan Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -119,3 +119,17 @@ def irt_evaluation(difficulty, discrimination, thetas):
     kernel = difficulty[:, None] - thetas
     kernel *= discrimination[:, None]
     return 1.0 / (1 + np.exp(kernel))
+
+
+def graded_probability_from_parameters(difficulty, discrimination, 
+                                       max_response, response):
+    """
+        Computes the probability for a polytomous graded response model
+        given a set of responses
+
+        Args:
+            difficulty: (2D array) [n_items, n_levels] of ordered difficulties
+            discrimination: (1D Array) [n_items] of discrimination parameters
+            max_response: (1D Array) [n_items] maximum number of levels for each item
+            response: Response
+    """

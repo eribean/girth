@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import fminbound, fmin_powell
+from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import trim_response_set_and_counts, rasch_approx
 from girth import condition_polytomous_response, irt_evaluation
@@ -215,6 +215,11 @@ def twopl_jml(dataset, max_iter=25):
     return discrimination, betas
 
 
+def _jml_inequality(test):
+    """Inequality constraints for graded jml minimization."""
+    return np.concatenate(([1, 1], np.diff(test)[1:]))
+
+
 def graded_jml(dataset, max_iter=25):
     """
         Estimates difficulty and discrimination paramaters
@@ -250,7 +255,7 @@ def graded_jml(dataset, max_iter=25):
                                                item_counts[ndx] - 1)
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = 10000
-
+    
     for iteration in range(max_iter):
         previous_betas = betas.copy()
 
@@ -288,7 +293,7 @@ def graded_jml(dataset, max_iter=25):
             static_component = graded_prob[np.delete(responses, 
                                                      slice(start_ndx, end_ndx))]
             partial_maximum_likelihood = -np.log(static_component).sum()
-
+            
             def _alpha_beta_min(estimates):
                 # Set the estimates int
                 discrimination[start_ndx:end_ndx] = estimates[0]
@@ -306,7 +311,9 @@ def graded_jml(dataset, max_iter=25):
             initial_guess = np.concatenate(([discrimination[start_ndx]], 
                                             betas[start_ndx+1:end_ndx]))
             otpt = fmin_slsqp(_alpha_beta_min, initial_guess,
-                               disp=False)
+                              disp=False, f_ieqcons=_jml_inequality,
+                              bounds=[(.25, 4)] + [(-6, 6)] * (item_counts[ndx]-1))
+            
             discrimination[start_ndx:end_ndx] = otpt[0]
             betas[start_ndx+1:end_ndx] = otpt[1:]
             betas_roll[start_ndx:end_ndx-1] = otpt[1:]
@@ -315,4 +322,4 @@ def graded_jml(dataset, max_iter=25):
         if(np.abs(previous_betas - betas).max() < 1e-3):
             break
 
-    return discrimination, betas
+    return discrimination[start_indices], betas, thetas

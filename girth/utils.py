@@ -95,6 +95,54 @@ def trim_response_set_and_counts(response_sets, counts):
     return response_sets, counts
 
 
+def condition_polytomous_response(dataset, trim_ends=True):
+    """
+    Transforms item responses for easier use during parameter
+    estimation
+
+    This takes an input array of ordinal values and converts it into
+    an array of linear indices to access difficulty parameters through 
+    fancy indexing. 
+
+    Args:
+        dataset:  [n_items x n_takers] 2d array of ordinal responses
+        trim_ends:  (boolean) trims responses that are either all no or all yes
+
+    Returns:
+        updated dataset array adjusted for linear indexing, 
+        vector of lengths associated with each item
+    """
+    # Remove all no / yes endorsements
+    min_value, max_value = dataset.min(), dataset.max()
+    n_items = dataset.shape[0]
+
+    if trim_ends:
+        raw_score_sums = dataset.sum(0)
+        mask = ((raw_score_sums == (n_items * min_value)) | 
+                (raw_score_sums == (n_items * max_value)))
+        dataset = dataset[:, ~mask]
+    
+    betas_length = np.zeros((n_items,), dtype='int')
+    the_output = dataset.copy()
+    the_output -= min_value
+    
+    # Loop over rows, determine the number of unique
+    # responses, and replace with linear indexing
+    cnt = 0
+    for ndx, item in enumerate(the_output):
+        values, indices = np.unique(item, return_inverse=True)
+        betas_length[ndx] = values.size
+
+        # Recode from zero to N-1
+        values = np.arange(0, betas_length[ndx]) + cnt
+        the_output[ndx] = values[indices]
+
+        # Update linear index
+        cnt += betas_length[ndx]
+
+    return the_output, betas_length
+
+
 def irt_evaluation(difficulty, discrimination, thetas):
     """
         Evaluates an IRT model and returns the exact values.  This function

@@ -217,6 +217,7 @@ def twopl_jml(dataset, max_iter=25):
 
 def _jml_inequality(test):
     """Inequality constraints for graded jml minimization."""
+    # First position is discrimination, next are difficulties
     return np.concatenate(([1, 1], np.diff(test)[1:]))
 
 
@@ -233,7 +234,9 @@ def graded_jml(dataset, max_iter=25):
             max_iter: maximum number of iterations to run
 
         Returns:
-            array of discriminations, array of difficulty estimates
+            array of discriminations, 
+            array of difficulty estimates (np.nan is a null value)
+            array of person ability estimates
     """
     responses, item_counts = condition_polytomous_response(dataset)    
     n_items, n_takers = responses.shape
@@ -278,7 +281,6 @@ def graded_jml(dataset, max_iter=25):
         # Recenter theta to identify model
         thetas -= thetas.mean()
         thetas /= thetas.std(ddof=1)
-
         #####################
         # STEP 2
         # Estimate Betas / alpha, given Theta
@@ -290,8 +292,10 @@ def graded_jml(dataset, max_iter=25):
             end_ndx = cumulative_item_counts[ndx]
             graded_prob = (irt_evaluation(betas, discrimination, thetas) - 
                            irt_evaluation(betas_roll, discrimination, thetas))
-            static_component = graded_prob[np.delete(responses, 
-                                                     slice(start_ndx, end_ndx))]
+
+            static_component = np.take_along_axis(graded_prob, 
+                                                  np.delete(responses, ndx, axis=0), 
+                                                  axis=0)
             partial_maximum_likelihood = -np.log(static_component).sum()
             
             def _alpha_beta_min(estimates):
@@ -302,9 +306,9 @@ def graded_jml(dataset, max_iter=25):
 
                 graded_prob = (irt_evaluation(betas, discrimination, thetas) - 
                                irt_evaluation(betas_roll, discrimination, thetas))
-
-                values = graded_prob[responses[ndx]]
- 
+                
+                values = np.take_along_axis(graded_prob, responses[None, ndx], axis=0)
+                
                 return -np.log(values).sum() + partial_maximum_likelihood
 
             # Solves jointly for parameters using derivative free methods
@@ -317,9 +321,17 @@ def graded_jml(dataset, max_iter=25):
             discrimination[start_ndx:end_ndx] = otpt[0]
             betas[start_ndx+1:end_ndx] = otpt[1:]
             betas_roll[start_ndx:end_ndx-1] = otpt[1:]
-
+            
         # Check termination criterion
         if(np.abs(previous_betas - betas).max() < 1e-3):
             break
 
-    return discrimination[start_indices], betas, thetas
+    # Trim difficulties to conform to standard output
+    #TODO:  look where missing values are and place NAN there instead
+    # of appending them to the end
+    output_betas = np.full((n_items, item_counts.max()-1), np.nan)
+    for ndx, (start_ndx, end_ndx) in enumerate(zip(start_indices, cumulative_item_counts)):
+        output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
+        
+    
+    return discrimination[start_indices], output_betas, thetas

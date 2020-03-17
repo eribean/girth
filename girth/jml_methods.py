@@ -3,7 +3,6 @@ from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import trim_response_set_and_counts, rasch_approx
 from girth import condition_polytomous_response, irt_evaluation
-from girth.synthetic import _graded_func
 
 
 def rasch_jml(dataset, discrimination=1, max_iter=25):
@@ -308,7 +307,7 @@ def grm_jml(dataset, max_iter=25):
                                irt_evaluation(betas_roll, discrimination, thetas))
                 
                 values = np.take_along_axis(graded_prob, responses[None, ndx], axis=0)
-                
+                np.clip(values, 1e-23, np.inf, out=values)
                 return -np.log(values).sum() + partial_maximum_likelihood
 
             # Solves jointly for parameters using derivative free methods

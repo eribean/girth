@@ -221,7 +221,7 @@ def _jml_inequality(test):
     return np.concatenate(([1, 1], np.diff(test)[1:]))
 
 
-def graded_jml(dataset, max_iter=25):
+def grm_jml(dataset, max_iter=25):
     """
         Estimates difficulty and discrimination paramaters
         for a graded response two parameter model

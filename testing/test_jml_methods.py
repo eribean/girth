@@ -105,6 +105,7 @@ class TestPolytomousJMLMethods(unittest.TestCase):
 
         np.testing.assert_allclose(alphas, output[0])
         np.testing.assert_allclose(betas, output[1], rtol=1e-6)
+        
 
 if __name__ == '__main__':
     unittest.main()

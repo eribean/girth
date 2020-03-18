@@ -4,8 +4,12 @@ import numpy as np
 from scipy.special import roots_legendre
 from scipy import integrate
 
+from girth import create_synthetic_irt_dichotomous
 from girth import irt_evaluation, trim_response_set_and_counts
+from girth import condition_polytomous_response
 from girth.utils import _get_quadrature_points, _compute_partial_integral
+from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants, 
+                                    _solve_integral_equations)
 
 
 class TestUtilitiesMethods(unittest.TestCase):
@@ -121,7 +125,111 @@ class TestUtilitiesMethods(unittest.TestCase):
         np.testing.assert_array_equal(counts[1:-1], new_counts)
 
 
+class TestPolytomousUtilities(unittest.TestCase):
+    """Tests the polytomous utilities"""
 
+    def test_condition_polytomous_response(self):
+        """Testing polytomous response conditioning."""
+        dataset = np.random.randint(1, 6, (15, 100))
+        dataset[7] = np.random.randint(1, 3, (1, 100))
+        output = condition_polytomous_response(dataset, trim_ends=False)
+
+        self.assertTupleEqual(output[0].shape, dataset.shape)
+        row_max_start = np.cumsum(dataset.max(axis=1))
+        row_max_end = row_max_start.copy() - 1
+        row_max_start = np.roll(row_max_start, 1)
+        row_max_start[0] = 0
+
+        for ndx in range(dataset.shape[0]):
+            otpts = np.unique(dataset[ndx])
+            otpts2 = np.unique(output[0][ndx])
+            self.assertEqual(otpts.size, output[1][ndx])
+            self.assertTrue(otpts2.min() == row_max_start[ndx])
+            self.assertTrue(otpts2.max() == row_max_end[ndx])
+
+        # Trim First Column but not last
+        dataset[:, 0] = 1
+        output = condition_polytomous_response(dataset, trim_ends=True)
+        self.assertTupleEqual(output[0].shape, (dataset.shape[0], dataset.shape[1]-1))
+        self.assertTrue(output[0].std(axis=0)[0] != 0)
+ 
+        # Trim First/Last Column but not last
+        dataset[:, -1] = 1
+        output = condition_polytomous_response(dataset, trim_ends=True)
+        self.assertTupleEqual(output[0].shape, (dataset.shape[0], dataset.shape[1]-2))
+        self.assertTrue(output[0].std(axis=0)[0] != 0)
+        self.assertTrue(output[0].std(axis=0)[-1] != 0)
+
+
+    def test_solve_for_constants(self):
+        """Testing solving for boundary constants."""
+        np.random.seed(73)
+        dataset = np.random.randint(0, 4, (1, 100))
+        _, counts = np.unique(dataset, return_counts=True)
+
+        output = _solve_for_constants(dataset)
+
+        #Compare to hand calculations
+        b11 = counts[0] + counts[1]
+        b12 = -counts[0]
+        b13 = 0
+        b21 = -counts[2]
+        b22 = counts[1] + counts[2]
+        b23 = -counts[1]
+        b31 = 0
+        b32 = -counts[3]
+        b33 = counts[2] + counts[3]
+        b_matrix = np.array([[b11, b12, b13],
+                             [b21, b22, b23],
+                             [b31, b32, b33]])
+        hand_calcs = np.linalg.inv(b_matrix) @ np.array([counts[1], 0, 0]).T
+        np.testing.assert_array_equal(output, hand_calcs)
+
+
+    def test_integral_equations(self):
+        """Tests solving for integral given a ratio."""
+        np.random.seed(786)
+        theta = np.random.randn(50000)
+        discrimination = 1.43
+        difficulty = np.array([-.4, .1, .5])
+
+        # Compare against dichotomous data
+        syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination, theta)
+        n0 = np.count_nonzero(~syn_data, axis=1)
+        n1 = np.count_nonzero(syn_data, axis=1)
+        ratio = n1 / (n1 + n0)
+
+        theta = _get_quadrature_points(61, -5, 5)
+        distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
+        results = _solve_integral_equations(discrimination, ratio, distribution, theta)
+        np.testing.assert_array_almost_equal(results, difficulty, decimal=2)
+
+
+    def test_graded_partial_integral(self):
+        """Testing the partial integral in the graded model."""
+        theta = _get_quadrature_points(61, -5, 5)
+        distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
+        responses = np.random.randint(0, 3, (10, 100))
+        betas = np.array([-10000, -.3, 0.1, 1.2])
+        betas_roll = np.roll(betas, -1)
+        betas_roll[-1] = 10000
+
+        output = _graded_partial_integral(theta, betas, betas_roll,
+                                          1.0, responses, distribution)
+
+        # Compare to hand calculations
+        hand_calc = list()
+        for ndx in range(responses.shape[1]):
+            left_betas = betas[responses[:, ndx]]
+            right_betas = betas_roll[responses[:, ndx]]
+            probability = (1.0 / (1.0 + np.exp(left_betas[:, None] - theta[None, :])) - 
+                           1.0 / (1.0 + np.exp(right_betas[:, None] - theta[None, :])))
+            hand_calc.append(probability.prod(0))
+
+        hand_calc = np.asarray(hand_calc)
+        hand_calc *= distribution
+
+        np.testing.assert_array_equal(hand_calc, output)
 
 
 if __name__ == '__main__':

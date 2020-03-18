@@ -2,16 +2,23 @@
 ![codecov.io](https://codecov.io/gh/eribean/girth/coverage.svg?branch=master)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory Package
-The GIRTh package is intended to be a python module implementing a broad swath of item response theory parameter estimation packages.
+Girth is a python package for estimating item response theory IRT) parameters.  In addition, support for synthetic irt data generation is supported as well.  Currently, the supported estimation methods include:
 
-## Dependencies
+**Dichotomous Models**
+1. Rasch Model
+   * Joint Maximum Likelihood
+   * Conditional Likelihood
+   * Marginal Maximum Likelihood
+2. One / Two Parameter Logistic Models
+   * Joint Maximum Likelihood
+   * Marginal Maximum Likelihood
 
-* Python 3.7  
-* Numpy  
-* Scipy  
-
-We use the anaconda environment which can be installed
-Download [here](https://www.anaconda.com/distribution/)
+**Polytomous Models**
+1. Graded Response Model
+   * Joint Maximum Likelihood
+   * Marginal Maximum Likelihood
+   
+More information can be found on the [homepage](https://eribean.github.io/girth/).
 
 ## Installation
 Via pip
@@ -57,6 +64,15 @@ nosetests testing/
 ```
 nosetests --with-coverage --cover-package=girth testing/
 ```
+
+## Dependencies
+
+* Python 3.7  
+* Numpy  
+* Scipy  
+
+We use the anaconda environment which can be installed
+Download [here](https://www.anaconda.com/distribution/)
 
 ## Contact
 

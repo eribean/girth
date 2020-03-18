@@ -103,8 +103,8 @@ class TestPolytomousJMLMethods(unittest.TestCase):
                           [-0.47923628,  0.31797999,  0.89676896],
                           [-0.67769121,  0.49737426,      np.nan]])
 
-        np.testing.assert_allclose(alphas, output[0], rtol=1e-6)
-        np.testing.assert_allclose(betas, output[1], rtol=1e-6)
+        np.testing.assert_allclose(alphas, output[0], rtol=1e-5)
+        np.testing.assert_allclose(betas, output[1], rtol=1e-5)
         
 
 if __name__ == '__main__':

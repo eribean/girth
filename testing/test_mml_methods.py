@@ -7,6 +7,9 @@ from girth import rasch_approx, onepl_approx, twopl_approx
 from girth import rasch_separate, onepl_separate, twopl_separate
 from girth import rasch_full, onepl_full, twopl_full
 
+from girth import create_synthetic_irt_polytomous
+from girth import grm_separate
+
 
 class TestMMLRaschMethods(unittest.TestCase):
 
@@ -204,5 +207,76 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         self.assertLess(np.abs(output[1] - difficulty).mean(), 0.1)        
 
 
+class TestMMLGradedResponseModel(unittest.TestCase):
+    """Tests the marginal maximum likelihood for GRM."""
+ 
+    def test_graded_large_participant(self):
+        """Regression Testing graded response model with large N."""
+        np.random.seed(1944)
+        difficulty = np.sort(np.random.randn(5, 4), axis=1)
+        discrimination = np.random.rand(5) + 0.5
+        thetas = np.random.randn(600)
+        syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
+                                                   thetas)
+
+        estimated_parameters = grm_separate(syn_data)
+
+        # Regression test
+        expected_discrimination = np.array([0.58291387, 1.38349382, 0.87993092, 
+                                            1.17329774, 1.47195824])
+
+        expectected_difficulty = np.array([[-1.23881672, -0.5340817 ,  0.06170343,  1.23881201],
+                                           [-1.09279868, -0.76747967,  0.44660955,  1.28909032],
+                                           [-0.16828803,  0.23943693,  0.76140209,  1.24435541],
+                                           [-2.02935022, -0.70214267, -0.23281603,  1.27521818],
+                                           [-1.47758497, -0.9050062 ,  0.0698804 ,  0.71286592]])
+
+        np.testing.assert_array_almost_equal(estimated_parameters[0], expected_discrimination)
+        np.testing.assert_array_almost_equal(estimated_parameters[1], expectected_difficulty)
+        
+
+    def test_graded_small_participant(self):
+        """Regression Testing graded response model with small N."""
+        np.random.seed(87)
+        difficulty = np.sort(np.random.randn(5, 4), axis=1)
+        discrimination = np.random.rand(5) + 0.5
+        thetas = np.random.randn(101)
+        syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
+                                                   thetas)
+
+        estimated_parameters = grm_separate(syn_data)
+
+        # Regression test
+        expected_discrimination = np.array([1.72485717, 0.39305266, 0.82841429, 
+                                            0.93731447, 1.56774651])
+
+        expectected_difficulty = np.array([[-0.1571751 ,  0.22757599,  0.33438484,  0.59311136],
+                                           [ 1.22266539,  1.3332354 ,  2.26915694,  3.51488207],
+                                           [-1.25515215, -1.06235363, -0.70073232,  0.87821931],
+                                           [-1.26630059, -0.37880122,  2.25720247,      np.nan],
+                                           [-1.36961213, -0.66186681, -0.50308306,      np.nan]])
+
+        np.testing.assert_array_almost_equal(estimated_parameters[0], expected_discrimination)
+        np.testing.assert_array_almost_equal(estimated_parameters[1], expectected_difficulty)
+        
+
+    def test_graded_response_model_close(self):
+        """Regression Testing graded response model with large N."""
+        np.random.seed(6322)
+        difficulty = np.sort(np.random.randn(10, 4), axis=1)
+        discrimination = np.random.rand(10) + 0.5
+        thetas = np.random.randn(1000)
+        syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
+                                                   thetas)
+
+        estimated_parameters = grm_separate(syn_data)
+
+        rmse = np.sqrt(np.square(estimated_parameters[0] - discrimination).mean())
+        self.assertLess(rmse, .0966)
+
+        rmse = np.sqrt(np.square(estimated_parameters[1] - difficulty).mean())
+        self.assertLess(rmse, .1591)
+
+        # check for close errors
 if __name__ == '__main__':
     unittest.main()

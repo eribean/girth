@@ -1,7 +1,8 @@
 import numpy as np
-from scipy.optimize import fminbound, fmin_powell
+from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import trim_response_set_and_counts, rasch_approx
+from girth import condition_polytomous_response, irt_evaluation
 
 
 def rasch_jml(dataset, discrimination=1, max_iter=25):
@@ -211,3 +212,125 @@ def twopl_jml(dataset, max_iter=25):
             break
 
     return discrimination, betas
+
+
+def _jml_inequality(test):
+    """Inequality constraints for graded jml minimization."""
+    # First position is discrimination, next are difficulties
+    return np.concatenate(([1, 1], np.diff(test)[1:]))
+
+
+def grm_jml(dataset, max_iter=25):
+    """
+        Estimates difficulty and discrimination paramaters
+        for a graded response two parameter model
+
+        difficulty parameters are category boundaries and by
+        definition must be ordered
+
+        Args:
+            dataset: [items x participants] matrix of ordinal values
+            max_iter: maximum number of iterations to run
+
+        Returns:
+            array of discriminations, 
+            array of difficulty estimates (np.nan is a null value)
+            array of person ability estimates
+    """
+    responses, item_counts = condition_polytomous_response(dataset)    
+    n_items, n_takers = responses.shape
+
+    # Set initial parameter estimates to default
+    thetas = np.zeros((n_takers,))
+
+    # Initialize difficulty parameters for iterations
+    betas = np.full((item_counts.sum(),), -10000.0)
+    discrimination = np.ones_like(betas)
+    cumulative_item_counts = item_counts.cumsum()
+    start_indices = np.roll(cumulative_item_counts, 1)
+    start_indices[0] = 0
+
+    for ndx in range(n_items):
+        end_ndx = cumulative_item_counts[ndx]
+        start_ndx = start_indices[ndx] + 1
+        betas[start_ndx:end_ndx] = np.linspace(-1, 1, 
+                                               item_counts[ndx] - 1)
+    betas_roll = np.roll(betas, -1)
+    betas_roll[cumulative_item_counts-1] = 10000
+    
+    for iteration in range(max_iter):
+        previous_betas = betas.copy()
+
+        #####################
+        # STEP 1
+        # Estimate theta, given betas / alpha
+        # Loops over all persons
+        #####################
+        for ndx in range(n_takers):
+            def _theta_min(theta):
+                # Solves for ability parameters (theta)
+                graded_prob = (irt_evaluation(betas, discrimination, theta) - 
+                               irt_evaluation(betas_roll, discrimination, theta))
+
+                values = graded_prob[responses[:, ndx]]
+                return -np.log(values).sum()
+
+            thetas[ndx] = fminbound(_theta_min, -6, 6)
+
+        # Recenter theta to identify model
+        thetas -= thetas.mean()
+        thetas /= thetas.std(ddof=1)
+        #####################
+        # STEP 2
+        # Estimate Betas / alpha, given Theta
+        # Loops over all items
+        #####################
+        for ndx in range(n_items):
+            # Compute ML for static items
+            start_ndx = start_indices[ndx]
+            end_ndx = cumulative_item_counts[ndx]
+            graded_prob = (irt_evaluation(betas, discrimination, thetas) - 
+                           irt_evaluation(betas_roll, discrimination, thetas))
+
+            static_component = np.take_along_axis(graded_prob, 
+                                                  np.delete(responses, ndx, axis=0), 
+                                                  axis=0)
+            partial_maximum_likelihood = -np.log(static_component).sum()
+            
+            def _alpha_beta_min(estimates):
+                # Set the estimates int
+                discrimination[start_ndx:end_ndx] = estimates[0]
+                betas[start_ndx+1:end_ndx] = estimates[1:]
+                betas_roll[start_ndx:end_ndx-1] = estimates[1:]
+
+                graded_prob = (irt_evaluation(betas, discrimination, thetas) - 
+                               irt_evaluation(betas_roll, discrimination, thetas))
+                
+                values = np.take_along_axis(graded_prob, responses[None, ndx], axis=0)
+                np.clip(values, 1e-23, np.inf, out=values)
+                return -np.log(values).sum() + partial_maximum_likelihood
+
+            # Solves jointly for parameters using derivative free methods
+            initial_guess = np.concatenate(([discrimination[start_ndx]], 
+                                            betas[start_ndx+1:end_ndx]))
+            otpt = fmin_slsqp(_alpha_beta_min, initial_guess,
+                              disp=False, f_ieqcons=_jml_inequality,
+                              bounds=[(.25, 4)] + [(-6, 6)] * (item_counts[ndx]-1))
+            
+            discrimination[start_ndx:end_ndx] = otpt[0]
+            betas[start_ndx+1:end_ndx] = otpt[1:]
+            betas_roll[start_ndx:end_ndx-1] = otpt[1:]
+            
+        # Check termination criterion
+        if(np.abs(previous_betas - betas).max() < 1e-3):
+            break
+
+    # Trim difficulties to conform to standard output
+    #TODO:  look where missing values are and place NAN there instead
+    # of appending them to the end
+    output_betas = np.full((n_items, item_counts.max()-1), np.nan)
+    for ndx, (start_ndx, end_ndx) in enumerate(zip(start_indices, cumulative_item_counts)):
+        output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
+        
+    
+    return discrimination[start_indices], output_betas, thetas

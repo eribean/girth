@@ -3,7 +3,9 @@ import unittest
 import numpy as np
 
 from girth import create_synthetic_irt_dichotomous
-from girth import rasch_jml, onepl_jml, twopl_jml
+from girth import create_synthetic_irt_polytomous
+from girth import rasch_jml, onepl_jml, twopl_jml, grm_jml
+from girth.jml_methods import _jml_inequality
 
 
 class TestJointMaximum(unittest.TestCase):
@@ -66,6 +68,44 @@ class TestJointMaximum(unittest.TestCase):
         np.testing.assert_allclose(alphas, output[0])
         np.testing.assert_allclose(betas, output[1], rtol=1e-6)
 
+
+class TestPolytomousJMLMethods(unittest.TestCase):
+    """Test the joint maximum likelihood methods for polytomous data."""
+
+    def test_jml_inequality(self):
+        """Testing inequality constraint."""
+        estimates = [1.0, 2.0, 1.0, 3.0]
+        output = _jml_inequality(estimates)
+        np.testing.assert_equal(output, [1.0, 1.0, -1.0, 2.0])
+
+        estimates = [1.0, 2.0, 2.5, 2.5]
+        output = _jml_inequality(estimates)
+        np.testing.assert_equal(output, [1.0, 1.0, 0.5, 0.0])
+
+    def test_graded_jml_regression(self):
+        """Testing joint maximum grm model."""
+        np.random.seed(1022)
+        difficulty = np.sort(np.random.randn(5, 3), axis=1)
+        discrimination = 0.5 + np.random.rand(5)
+        thetas = np.random.randn(50) 
+
+        syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
+                                                   thetas)
+
+        output = grm_jml(syn_data)
+
+        # Expected Outputs (Basically a smoke test)
+        alphas = np.array([4., 0.79558366, 0.25, 4., 1.84876057])
+
+        betas = np.array([[-0.06567405,  0.00834638,  0.04343115],
+                          [-1.72554167, -1.56601927, -0.87385611],
+                          [-3.30647888,  1.86102112,      np.nan],
+                          [-0.47923628,  0.31797999,  0.89676896],
+                          [-0.67769121,  0.49737426,      np.nan]])
+
+        np.testing.assert_allclose(alphas, output[0], rtol=1e-5)
+        np.testing.assert_allclose(betas, output[1], rtol=1e-5)
+        
 
 if __name__ == '__main__':
     unittest.main()

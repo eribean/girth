@@ -67,6 +67,36 @@ def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
     return  gauss[None, :] * (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
 
 
+def convert_responses_to_kernel_sign(responses):
+    """Converts dichotomous responses to the appropriate kernel sign.
+
+    Takes in an array of responses coded as either [True/False] or [0/1]
+    and converts it into [+1 / -1] to be used during parameter estimation.
+    
+    Values that are not 0 or 1 are converted into a zero which means these
+    values do not contribute to parameter estimates.  This can be used to 
+    account for missing values.
+    
+    Args:
+        responses: [n_items x n_participants] array of response values
+
+    Returns:
+        2d array of sign values to use in the parameter estimation
+    """
+    # The default value is now 0
+    the_sign = np.zeros_like(responses, dtype='float')
+
+    # 1 -> -1
+    mask = responses == 1
+    the_sign[mask] = -1
+    
+    #0 -> 1
+    mask = responses == 0
+    the_sign[mask] = 1
+
+    return the_sign
+
+
 def trim_response_set_and_counts(response_sets, counts):
     """
         Trims all true or all false responses from the response set/counts.

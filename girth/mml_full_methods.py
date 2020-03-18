@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound, brentq, fmin_powell
 
-from girth import irt_evaluation
+from girth import irt_evaluation, convert_responses_to_kernel_sign
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth import rasch_approx, onepl_approx
 
@@ -13,7 +13,7 @@ def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
     """
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    the_sign = (-1)**unique_sets
+    the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     theta = _get_quadrature_points(61, -5, 5)
 
@@ -119,7 +119,7 @@ def twopl_full(dataset, max_iter=25):
     """
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    the_sign = (-1)**unique_sets
+    the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     theta = _get_quadrature_points(61, -5, 5)
 

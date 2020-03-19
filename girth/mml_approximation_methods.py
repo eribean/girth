@@ -3,6 +3,7 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound
 
+from girth import convert_responses_to_kernel_sign, get_true_false_counts
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 
 
@@ -17,8 +18,7 @@ def rasch_approx(dataset, discrimination=1):
         Returns:
             array of discrimination estimates
     """
-    n_no = np.count_nonzero(~dataset, axis=1)
-    n_yes = np.count_nonzero(dataset, axis=1)
+    n_no, n_yes = get_true_false_counts(dataset)
     return (np.sqrt(1 + discrimination**2 / 3) *
             np.log(n_no / n_yes) / discrimination)
 
@@ -33,12 +33,11 @@ def onepl_approx(dataset):
         Returns:
             array of discrimination, difficulty estimates
     """
-    n_no = np.count_nonzero(~dataset, axis=1)
-    n_yes = np.count_nonzero(dataset, axis=1)
+    n_no, n_yes = get_true_false_counts(dataset)
     scalar = np.log(n_no / n_yes)
 
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    the_sign = (-1)**unique_sets
+    the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     # Inline definition of cost function to minimize
     def min_func(estimate):
@@ -68,7 +67,7 @@ def twopl_approx(dataset, max_iter=25):
     """
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    the_sign = (-1)**unique_sets
+    the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     theta = _get_quadrature_points(61, -5, 5)
 

@@ -1,4 +1,5 @@
-from .utils import irt_evaluation, trim_response_set_and_counts
+from .utils import (irt_evaluation, trim_response_set_and_counts, convert_responses_to_kernel_sign,
+                    get_true_false_counts)
 from .polytomous_utils import condition_polytomous_response
 from .synthetic import (create_correlated_abilities, create_synthetic_irt_dichotomous, 
                         create_synthetic_mirt_dichotomous)

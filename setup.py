@@ -11,7 +11,7 @@ if __name__ == '__main__':
     setup(
         name="girth", 
         packages=['girth'],
-        version="0.1.2",
+        version="0.1.3",
         license="MIT",
         description="A python package for Item Response Theory.",
         long_description=long_description.replace('<ins>','').replace('</ins>',''),

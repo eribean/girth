@@ -3,6 +3,7 @@ from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import trim_response_set_and_counts, rasch_approx
 from girth import condition_polytomous_response, irt_evaluation
+from girth import convert_responses_to_kernel_sign
 
 
 def rasch_jml(dataset, discrimination=1, max_iter=25):
@@ -27,7 +28,7 @@ def rasch_jml(dataset, discrimination=1, max_iter=25):
     unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 
     n_takers = unique_sets.shape[1]
-    the_sign = discrimination * (-1)**unique_sets
+    the_sign = discrimination * convert_responses_to_kernel_sign(unique_sets)
     thetas = np.zeros((n_takers,))
 
     for iteration in range(max_iter):
@@ -92,7 +93,7 @@ def onepl_jml(dataset, max_iter=25):
     unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 
     n_takers = unique_sets.shape[1]
-    the_sign = (-1)**unique_sets
+    the_sign = convert_responses_to_kernel_sign(unique_sets)
     thetas = np.zeros((n_takers,))
 
     for iteration in range(max_iter):
@@ -167,7 +168,7 @@ def twopl_jml(dataset, max_iter=25):
     unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 
     n_takers = unique_sets.shape[1]
-    the_sign = (-1)**unique_sets
+    the_sign = convert_responses_to_kernel_sign(unique_sets)
     thetas = np.zeros((n_takers,))
 
     for iteration in range(max_iter):

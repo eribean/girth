@@ -4,9 +4,10 @@ import numpy as np
 from scipy.special import roots_legendre
 from scipy import integrate
 
-from girth import create_synthetic_irt_dichotomous
-from girth import irt_evaluation, trim_response_set_and_counts
-from girth import condition_polytomous_response
+from girth import (create_synthetic_irt_dichotomous,
+                   irt_evaluation, trim_response_set_and_counts,
+                   convert_responses_to_kernel_sign)
+from girth import condition_polytomous_response, get_true_false_counts
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants, 
                                     _solve_integral_equations)
@@ -102,6 +103,7 @@ class TestUtilitiesMethods(unittest.TestCase):
 
     def test_trim_response_set(self):
         """Testing trim of all yes/no values."""
+        np.random.seed(439)
         dataset = np.random.rand(10, 300)
         counts = np.random.rand(300)
 
@@ -123,6 +125,47 @@ class TestUtilitiesMethods(unittest.TestCase):
 
         np.testing.assert_array_equal(dataset[:, 1:-1], new_set)
         np.testing.assert_array_equal(counts[1:-1], new_counts)
+
+        # Test when array contains nans
+        mask = np.random.rand(*dataset.shape) < 0.1
+        dataset[mask] = np.nan
+
+        # There are responses with zero variance
+        locations = np.where(np.nanstd(dataset, axis=0) == 0)
+        self.assertTrue(locations[0].size > 0)
+        
+        new_set, new_counts = trim_response_set_and_counts(dataset, counts)
+        locations = np.where(np.nanstd(new_set, axis=0) == 0)
+        self.assertTrue(locations[0].size == 0)        
+
+    def test_get_true_false_counts(self):
+        """Testing the counting of true and false."""
+        test_array = np.array([[1., 0., 4.3, 2.1, np.nan],
+                               [np.nan, np.nan, -1, 3.2, 1.2],
+                               [0.0, 1.0, 1.0, 0.0, 1.0]])
+
+        n_false, n_true = get_true_false_counts(test_array)
+        
+        expected_true = [1, 0, 3]
+        expected_false = [1, 0, 2]
+
+        np.testing.assert_array_equal(expected_true, n_true)
+        np.testing.assert_array_equal(expected_false, n_false)
+
+    def test_convert_response_to_kernel_sign(self):
+        """Testing conversion of response to kernel sign."""
+        test_array = np.array([[1., 0., 4.3, 2.1, np.nan],
+                               [np.nan, np.nan, -1, 3.2, 1.2],
+                               [0.0, 1.0, 1.0, 0.0, 1.0]])
+
+        expected_output = np.array([[-1, 1, 0, 0, 0],
+                                    [0, 0, 0, 0, 0],
+                                    [1, -1, -1, 1, -1]])
+
+        result = convert_responses_to_kernel_sign(test_array)                                   
+
+        np.testing.assert_array_equal(expected_output, result)
+
 
 
 class TestPolytomousUtilities(unittest.TestCase):

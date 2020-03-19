@@ -87,6 +87,7 @@ def get_true_false_counts(responses):
 
     return n_false, n_true
 
+
 def convert_responses_to_kernel_sign(responses):
     """Converts dichotomous responses to the appropriate kernel sign.
 

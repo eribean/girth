@@ -67,6 +67,26 @@ def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
     return  gauss[None, :] * (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
 
 
+def get_true_false_counts(responses):
+    """Returns the number of true and false for each item.
+
+    Takes in a responses array and returns counts associated with
+    true / false.  True is a value in the dataset which equals '1'
+    and false is a value which equals '0'.  All other values are
+    ignored
+
+    Args:
+        responses: [n_items x n_participants] array of response values
+
+    Returns:
+        1d array of 'false' counts per item,
+        1d array of 'true' counts per item
+    """
+    n_false = np.count_nonzero(responses == 0, axis=1)
+    n_true = np.count_nonzero(responses == 1, axis=1)
+
+    return n_false, n_true
+
 def convert_responses_to_kernel_sign(responses):
     """Converts dichotomous responses to the appropriate kernel sign.
 
@@ -101,9 +121,6 @@ def trim_response_set_and_counts(response_sets, counts):
     """
         Trims all true or all false responses from the response set/counts.
 
-        Requires np.unique to have already been run so that the first and
-        last response correspond to 0 / N
-
         Args:
             response_set:  (2D array) response set by persons obtained by running
                             numpy.unique
@@ -112,15 +129,10 @@ def trim_response_set_and_counts(response_sets, counts):
         Returns
             response_set, counts updated to reflect removal of response patterns
     """
-
-    # Remove the zero and full count values
-    if(response_sets[:, 0].sum() == 0):
-        response_sets = np.delete(response_sets, 0, axis=1)
-        counts = np.delete(counts, 0)
-
-    if(response_sets[:, -1].sum() == response_sets.shape[0]):
-        response_sets = np.delete(response_sets, -1, axis=1)
-        counts = np.delete(counts, -1)
+    # Remove response sets where output is all true/false
+    mask  = ~(np.nanvar(response_sets, axis=0) == 0)
+    response_sets = response_sets[:, mask]
+    counts = counts[mask]
 
     return response_sets, counts
 

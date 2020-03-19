@@ -3,7 +3,7 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound
 
-from girth import convert_responses_to_kernel_sign
+from girth import convert_responses_to_kernel_sign, get_true_false_counts
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 
 
@@ -18,8 +18,7 @@ def rasch_approx(dataset, discrimination=1):
         Returns:
             array of discrimination estimates
     """
-    n_no = np.count_nonzero(~dataset, axis=1)
-    n_yes = np.count_nonzero(dataset, axis=1)
+    n_no, n_yes = get_true_false_counts(dataset)
     return (np.sqrt(1 + discrimination**2 / 3) *
             np.log(n_no / n_yes) / discrimination)
 
@@ -34,8 +33,7 @@ def onepl_approx(dataset):
         Returns:
             array of discrimination, difficulty estimates
     """
-    n_no = np.count_nonzero(~dataset, axis=1)
-    n_yes = np.count_nonzero(dataset, axis=1)
+    n_no, n_yes = get_true_false_counts(dataset)
     scalar = np.log(n_no / n_yes)
 
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)

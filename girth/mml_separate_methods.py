@@ -2,8 +2,8 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound, brentq
 
-from girth import irt_evaluation, rasch_approx, condition_polytomous_response
-from girth import convert_responses_to_kernel_sign
+from girth import (irt_evaluation, rasch_approx, condition_polytomous_response,
+                   get_true_false_counts, convert_responses_to_kernel_sign)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants, 
                                     _solve_integral_equations)
@@ -23,8 +23,7 @@ def rasch_separate(dataset, discrimination=1, max_iter=25):
             array of discrimination estimates
     """
     n_items = dataset.shape[0]
-    n_no = np.count_nonzero(~dataset, axis=1)
-    n_yes = np.count_nonzero(dataset, axis=1)
+    n_no, n_yes = get_true_false_counts(dataset)
     scalar = n_yes / (n_yes + n_no)
 
     if np.ndim(discrimination) < 1:

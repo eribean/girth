@@ -1,6 +1,7 @@
 ![CircleCI](https://circleci.com/gh/eribean/girth.svg?style=shield)
 ![codecov.io](https://codecov.io/gh/eribean/girth/coverage.svg?branch=master)
 [![CodeFactor](https://www.codefactor.io/repository/github/eribean/girth/badge)](https://www.codefactor.io/repository/github/eribean/girth)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory Package
 Girth is a python package for estimating item response theory IRT) parameters.  In addition, support for synthetic irt data generation is supported as well.  Currently, the supported estimation methods include:

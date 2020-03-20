@@ -1,6 +1,7 @@
 ![CircleCI](https://circleci.com/gh/eribean/girth.svg?style=shield)
 ![codecov.io](https://codecov.io/gh/eribean/girth/coverage.svg?branch=master)
 [![CodeFactor](https://www.codefactor.io/repository/github/eribean/girth/badge)](https://www.codefactor.io/repository/github/eribean/girth)
+[![PyPI version](https://badge.fury.io/py/girth.svg)](https://badge.fury.io/py/girth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory Package

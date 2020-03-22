@@ -1,0 +1,3 @@
+[submodule "girth_docs"]
+	path = girth_docs
+	url = https://github.com/eribean/girth_docs.git

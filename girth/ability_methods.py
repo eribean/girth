@@ -126,12 +126,12 @@ def ability_eap(dataset, difficulty, discrimination, distribution=None):
     partial_int *= new_distribution
 
     # Compute the denominator
-    denominator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)
+    denominator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
 
     # compute the numerator
     partial_int *= theta
 
-    numerator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)
+    numerator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
 
     return numerator / denominator
 

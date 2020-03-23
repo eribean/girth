@@ -10,8 +10,8 @@ python setup.py install
 &lt;/code>&lt;/pre>&lt;h2 id="data-format">Data format&lt;/h2>
 &lt;p>IRT response data should be stored in a 2D &lt;a href="https://numpy.org/">numpy&lt;/a> array. This array holds the measured responses with the number of rows (vertical) equal to the number of items in the test, and the number of columns (horizontal) equal to the number of participants in the test.&lt;/p>
 &lt;figure>
-&lt;img src="https://eribean.github.io/girth/images/girth_data.jpg" width="200" height="300"/> &lt;figcaption>
-&lt;h4>Array Format&lt;/h4>
+&lt;img src="https://eribean.github.io/girth/girth/images/girth_data.jpg" width="80%"/> &lt;figcaption>
+&lt;h4>Example girth array layout&lt;/h4>
 &lt;/figcaption>
 &lt;/figure>
 &lt;p>It is up to the user to manipulate the data into this standardized format.&lt;/p>

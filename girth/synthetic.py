@@ -161,6 +161,15 @@ def _credit_func(difficulty, discrimination, thetas, output):
     output *= normalizing_term
 
 
+def _ggum_func(difficulty, discrimination, thetas, output):
+    """
+        Private function to compute the probabilities for
+        the graded unfolding model.  This is done in place
+        and does not return anything
+    """
+    pass
+
+
 def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
                                     model='grm', seed=None):
     """

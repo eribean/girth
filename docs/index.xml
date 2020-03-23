@@ -1,1 +1,22 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Documentation</title><link>https://eribean.github.io/girth/docs/</link><description>Recent content in Documentation on GIRTH</description><generator>Hugo -- gohugo.io</generator><atom:link href="https://eribean.github.io/girth/docs/index.xml" rel="self" type="application/rss+xml"/></channel></rss>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Documentation</title><link>https://eribean.github.io/girth/docs/</link><description>Recent content in Documentation on GIRTH</description><generator>Hugo -- gohugo.io</generator><atom:link href="https://eribean.github.io/girth/docs/index.xml" rel="self" type="application/rss+xml"/><item><title>Docs: Quick Start</title><link>https://eribean.github.io/girth/docs/quickstart/quickstart/</link><pubDate>Sun, 22 Mar 2020 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/docs/quickstart/quickstart/</guid><description>
+&lt;h2 id="installation">Installation&lt;/h2>
+&lt;p>The easiest way to get started is to install girth via pip and import the module:&lt;/p>
+&lt;div class="highlight">&lt;pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#000">pip&lt;/span> &lt;span style="color:#000">install&lt;/span> &lt;span style="color:#000">girth&lt;/span> &lt;span style="color:#ce5c00;font-weight:bold">--&lt;/span>&lt;span style="color:#000">upgrade&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-python" data-lang="python">&lt;span style="color:#204a87;font-weight:bold">import&lt;/span> &lt;span style="color:#000">girth&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>If you would like to build girth from source, check out the repository and install it&lt;/p>
+&lt;pre>&lt;code>git clone https://github.com/eribean/girth.git
+cd girth
+python setup.py install
+&lt;/code>&lt;/pre>&lt;h2 id="data-format">Data format&lt;/h2>
+&lt;p>IRT response data should be stored in a 2D &lt;a href="https://numpy.org/">numpy&lt;/a> array. This array holds the measured responses with the number of rows (vertical) equal to the number of items in the test, and the number of columns (horizontal) equal to the number of participants in the test.&lt;/p>
+&lt;figure>
+&lt;img src="https://eribean.github.io/girth/images/girth_data.jpg" width="200" height="300"/> &lt;figcaption>
+&lt;h4>Array Format&lt;/h4>
+&lt;/figcaption>
+&lt;/figure>
+&lt;p>It is up to the user to manipulate the data into this standardized format.&lt;/p>
+&lt;div class="alert alert-warning" role="alert">
+&lt;h4 class="alert-heading">Warning&lt;/h4>
+Missing data is supported for dichotomous measurements only.
+Use NAN (numpy.nan) to represent missing values.
+&lt;/div></description></item></channel></rss>

@@ -5,6 +5,9 @@ orbs:
 
 jobs:
   build-and-test:
+    branches:
+      ignore:
+        - gh-pages
     executor: python/default
     steps:
       - checkout

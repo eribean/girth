@@ -107,6 +107,7 @@ def twopl_approx(dataset, max_iter=25):
                           initial_guess, the_sign)
 
         for ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
             def min_func_local(estimate):
                 return min_func(estimate, dataset[ndx].reshape(1, -1),
                                 previous_guess[ndx],

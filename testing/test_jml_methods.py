@@ -59,11 +59,11 @@ class TestJointMaximum(unittest.TestCase):
         output = twopl_jml(syn_data)
 
         # Expected Outputs
-        alphas = np.array([1.13276949, 1.45060249, 1.3071953,
-                           1.89628754, 1.2134972])
+        alphas = np.array([0.29202081, 4., 0.91621924, 
+                           4., 0.27536785])
 
-        betas = np.array([-1.97170647, -0.78656027,  0.00478144,
-                          0.76341106,  1.69786748])
+        betas = np.array([-6., -0.39644246, -0.00862153,
+                          0.3869096, 6.])
 
         np.testing.assert_allclose(alphas, output[0])
         np.testing.assert_allclose(betas, output[1], rtol=1e-6)

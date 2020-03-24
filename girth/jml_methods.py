@@ -40,6 +40,8 @@ def rasch_jml(dataset, discrimination=1, max_iter=25):
         # Loops over all persons
         #####################
         for ndx in range(n_takers):
+            # pylint: disable=cell-var-from-loop
+
             def _theta_min(theta):
                 otpt = 1.0  / (1.0 + np.exp(np.outer(the_sign[:, ndx], (theta - betas))))
 
@@ -105,6 +107,8 @@ def onepl_jml(dataset, max_iter=25):
         # Loops over all persons
         #####################
         for ndx in range(n_takers):
+            # pylint: disable=cell-var-from-loop
+
             def _theta_min(theta):
                 otpt = 1.0  / (1.0 + np.exp(np.outer(the_sign[:, ndx] * discrimination,
                                                      (theta - betas))))
@@ -126,6 +130,8 @@ def onepl_jml(dataset, max_iter=25):
             # Initialize cost evaluation to zero
             cost = 0
             for ndx in range(n_items):
+                # pylint: disable=cell-var-from-loop
+
                 def _beta_min(beta):
                     otpt = 1.0 / (1.0 + np.exp((thetas - beta) * the_sign[ndx,:] * estimate))
                     return -np.log(otpt).dot(counts)
@@ -180,6 +186,8 @@ def twopl_jml(dataset, max_iter=25):
         # Loops over all persons
         #####################
         for ndx in range(n_takers):
+            # pylint: disable=cell-var-from-loop
+
             def _theta_min(theta):
                 otpt = 1.0  / (1.0 + np.exp(np.outer(the_sign[:, ndx],
                                                      discrimination * (theta - betas))))
@@ -287,6 +295,7 @@ def grm_jml(dataset, max_iter=25):
         # Loops over all items
         #####################
         for ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
             # Compute ML for static items
             start_ndx = start_indices[ndx]
             end_ndx = cumulative_item_counts[ndx]

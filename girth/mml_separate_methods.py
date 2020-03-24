@@ -40,7 +40,8 @@ def rasch_separate(dataset, discrimination=1, max_iter=25):
 
     # Perform the minimization
     for ndx in range(n_items):
-
+        # pylint: disable=cell-var-from-loop
+        
         # Minimize each item separately
         def min_zero_local(estimate):
             return (scalar[ndx] -
@@ -139,6 +140,8 @@ def twopl_separate(dataset, max_iter=25):
                           initial_guess, the_sign)
 
         for ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
+
             def min_func_local(estimate):
                 return min_func(estimate, dataset[ndx].reshape(1, -1),
                                 previous_guess[ndx],
@@ -223,6 +226,8 @@ def grm_separate(dataset, max_iter=25):
                                                distribution)
         
         for item_ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
+
             # Indices into linearized difficulty parameters
             start_ndx = start_indices[item_ndx]
             end_ndx = cumulative_item_counts[item_ndx]

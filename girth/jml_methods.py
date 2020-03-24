@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
+from scipy.optimize import fminbound, fmin_slsqp
 
 from girth import trim_response_set_and_counts, rasch_approx
 from girth import condition_polytomous_response, irt_evaluation
@@ -40,8 +40,11 @@ def rasch_jml(dataset, discrimination=1, max_iter=25):
         # Loops over all persons
         #####################
         for ndx in range(n_takers):
+            # pylint: disable=cell-var-from-loop
+
             def _theta_min(theta):
-                otpt = 1.0  / (1.0 + np.exp(np.outer(the_sign[:, ndx], (theta - betas))))
+                otpt = 1.0  / (1.0 + np.exp(the_sign[:, ndx] *  
+                                            (theta - betas)))
 
                 return -np.log(otpt).sum()
 
@@ -105,11 +108,15 @@ def onepl_jml(dataset, max_iter=25):
         # Loops over all persons
         #####################
         for ndx in range(n_takers):
+            # pylint: disable=cell-var-from-loop
+            scalar = the_sign[:, ndx] * discrimination
+
             def _theta_min(theta):
-                otpt = 1.0  / (1.0 + np.exp(np.outer(the_sign[:, ndx] * discrimination,
-                                                     (theta - betas))))
+                otpt = 1.0  / (1.0 + np.exp(scalar * 
+                                            (theta - betas)))
 
                 return -np.log(otpt).sum()
+
             # Solve for ability with each paramter
             thetas[ndx] = fminbound(_theta_min, -6, 6)
 
@@ -126,6 +133,8 @@ def onepl_jml(dataset, max_iter=25):
             # Initialize cost evaluation to zero
             cost = 0
             for ndx in range(n_items):
+                # pylint: disable=cell-var-from-loop
+
                 def _beta_min(beta):
                     otpt = 1.0 / (1.0 + np.exp((thetas - beta) * the_sign[ndx,:] * estimate))
                     return -np.log(otpt).dot(counts)
@@ -180,9 +189,12 @@ def twopl_jml(dataset, max_iter=25):
         # Loops over all persons
         #####################
         for ndx in range(n_takers):
+            # pylint: disable=cell-var-from-loop
+            scalar = the_sign[:, ndx] * discrimination
+
             def _theta_min(theta):
-                otpt = 1.0  / (1.0 + np.exp(np.outer(the_sign[:, ndx],
-                                                     discrimination * (theta - betas))))
+                otpt = 1.0  / (1.0 + np.exp(scalar * 
+                                            (theta - betas)))
 
                 return -np.log(otpt).sum()
             # Solves for ability parameters
@@ -203,9 +215,9 @@ def twopl_jml(dataset, max_iter=25):
                                             the_sign[ndx,:] * estimates[0]))
                 return -np.log(otpt).dot(counts)
 
-            # Solves jointly for parameters using derivative free methods
-            otpt = fmin_powell(_alpha_beta_min, (discrimination[ndx], betas[ndx]),
-                               disp=False)
+            # Solves jointly for parameters using numerical derivatives
+            otpt = fmin_slsqp(_alpha_beta_min, (discrimination[ndx], betas[ndx]),
+                              bounds=[(0.25, 4), (-6, 6)], disp=False)
             discrimination[ndx], betas[ndx] = otpt
 
         # Check termination criterion
@@ -287,6 +299,7 @@ def grm_jml(dataset, max_iter=25):
         # Loops over all items
         #####################
         for ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
             # Compute ML for static items
             start_ndx = start_indices[ndx]
             end_ndx = cumulative_item_counts[ndx]
@@ -311,7 +324,7 @@ def grm_jml(dataset, max_iter=25):
                 np.clip(values, 1e-23, np.inf, out=values)
                 return -np.log(values).sum() + partial_maximum_likelihood
 
-            # Solves jointly for parameters using derivative free methods
+            # Solves jointly for parameters using numerical derivatives
             initial_guess = np.concatenate(([discrimination[start_ndx]], 
                                             betas[start_ndx+1:end_ndx]))
             otpt = fmin_slsqp(_alpha_beta_min, initial_guess,

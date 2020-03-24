@@ -44,6 +44,7 @@ def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
                           discrimination, the_sign)
 
         for ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
             # Minimize each one separately
             value = initial_guess[ndx] * 1.0
 
@@ -151,6 +152,7 @@ def twopl_full(dataset, max_iter=25):
                           initial_guess[:, 0], the_sign)
 
         for ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
             # Minimize each one separately
             value = initial_guess[ndx] * 1.0
 

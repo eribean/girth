@@ -1,4 +1,4 @@
-import unittest
+import unittest # pylint: disable=cyclic-import
 
 import numpy as np
 from scipy.stats import skewnorm

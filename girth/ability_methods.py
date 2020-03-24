@@ -41,6 +41,7 @@ def ability_map(dataset, difficulty, discrimination, distribution=None):
     thetas = np.zeros((n_takers,))
 
     for ndx in range(n_takers):
+        # pylint: disable=cell-var-from-loop
         scalar = the_sign[:, ndx] * discrimination
         def _theta_min(theta):
             otpt = 1.0  / (1.0 + np.exp(scalar * (theta - difficulty)))
@@ -134,6 +135,3 @@ def ability_eap(dataset, difficulty, discrimination, distribution=None):
     numerator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
 
     return numerator / denominator
-
-
-    

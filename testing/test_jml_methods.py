@@ -66,7 +66,7 @@ class TestJointMaximum(unittest.TestCase):
                           0.3869096, 6.])
 
         np.testing.assert_allclose(alphas, output[0])
-        np.testing.assert_allclose(betas, output[1], rtol=1e-6)
+        np.testing.assert_allclose(betas, output[1], rtol=1e-5)
 
 
 class TestPolytomousJMLMethods(unittest.TestCase):

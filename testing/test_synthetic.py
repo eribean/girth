@@ -99,25 +99,25 @@ class TestPolytomousSynthetic(unittest.TestCase):
         test_candidate[:] = [0.25, .3, .6]
         output = _my_digitize(test_candidate)
 
-        self.assertEquals(output, 0)
+        self.assertEqual(output, 0)
 
         # One position
         test_candidate[:] = [0.3, .25, .6]
         output = _my_digitize(test_candidate)
 
-        self.assertEquals(output, 1)
+        self.assertEqual(output, 1)
 
         # One position boundary
         test_candidate[:] = [0.3, .25, .3]
         output = _my_digitize(test_candidate)
 
-        self.assertEquals(output, 1)
+        self.assertEqual(output, 1)
 
         # Two position 
         test_candidate[:] = [0.35, .25, .3]
         output = _my_digitize(test_candidate)
 
-        self.assertEquals(output, 2)
+        self.assertEqual(output, 2)
 
 
     def test_graded_function(self):
@@ -195,7 +195,8 @@ class TestPolytomousSynthetic(unittest.TestCase):
         """Regression testing graded and credit polytomous functions"""
         seed = 876
         np.random.seed(seed)
-        difficulty = np.random.randn(5, 4)
+        difficulty_pcm = np.random.randn(5, 4)
+        difficulty = np.sort(difficulty_pcm, axis=1)
         discrimination = 1.23
         thetas = np.random.randn(8)
 
@@ -206,17 +207,17 @@ class TestPolytomousSynthetic(unittest.TestCase):
                                                            model='grm',
                                                            seed=seed)
 
-        poly_data_credit = create_synthetic_irt_polytomous(difficulty, 
+        poly_data_credit = create_synthetic_irt_polytomous(difficulty_pcm, 
                                                            discrimination,
                                                            thetas,
                                                            model='pcm',
                                                            seed=seed)
 
-        expected_graded = np.array([[5, 1, 1, 5, 1, 1, 5, 5],
-                                    [5, 5, 1, 5, 5, 1, 3, 1],
-                                    [5, 5, 1, 5, 1, 1, 5, 1],
-                                    [5, 5, 5, 5, 5, 1, 5, 1],
-                                    [5, 5, 4, 5, 4, 4, 5, 2]])
+        expected_graded = np.array([[5, 2, 2, 5, 2, 2, 5, 5],
+                                    [5, 5, 1, 5, 5, 1, 2, 1],
+                                    [5, 5, 1, 3, 2, 1, 5, 1],
+                                    [3, 5, 3, 5, 4, 1, 4, 1],
+                                    [5, 5, 3, 4, 3, 3, 5, 2]])
 
         expected_partial = np.array([[5, 5, 2, 5, 2, 1, 5, 3],
                                      [5, 5, 1, 5, 4, 1, 4, 1],

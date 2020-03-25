@@ -176,6 +176,40 @@ def _unfold_func(difficulty, discrimination, thetas, output, src=0.):
         output[-(ndx+1)] *= src
 
 
+def _check_difficulty_parameters(difficulty, model):
+    """
+        Given a model type, check the difficulty parameters
+        for validity
+    """
+    max_value = difficulty.shape[1] + 1
+
+    if model in ["grm"]:
+        # Check that all the arguments are sorted
+        if not np.all(difficulty[:, :-1] < difficulty[:, 1:]):
+            raise AssertionError("Difficulty Parameters must be "
+                                 "in ascending order")
+
+    elif model in ['gum']:
+        # Parameters must be odd
+        if max_value % 2:
+            raise AssertionError("There must be an odd number of "
+                                 "difficulty parameters")
+
+        # Parameters must be skew-symmetric about the center point
+        middle_index = (difficulty.shape[1] - 1) // 2
+        adjusted_difficulty = (difficulty - 
+                               difficulty[:, middle_index][:, None])
+
+        if not np.all(adjusted_difficulty[:, :middle_index][:, ::-1] == 
+                      -adjusted_difficulty[:, (middle_index+1):]):
+            raise AssertionError("Difficulty Parameters must be "
+                                 "symmetric about offset")
+
+        max_value = middle_index + 1
+            
+    return max_value
+
+
 def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
                                     model='grm', seed=None):
     """
@@ -215,6 +249,9 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
                         'pcm': _credit_func,
                         'gum': _unfold_func}[model.lower()]        
 
+    # Check difficulty parameters for validity
+    clip_high = _check_difficulty_parameters(difficulty, model.lower())
+
     # Initialize output for memory concerns        
     level_scratch = np.zeros((n_levels + 2, thetas.size))
     output = np.zeros((n_items, thetas.size), dtype='int')
@@ -236,4 +273,5 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
     
     # Add 1 to return [1, n_levels]
     output += 1
+    np.clip(output, 0, clip_high, out=output)
     return output    

@@ -200,8 +200,7 @@ def _check_difficulty_parameters(difficulty, model):
         adjusted_difficulty = (difficulty - 
                                difficulty[:, middle_index][:, None])
 
-        if not np.all(adjusted_difficulty[:, :middle_index][:, ::-1] == 
-                      -adjusted_difficulty[:, (middle_index+1):]):
+        if not np.all(np.abs(adjusted_difficulty.sum(axis=1)) < 1e-7):
             raise AssertionError("Difficulty Parameters must be "
                                  "symmetric about offset")
 

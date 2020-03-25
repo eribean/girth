@@ -161,6 +161,54 @@ def _credit_func(difficulty, discrimination, thetas, output):
     output *= normalizing_term
 
 
+def _unfold_func(difficulty, discrimination, thetas, output, src=0.):
+    """
+        Private function to compute the probabilities for
+        the graded unfolding model.  This is done in place
+        and does not return anything
+    """
+    ### Call partial credit model on difficulties
+    _credit_func(difficulty, discrimination, thetas, output)
+
+    # Add the probabilities together, should always be even
+    for ndx in range(output.shape[0] // 2):
+        output[ndx] += (output[-(ndx+1)] * (1. - src))
+        output[-(ndx+1)] *= src
+
+
+def _check_difficulty_parameters(difficulty, model):
+    """
+        Given a model type, check the difficulty parameters
+        for validity
+    """
+    max_value = difficulty.shape[1] + 1
+
+    if model in ["grm"]:
+        # Check that all the arguments are sorted
+        if not np.all(difficulty[:, :-1] < difficulty[:, 1:]):
+            raise AssertionError("Difficulty Parameters must be "
+                                 "in ascending order")
+
+    elif model in ['gum']:
+        # Parameters must be odd
+        if max_value % 2:
+            raise AssertionError("There must be an odd number of "
+                                 "difficulty parameters")
+
+        # Parameters must be skew-symmetric about the center point
+        middle_index = (difficulty.shape[1] - 1) // 2
+        adjusted_difficulty = (difficulty - 
+                               difficulty[:, middle_index][:, None])
+
+        if not np.all(np.abs(adjusted_difficulty.sum(axis=1)) < 1e-7):
+            raise AssertionError("Difficulty Parameters must be "
+                                 "symmetric about offset")
+
+        max_value = middle_index + 1
+            
+    return max_value
+
+
 def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
                                     model='grm', seed=None):
     """
@@ -172,9 +220,10 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
             difficulty: [2D array (items x n_levels-1)] of difficulty parameters
             discrimination:  [array | number] of discrimination parameters
             thetas: [array] of person abilities
-            model: ["grm", "pcm] string specifying which polytomous model to use
+            model: ["grm", "pcm", "gum"] string specifying which polytomous model to use
                     'grm': Graded Response Model
                     'pcm': Generalized Partial Credit Model
+                    'gum': Generalized Graded Unfolding Model
             seed: Optional setting to reproduce results
 
         Returns:
@@ -191,12 +240,16 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
         np.random.seed(seed)
     
     # Check for single input of discrimination
-    if (np.ndim(discrimination) < 1) or (np.shape(discrimination)[0] == 1):
+    if np.atleast_1d(discrimination).size == 1:
         discrimination = np.full((n_items,), discrimination)
 
     # Get the model to use, will throw error if not supported
     probability_func = {'grm': _graded_func, 
-                        'pcm': _credit_func}[model.lower()]        
+                        'pcm': _credit_func,
+                        'gum': _unfold_func}[model.lower()]        
+
+    # Check difficulty parameters for validity
+    clip_high = _check_difficulty_parameters(difficulty, model.lower())
 
     # Initialize output for memory concerns        
     level_scratch = np.zeros((n_levels + 2, thetas.size))
@@ -219,4 +272,5 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
     
     # Add 1 to return [1, n_levels]
     output += 1
+    np.clip(output, 0, clip_high, out=output)
     return output    

@@ -161,13 +161,19 @@ def _credit_func(difficulty, discrimination, thetas, output):
     output *= normalizing_term
 
 
-def _ggum_func(difficulty, discrimination, thetas, output):
+def _unfold_func(difficulty, discrimination, thetas, output, src=0.):
     """
         Private function to compute the probabilities for
         the graded unfolding model.  This is done in place
         and does not return anything
     """
-    pass
+    ### Call partial credit model on difficulties
+    _credit_func(difficulty, discrimination, thetas, output)
+
+    # Add the probabilities together, should always be even
+    for ndx in range(output.shape[0] // 2):
+        output[ndx] += (output[-(ndx+1)] * (1. - src))
+        output[-(ndx+1)] *= src
 
 
 def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
@@ -181,9 +187,10 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
             difficulty: [2D array (items x n_levels-1)] of difficulty parameters
             discrimination:  [array | number] of discrimination parameters
             thetas: [array] of person abilities
-            model: ["grm", "pcm] string specifying which polytomous model to use
+            model: ["grm", "pcm", "gum"] string specifying which polytomous model to use
                     'grm': Graded Response Model
                     'pcm': Generalized Partial Credit Model
+                    'gum': Generalized Graded Unfolding Model
             seed: Optional setting to reproduce results
 
         Returns:
@@ -200,12 +207,13 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
         np.random.seed(seed)
     
     # Check for single input of discrimination
-    if (np.ndim(discrimination) < 1) or (np.shape(discrimination)[0] == 1):
+    if np.atleast_1d(discrimination).size == 1:
         discrimination = np.full((n_items,), discrimination)
 
     # Get the model to use, will throw error if not supported
     probability_func = {'grm': _graded_func, 
-                        'pcm': _credit_func}[model.lower()]        
+                        'pcm': _credit_func,
+                        'gum': _unfold_func}[model.lower()]        
 
     # Initialize output for memory concerns        
     level_scratch = np.zeros((n_levels + 2, thetas.size))

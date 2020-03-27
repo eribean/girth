@@ -97,11 +97,11 @@ class TestPolytomousJMLMethods(unittest.TestCase):
         # Expected Outputs (Basically a smoke test)
         alphas = np.array([4., 0.79558366, 0.25, 4., 1.84876057])
 
-        betas = np.array([[-0.06567405,  0.00834638,  0.04343115],
-                          [-1.72554167, -1.56601927, -0.87385611],
-                          [-3.30647888,  1.86102112,      np.nan],
-                          [-0.47923628,  0.31797999,  0.89676896],
-                          [-0.67769121,  0.49737426,      np.nan]])
+        betas = np.array([[-0.06567396,  0.00834646,  0.04343122],
+                          [-1.72554323, -1.56602067, -0.87385678],
+                          [-3.30647782,  1.86102210,      np.nan],
+                          [-0.47923614,  0.31797999,  0.89676892],
+                          [-0.67769087,  0.49737400,      np.nan]])
 
         np.testing.assert_allclose(alphas, output[0], rtol=1e-5)
         np.testing.assert_allclose(betas, output[1], rtol=1e-5)

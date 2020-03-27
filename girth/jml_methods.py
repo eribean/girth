@@ -303,13 +303,6 @@ def grm_jml(dataset, max_iter=25):
             # Compute ML for static items
             start_ndx = start_indices[ndx]
             end_ndx = cumulative_item_counts[ndx]
-            graded_prob = (irt_evaluation(betas, discrimination, thetas) - 
-                           irt_evaluation(betas_roll, discrimination, thetas))
-
-            static_component = np.take_along_axis(graded_prob, 
-                                                  np.delete(responses, ndx, axis=0), 
-                                                  axis=0)
-            partial_maximum_likelihood = -np.log(static_component).sum()
             
             def _alpha_beta_min(estimates):
                 # Set the estimates int
@@ -322,7 +315,7 @@ def grm_jml(dataset, max_iter=25):
                 
                 values = np.take_along_axis(graded_prob, responses[None, ndx], axis=0)
                 np.clip(values, 1e-23, np.inf, out=values)
-                return -np.log(values).sum() + partial_maximum_likelihood
+                return -np.log(values).sum() 
 
             # Solves jointly for parameters using numerical derivatives
             initial_guess = np.concatenate(([discrimination[start_ndx]], 
@@ -348,3 +341,106 @@ def grm_jml(dataset, max_iter=25):
         
     
     return discrimination[start_indices], output_betas, thetas
+
+
+def pcm_jml(dataset, max_iter=25):
+    """
+        Estimates difficulty and discrimination paramaters
+        for a partial credit response two parameter model
+
+        difficulty parameters can be disordered
+        
+        Args:
+            dataset: [items x participants] matrix of ordinal values
+            max_iter: maximum number of iterations to run
+
+        Returns:
+            array of discriminations, 
+            array of difficulty estimates (np.nan is a null value)
+            array of person ability estimates
+    """
+    responses, item_counts = condition_polytomous_response(dataset, _reference=0.0)    
+    n_items, n_takers = responses.shape
+
+    # Set initial parameter estimates to default
+    thetas = np.zeros((n_takers,))
+
+    # Initialize item parameters for iterations
+    discrimination = np.ones((n_items,))
+    betas = np.full((n_items, item_counts.max() - 1), np.nan)
+    scratch = np.zeros((n_items, betas.shape[1] + 1))
+        
+    for ndx in range(n_items):
+        item_length = item_counts[ndx] - 1
+        betas[ndx, :item_length] = np.linspace(-1, 1, item_length)
+
+    for iteration in range(max_iter):
+        previous_discrimination = discrimination.copy()
+
+        #####################
+        # STEP 1
+        # Estimate theta, given betas / alpha
+        # Loops over all persons
+        #####################
+        for ndx in range(n_takers):
+            # pylint: disable=cell-var-from-loop
+            response_set = responses[:, ndx]
+            
+            def _theta_min(theta, scratch):
+                # Solves for ability parameters (theta)
+                
+                # Graded PCM Model
+                scratch *= 0.
+                scratch[:, 1:] = theta - betas
+                scratch *= discrimination[:, None]
+                np.cumsum(scratch, axis=1, out=scratch)
+                np.exp(scratch, out=scratch)
+                scratch /= np.nansum(scratch, axis=1)[:, None]
+                
+                # Probability associated with response
+                values = np.take_along_axis(scratch, response_set[:, None], axis=1)
+                return -np.log(values + 1e-23).sum()
+
+            thetas[ndx] = fminbound(_theta_min, -6, 6, args=(scratch,))
+
+        # Recenter theta to identify model
+        thetas -= thetas.mean()
+        thetas /= thetas.std(ddof=1)
+
+        #####################
+        # STEP 2
+        # Estimate Betas / alpha, given Theta
+        # Loops over all items
+        #####################
+        for ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
+            # Compute ML for static items
+            response_set = responses[ndx]
+            
+            def _alpha_beta_min(estimates):
+                # PCM_Model
+                kernel = thetas[:, None] - estimates[None, :]
+                kernel *= estimates[0]
+                kernel[:, 0] = 0
+                np.cumsum(kernel, axis=1, out=kernel)
+                np.exp(kernel, out=kernel)
+                kernel /= np.nansum(kernel, axis=1)[:, None]
+                # Probability associated with response
+                values = np.take_along_axis(kernel, response_set[:, None], axis=1)
+                return -np.log(values).sum()
+
+            # Solves jointly for parameters using numerical derivatives
+            initial_guess = np.concatenate(([discrimination[ndx]], 
+                                            betas[ndx, :item_counts[ndx]-1]))
+            otpt = fmin_slsqp(_alpha_beta_min, initial_guess,
+                              disp=False, 
+                              bounds=[(.25, 4)] + [(-6, 6)] * (item_counts[ndx]-1))
+            
+            discrimination[ndx] = otpt[0]
+            betas[ndx, :item_counts[ndx]-1] = otpt[1:]
+        
+        # Check termination criterion
+        if(np.abs(previous_discrimination - discrimination).max() < 1e-3):
+            break
+            
+    return discrimination, betas

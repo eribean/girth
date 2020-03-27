@@ -5,7 +5,7 @@ from scipy.optimize import fminbound
 from girth import irt_evaluation
 
 
-def condition_polytomous_response(dataset, trim_ends=True):
+def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
     """
     Transforms item responses for easier use during parameter
     estimation
@@ -44,7 +44,7 @@ def condition_polytomous_response(dataset, trim_ends=True):
         betas_length[ndx] = values.size
 
         # Recode from zero to N-1
-        values = np.arange(0, betas_length[ndx]) + cnt
+        values = np.arange(0, betas_length[ndx]) + cnt * _reference
         the_output[ndx] = values[indices]
 
         # Update linear index

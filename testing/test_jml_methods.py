@@ -107,6 +107,7 @@ class TestPolytomousJMLMethods(unittest.TestCase):
         np.testing.assert_allclose(betas, output[1], rtol=1e-5)
 
     def test_partial_credit_jml_regression(self):
+        """Testing joint maximum partical credit model."""
         np.random.seed(3)
         difficulty = np.random.randn(5, 3)
         discrimination = 0.5 + np.random.rand(5)
@@ -118,15 +119,15 @@ class TestPolytomousJMLMethods(unittest.TestCase):
         output = pcm_jml(syn_data)
 
         # Expected Outputs (Basically a smoke test)
-        alphas = np.array([0.41826845, 4., 0.3560201, 0.42943596, 4.])
+        alphas = np.array([0.41826845, 4., 0.356021, 0.42943596, 4.])
         betas = [[ 6.        , -1.83001522,  0.57618678],
                  [-1.34063596, -0.36478777,  0.3783891 ],
                  [ 3.32583095, -1.63422385,  0.93340261],
                  [ 2.58060883, -3.65355207,  1.80558368],
                  [ 0.55722762,  1.01035413,  0.74398657]]
 
-        np.testing.assert_allclose(alphas, output[0], rtol=1e-5)
-        np.testing.assert_allclose(betas, output[1], rtol=1e-5)
+        np.testing.assert_allclose(alphas, output[0], atol=1e-5)
+        np.testing.assert_allclose(betas, output[1], atol=1e-5)
         
 
 if __name__ == '__main__':

@@ -263,7 +263,6 @@ def pcm_full(dataset, max_iter=25):
 
             partial_int *= new_values
         
-        print(iteration, np.abs(previous_discrimination - discrimination).max())
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
     

@@ -110,3 +110,4 @@ def _credit_partial_integral(theta, betas, discrimination,
     kernel /= np.nansum(kernel, axis=0)[None, :]
 
     return kernel[response_set, :]
+    

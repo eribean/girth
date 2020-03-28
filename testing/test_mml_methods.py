@@ -1,4 +1,4 @@
-import unittest
+import unittest # pylint: disable=cyclic-import
 
 import numpy as np
 
@@ -324,7 +324,7 @@ class TestMMLPartialCreditModel(unittest.TestCase):
         rmse_large = rmse(output_large[0][:5], self.discrimination_smol)
 
         self.assertLess(rmse_large, rmse_smol)
-        self.assertAlmostEqual(rmse_large, 0.07285609)
+        self.assertAlmostEqual(rmse_large, 0.07285609, places=5)
 
         # Regression Tests
         expected_discr = np.array([0.81233975, 0.98594227, 1.15784476, 

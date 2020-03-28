@@ -206,7 +206,6 @@ def pcm_full(dataset, max_iter=25):
     betas[:, 0] = 0
     for ndx in range(n_items):
         betas[ndx, 1:item_counts[ndx]] = np.linspace(-1, 1, item_counts[ndx]-1)
-    new_betas = np.zeros_like(betas[0])
 
     #############
     ## 1. Start the iteration loop
@@ -232,7 +231,8 @@ def pcm_full(dataset, max_iter=25):
         for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
             item_length = item_counts[item_ndx]
-            
+            new_betas = np.zeros((item_length))
+
             # Remove the previous output
             old_values = _credit_partial_integral(theta, previous_betas[item_ndx],
                                                   previous_discrimination[item_ndx],

@@ -8,7 +8,7 @@ from girth import rasch_separate, onepl_separate, twopl_separate
 from girth import rasch_full, onepl_full, twopl_full
 
 from girth import create_synthetic_irt_polytomous
-from girth import grm_separate
+from girth import grm_separate, pcm_full
 
 
 class TestMMLRaschMethods(unittest.TestCase):
@@ -277,6 +277,102 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         rmse = np.sqrt(np.square(estimated_parameters[1] - difficulty).mean())
         self.assertLess(rmse, .1591)
 
-        # check for close errors
+        
+class TestMMLPartialCreditModel(unittest.TestCase):
+    """Tests the marginal maximum likelihood for GRM."""
+
+    @classmethod
+    def setUp(self):
+        np.random.seed(1944)
+        self.difficulty = np.random.randn(10, 4)
+        self.discrimination = np.random.rand(10) + 0.5
+        thetas = np.random.randn(1000)
+        thetas_smol = thetas[:500].copy()
+
+        self.discrimination_smol = self.discrimination[:5].copy()
+        self.difficulty_smol = self.difficulty[:5, :].copy()
+        
+        self.syn_data_smol = create_synthetic_irt_polytomous(self.difficulty_smol, 
+                                                             self.discrimination_smol,
+                                                             thetas_smol,
+                                                             model='PCM',
+                                                             seed=546)
+
+        self.syn_data_larg = create_synthetic_irt_polytomous(self.difficulty, 
+                                                             self.discrimination,
+                                                             thetas,
+                                                             model='PCM',
+                                                             seed=546)
+
+        self.syn_data_mixed = create_synthetic_irt_polytomous(self.difficulty_smol[:, 1:],
+                                                              self.discrimination_smol,
+                                                              thetas,
+                                                              model='PCm',
+                                                              seed=543)
+
+
+
+    def test_pcm_gets_better(self):
+        """Testing mml partial credit model improves with parameters."""
+        output_smol = pcm_full(self.syn_data_smol)
+        output_large = pcm_full(self.syn_data_larg)
+
+        def rmse(expected, result):
+            return np.sqrt(np.nanmean(np.square(expected - result)))
+        
+        rmse_smol = rmse(output_smol[0], self.discrimination_smol)
+        rmse_large = rmse(output_large[0][:5], self.discrimination_smol)
+
+        self.assertLess(rmse_large, rmse_smol)
+        self.assertAlmostEqual(rmse_large, 0.07285609)
+
+        # Regression Tests
+        expected_discr = np.array([0.81233975, 0.98594227, 1.15784476, 
+                                   0.54351843, 1.0774421, 0.53615107, 
+                                   1.0475184 , 0.82479055, 1.13312411, 
+                                   0.52347491])
+
+        expected_diff = np.array([[-0.36227744,  1.12566146, -0.86842382, -0.05673954],
+                                  [-0.74530762,  0.50813106, -1.30358698,  1.5485216 ],
+                                  [-0.37363539,  0.22108959,  1.49892019,  0.82861686],
+                                  [ 0.61968408, -1.62910758, -0.17415797, -0.64065788],
+                                  [-0.7778677 , -1.53569663,  0.2063686 ,  0.74254058],
+                                  [ 0.34622206, -1.93388653,  1.02447532, -0.60102884],
+                                  [-1.05718775, -0.99201864,  0.78186396,  1.02659318],
+                                  [ 0.34289862,  0.6030145 ,  1.80655127, -1.16526299],
+                                  [ 0.83155461, -2.08791222,  0.72527178, -1.12898438],
+                                  [-0.22679832, -1.18577464,  1.94080754, -0.45182257]])
+
+        np.testing.assert_array_almost_equal(expected_discr, output_large[0], decimal=5)
+        np.testing.assert_array_almost_equal(expected_diff, output_large[1], decimal=5)
+
+
+    def test_pcm_mixed_difficulty_length(self):
+        """Testing response set with different difficulty lengths."""
+        syn_data = self.syn_data_larg.copy()
+        syn_data[:5, :] = self.syn_data_mixed
+
+        expected_diff = np.array([[ 1.41437983, -1.03972953, -0.03385635,      np.nan],
+                                  [ 0.39319676, -1.14680525,  1.43869585,      np.nan],
+                                  [ 0.13998335,  1.48481773,  0.91181363,      np.nan],
+                                  [-2.15135695, -0.38479504, -0.18542855,      np.nan],
+                                  [-1.41430646,  0.01855994,  0.74583287,      np.nan],
+                                  [ 0.44810092, -2.07080129,  1.08690341, -0.71594963],
+                                  [-1.05746582, -1.02600005,  0.78565529,  1.02590547],
+                                  [ 0.28814764,  0.56462721,  1.74554608, -1.05376351],
+                                  [ 0.72998838, -2.03041128,  0.65498806, -1.05767631],
+                                  [-0.22134409, -1.21822046,  1.96707249, -0.48492872]])
+
+        expected_discr = np.array([0.67902721, 1.20333533, 1.20038813, 0.52138263, 
+                                   1.30479874, 0.49527629, 1.01702145, 0.86596228, 
+                                   1.1954911 , 0.51227604])
+
+        output = pcm_full(syn_data)
+        np.testing.assert_array_almost_equal(expected_diff, output[1], decimal=5)
+        np.testing.assert_array_almost_equal(expected_discr, output[0], decimal=5)
+
+
+
+
 if __name__ == '__main__':
     unittest.main()

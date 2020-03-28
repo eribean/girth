@@ -96,8 +96,8 @@ def _credit_partial_integral(theta, betas, discrimination,
     """Computes the partial integral for the partial credit model."""
     kernel = theta[None, :] - betas[:, None]
     kernel *= discrimination
+    kernel[0] = 0
     np.cumsum(kernel, axis=0, out=kernel)
     np.exp(kernel, out=kernel)
     kernel /= np.nansum(kernel, axis=0)[None, :]
-    
     return kernel[response_set, :]

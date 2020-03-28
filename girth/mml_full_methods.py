@@ -198,9 +198,7 @@ def pcm_full(dataset, max_iter=25):
     # Initialize difficulty parameters for estimation
     betas = np.full((n_items, item_counts.max()), np.nan)
     discrimination = np.ones((n_items,))
-    
     partial_int = np.ones((responses.shape[1], theta.size))
-    partial_int *= distribution[None, :]
 
     betas[:, 0] = 0
     for ndx in range(n_items):
@@ -218,6 +216,8 @@ def pcm_full(dataset, max_iter=25):
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         # and for speed
+        partial_int *= 0.0
+        partial_int += distribution[None, :]
         for item_ndx in range(n_items):
             partial_int *= _credit_partial_integral(theta, betas[item_ndx], 
                                                     discrimination[item_ndx],
@@ -249,8 +249,7 @@ def pcm_full(dataset, max_iter=25):
             # Univariate minimization for discrimination parameter
             initial_guess = np.concatenate(([discrimination[item_ndx]], 
                                              betas[item_ndx, 1:item_length]))
-            if item_ndx == 0:
-                print(iteration, initial_guess)
+            
             otpt = fmin_slsqp(_local_min_func, initial_guess,
                               disp=False,
                               bounds=[(.25, 4)] + [(-6, 6)] * (item_length - 1))
@@ -263,8 +262,9 @@ def pcm_full(dataset, max_iter=25):
                                                   responses[item_ndx])
 
             partial_int *= new_values
-            
-        if np.abs(previous_discrimination - discrimination).mean() < 1e-3:
+        
+        print(iteration, np.abs(previous_discrimination - discrimination).max())
+        if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
     
     #TODO:  look where missing values are and place NAN there instead

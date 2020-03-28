@@ -94,10 +94,19 @@ def _solve_integral_equations(discrimination, ratio, distribution, theta):
 def _credit_partial_integral(theta, betas, discrimination, 
                              response_set):
     """Computes the partial integral for the partial credit model."""
+    # Creates a 2d array [beta x thetas]
     kernel = theta[None, :] - betas[:, None]
     kernel *= discrimination
+
+    # This can be removed since its a scalar
+    # in the optimization
     kernel[0] = 0
+    
+    # PCM is additive in log space
     np.cumsum(kernel, axis=0, out=kernel)
     np.exp(kernel, out=kernel)
+
+    # Normalize probability to equal one
     kernel /= np.nansum(kernel, axis=0)[None, :]
+
     return kernel[response_set, :]

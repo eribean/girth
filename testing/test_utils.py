@@ -11,7 +11,7 @@ from girth import (create_synthetic_irt_dichotomous,
 from girth import condition_polytomous_response, get_true_false_counts
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants, 
-                                    _solve_integral_equations)
+                                    _solve_integral_equations, _credit_partial_integral)
 
 
 class TestUtilitiesMethods(unittest.TestCase):
@@ -275,6 +275,33 @@ class TestPolytomousUtilities(unittest.TestCase):
 
         np.testing.assert_array_equal(hand_calc, output)
 
+
+    def test_credit_partial_integration(self):
+        """Testing the partial integral in the graded model."""
+        theta = _get_quadrature_points(61, -5, 5)
+        response_set = np.array([0, 1, 2, 2, 1, 0, 3, 1, 3, 2, 2, 2])
+        betas = np.array([0, -0.4, 0.94, -.37])
+        discrimination = 1.42
+
+        # Hand calculations
+        offsets = np.cumsum(betas)[1:]
+        first_pos = np.ones_like(theta)
+        second_pos = np.exp(discrimination * (theta - offsets[0]))
+        third_pos = np.exp(2*discrimination * (theta - offsets[1]/2))
+        last_pos = np.exp(3*discrimination * (theta - offsets[2]/3))
+        norm_term = first_pos + second_pos + third_pos + last_pos
+
+        probability_values = [first_pos / norm_term, second_pos / norm_term,
+                              third_pos / norm_term, last_pos / norm_term]
+        expected = np.zeros((response_set.size, theta.size))
+        for ndx, response in enumerate(response_set):
+            expected[ndx] = probability_values[response]
+
+        result = _credit_partial_integral(theta, betas, discrimination,
+                                          response_set)
+
+        np.testing.assert_array_almost_equal(result, expected)
+        
 
 if __name__ == '__main__':
     unittest.main()

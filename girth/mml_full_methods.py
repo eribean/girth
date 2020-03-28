@@ -188,7 +188,8 @@ def pcm_full(dataset, max_iter=25):
         array of discrimination parameters
         2d array of difficulty parameters, (NAN represents non response)
     """
-    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False, _reference=0.0)
+    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False, 
+                                                           _reference=0.0)
     n_items = responses.shape[0]
 
     # Interpolation Locations
@@ -200,14 +201,18 @@ def pcm_full(dataset, max_iter=25):
     discrimination = np.ones((n_items,))
     partial_int = np.ones((responses.shape[1], theta.size))
 
+    # Not all items need to have the same
+    # number of response categories
     betas[:, 0] = 0
     for ndx in range(n_items):
         betas[ndx, 1:item_counts[ndx]] = np.linspace(-1, 1, item_counts[ndx]-1)
+    new_betas = np.zeros_like(betas[0])
 
     #############
     ## 1. Start the iteration loop
     ## 2. Estimate Dicriminatin/Difficulty Jointly
-    ## 3. minimize and repeat
+    ## 3. Integrate of theta
+    ## 4. minimize and repeat
     #############
     for iteration in range(max_iter):
         previous_discrimination = discrimination.copy()
@@ -233,7 +238,6 @@ def pcm_full(dataset, max_iter=25):
                                                   previous_discrimination[item_ndx],
                                                   responses[item_ndx])
             partial_int /= old_values
-            new_betas = np.zeros_like(betas[item_ndx])
             
             def _local_min_func(estimate):
                 new_betas[1:] = estimate[1:]

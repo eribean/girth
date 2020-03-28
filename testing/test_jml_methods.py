@@ -4,7 +4,7 @@ import numpy as np
 
 from girth import create_synthetic_irt_dichotomous
 from girth import create_synthetic_irt_polytomous
-from girth import rasch_jml, onepl_jml, twopl_jml, grm_jml
+from girth import rasch_jml, onepl_jml, twopl_jml, grm_jml, pcm_jml
 from girth.jml_methods import _jml_inequality
 
 
@@ -102,6 +102,28 @@ class TestPolytomousJMLMethods(unittest.TestCase):
                           [-3.30647782,  1.86102210,      np.nan],
                           [-0.47923614,  0.31797999,  0.89676892],
                           [-0.67769087,  0.49737400,      np.nan]])
+
+        np.testing.assert_allclose(alphas, output[0], rtol=1e-5)
+        np.testing.assert_allclose(betas, output[1], rtol=1e-5)
+
+    def test_partial_credit_jml_regression(self):
+        np.random.seed(3)
+        difficulty = np.random.randn(5, 3)
+        discrimination = 0.5 + np.random.rand(5)
+        thetas = np.random.randn(50) 
+
+        syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
+                                                   thetas, model='pcm')
+       
+        output = pcm_jml(syn_data)
+
+        # Expected Outputs (Basically a smoke test)
+        alphas = np.array([0.41826845, 4., 0.3560201, 0.42943596, 4.])
+        betas = [[ 6.        , -1.83001522,  0.57618678],
+                 [-1.34063596, -0.36478777,  0.3783891 ],
+                 [ 3.32583095, -1.63422385,  0.93340261],
+                 [ 2.58060883, -3.65355207,  1.80558368],
+                 [ 0.55722762,  1.01035413,  0.74398657]]
 
         np.testing.assert_allclose(alphas, output[0], rtol=1e-5)
         np.testing.assert_allclose(betas, output[1], rtol=1e-5)

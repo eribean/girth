@@ -89,3 +89,15 @@ def _solve_integral_equations(discrimination, ratio, distribution, theta):
         difficulty[ratio_ndx] = fminbound(_min_func_local, -6, 6)
     
     return difficulty
+
+
+def _credit_partial_integral(theta, betas, discrimination, 
+                             response_set):
+    """Computes the partial integral for the partial credit model."""
+    kernel = theta[None, :] - betas[:, None]
+    kernel *= discrimination
+    np.cumsum(kernel, axis=0, out=kernel)
+    np.exp(kernel, out=kernel)
+    kernel /= np.nansum(kernel, axis=0)[None, :]
+    
+    return kernel[response_set, :]

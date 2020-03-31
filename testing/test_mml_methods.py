@@ -45,7 +45,7 @@ class TestMMLRaschMethods(unittest.TestCase):
         expected_output = np.array([-1.32474665, -0.81460991, -0.08221992,
                                      0.65867573,  1.47055368])
 
-        np.testing.assert_allclose(expected_output, output)
+        np.testing.assert_allclose(expected_output, output, rtol=1e-5)
 
 
     def test_rasch_regression_full(self):
@@ -102,11 +102,11 @@ class TestMMLOnePLMethods(unittest.TestCase):
         """Testing onepl separate methods."""
         syn_data = self.data.copy()
         output = onepl_separate(syn_data)
-        expected_output = np.array([-1.37650768, -0.64900385, -0.0393339 ,
-                                    0.7791904 ,  1.38618721])
+        expected_output = np.array([-1.37650733, -0.64900392, -0.03933326,  
+                                     0.77918889,  1.38618695])
 
-        self.assertAlmostEqual(output[0], 1.901703384)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+        self.assertAlmostEqual(output[0], 1.901703384, places=5)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-5)
 
 
     def test_onepl_regression_full(self):

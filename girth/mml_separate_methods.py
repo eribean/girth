@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import integrate
-from scipy.optimize import fminbound, brentq
+from scipy.optimize import fminbound
 
 from girth import (irt_evaluation, rasch_approx, condition_polytomous_response,
                    get_true_false_counts, convert_responses_to_kernel_sign)
@@ -46,9 +46,9 @@ def rasch_separate(dataset, discrimination=1, max_iter=25):
         def min_zero_local(estimate):
             return (scalar[ndx] -
                     integrate.fixed_quad(quadrature_function, -10, 10,
-                    (estimate, discrimination[ndx]), n=101)[0])
+                    (estimate, discrimination[ndx]), n=101)[0])**2
 
-        the_parameters[ndx] = brentq(min_zero_local, -6, 6)
+        the_parameters[ndx] = fminbound(min_zero_local, -6, 6)
 
     return the_parameters
 

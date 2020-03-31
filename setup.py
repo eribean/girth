@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, convert_path
 
 # read the contents of your README file
 from os import path
@@ -7,10 +7,13 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
+print(convert_path('/performance'))
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth'],
+        packages=['girth', 'girth.performance'],
+        package_dir={'girth': 'girth', 
+                     'girth.performance':convert_path('./performance')},
         version="0.1.3",
         license="MIT",
         description="A python package for Item Response Theory.",

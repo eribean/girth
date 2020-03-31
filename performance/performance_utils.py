@@ -28,12 +28,12 @@ def _set_default(the_dict, the_key, the_default):
 def _validate_options(option_dict):
     """Validates options of performance."""
 
-    _set_default(option_dict, "num_processors", 1)
+    _set_default(option_dict, "Processor_count", 1)
 
-    if option_dict["num_processors"] in [-1, -2]:
+    if option_dict["Processor_count"] in [-1, -2]:
         cpu_count = (multiprocessing.cpu_count() // 
-                     abs(option_dict["num_processors"]))
-        option_dict["num_processors"] = cpu_count
+                     abs(option_dict["Processor_count"]))
+        option_dict["Processor_count"] = cpu_count
     
     return option_dict
 
@@ -53,7 +53,7 @@ def _validate_analysis(analysis_dict):
     _set_default(analysis_dict,"Trials", 50)
 
     # Discrimination Defaults
-    _set_default(analysis_dict, "Discrimination_pdf", "uniform")
+    _set_default(analysis_dict, "Discrimination_pdf", "lognorm")
     _set_default(analysis_dict, "Discrimination_pdf_args", {})
     _set_default(analysis_dict, "Discrimination_count", 10)
 
@@ -141,15 +141,18 @@ class LinearSpacePDF(object):
         self.scale = scale
     
     def rvs(self, size):
+        if type(size) is not list:
+            size = [size,]
+
         if len(list(size)) == 1:
-            otpt = linspace(self.loc, self.loc+self.scale, size)
+            otpt = linspace(self.loc, self.loc+self.scale, size[0])
 
         else:
             otpt = ones(size)
             x = linspace(self.loc, self.loc+self.scale, size[1])
-            otpt *= x[None, :
-            ]
+            otpt *= x[None, :]
         return otpt
+
 
 def scipy_stats_string_to_functions(pdf_string, pdf_kwargs=None):
     """Return a scipy pdf function from a string

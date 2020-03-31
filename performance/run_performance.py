@@ -1,6 +1,9 @@
 import json
 import argparse
+import multiprocessing
 from functools import partial
+from time import time
+from os import path
 
 import numpy as np
 import scipy as sp
@@ -96,34 +99,58 @@ def create_synthetic_data(difficulty, discrimination, analysis_dict, ndx):
         yield func(thetas=thetas, seed=seed)
 
 
-def gather_metrics(synthesis, analysis, ndx):
+def gather_metrics(analysis, synthesis, ndx):
     """ Runs the synthetic data creation
  
         Args:
-            synthesis: Dictionary of synthesis parameters
             analysis: Dictionary of analysis parameters
+            synthesis: Dictionary of synthesis parameters
+            ndx: integer into ability count
         
-        Return metrics 
+        Returns:
+            dictionary of metrics for run 
     """
-    alpha, beta = create_item_parameters(synthesis)
+    alpha, beta = create_item_parameters(analysis)
 
-    datasets = create_synthetic_data(beta, alpha, synthesis, 0)
+    datasets = create_synthetic_data(beta, alpha, analysis, ndx)
 
-    estimate_func = girth.__dict__[analysis['Model']]
+    estimate_func = girth.__dict__[synthesis['Model']]
 
     rmse_alpha = list()
     rmse_beta = list()
+    time_counts = list()
 
     for dataset in datasets:
+        t1 = time()
         otpt = estimate_func(dataset)
+        time_counts.append(time() - t1)
 
-        value = np.sqrt(np.nanmean(np.square(otpt[0] - alpha)))
-        rmse_alpha.append(value)
+        if type(otpt) is tuple:
+            value = np.sqrt(np.nanmean(np.square(otpt[0] - alpha)))
+            rmse_alpha.append(value)
 
-        value = np.sqrt(np.nanmean(np.square(otpt[1] - beta)))
-        rmse_beta.append(value)
+            value = np.sqrt(np.nanmean(np.square(otpt[1] - beta)))
+            rmse_beta.append(value)
+        
+        else:
+            rmse_alpha.append(np.abs(alpha))
+            value = np.sqrt(np.nanmean(np.square(otpt[0] - beta)))
+            rmse_beta.append(value)           
     
-    return (rmse_alpha, rmse_beta)
+    # Package outputs
+    count = analysis['Ability_count'][ndx]
+    def _statistics(input_array):
+        return {'max': np.max(input_array),
+                'min': np.min(input_array),
+                'mean': np.mean(input_array),
+                'std': np.std(input_array, ddof=1),
+                'quartile_1': np.percentile(input_array, 25),
+                'quartile_2': np.percentile(input_array, 75)}
+
+    output = {count: {'alpha': _statistics(rmse_alpha),
+                      'beta': _statistics(rmse_beta),
+                      'time': _statistics(time_counts)}}    
+    return output
 
 
 if __name__ == '__main__':
@@ -140,10 +167,43 @@ if __name__ == '__main__':
     with open(args.config, 'r') as fptr:
         config_dict = json.load(fptr)
     
+    # Make sure values are working
     config_dict = validate_performance_dict(config_dict)
 
-    a, b = gather_metrics(config_dict['Analysis'], 
-                          config_dict['Synthesis']["Rasch_Approx"], 0)
+    # get the appropriate map function
+    processor_count = config_dict['Options']['Processor_count']
+    map_func = map
+    if processor_count > 1:
+        map_func = multiprocessing.Pool(processes=processor_count).map
 
-    print(np.mean(a), np.std(a, ddof=1))
-    print(np.mean(b), np.std(b, ddof=1))
+    # sort items from largest to smallest
+    ability_counts = config_dict["Analysis"]["Ability_count"]
+    ability_counts.sort(reverse=True)
+    ability_length = len(ability_counts)
+
+    print(f"Using {config_dict['Options']['Processor_count']} processors\n")
+
+    results_dict = dict()
+    # Loop over synthesis arguments
+    for key, synthesis in config_dict['Synthesis'].items():
+        print(f"Start processing on {key}")
+        results_dict[key] = {}
+        
+        # This function will be evaluted at each ability count
+        run_func = partial(gather_metrics, config_dict['Analysis'],
+                           synthesis)
+    
+        results = map_func(run_func, range(ability_length))
+    
+        for ndx, result in enumerate(results):
+            results_dict[key].update(result)
+    
+    alpha, beta = create_item_parameters(config_dict['Analysis'])
+    results_dict['Truth'] = {'alpha': alpha.tolist(),
+                             'beta': beta.tolist()}   
+    # write out file
+    output_file = path.join(args.output_dir, 
+                            config_dict['Name'].replace(' ', '_') + '.json')
+    
+    with open(output_file, 'w') as fptr:
+        json.dump(results_dict, fptr, indent=4)

@@ -1,3 +1,4 @@
+#pylint: skip-file
 import json
 import argparse
 import multiprocessing

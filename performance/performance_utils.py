@@ -1,3 +1,4 @@
+#pylint: skip-file
 import multiprocessing
 import random
 from datetime import datetime

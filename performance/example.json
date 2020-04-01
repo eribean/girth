@@ -24,16 +24,6 @@
     },
     "Synthesis": 
     {
-        "TwoPL_Approx":
-        {
-            "Model": "twopl_approx",
-            "Discrimination_pdf": null,
-            "Discrimination_pdf_args": null,
-            "Difficulty_pdf": null,
-            "Difficulty_pdf_args": null,
-            "Ability_pdf": "norm",
-            "Ability_pdf_args": {"loc": 0.0, "scale": 1.0}
-        },
         "TwoPL_Separate":
         {
             "Model": "twopl_separate",

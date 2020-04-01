@@ -2,10 +2,10 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound, brentq, fmin_powell, fmin_slsqp
 
-from girth import irt_evaluation, convert_responses_to_kernel_sign
+from girth import (irt_evaluation, convert_responses_to_kernel_sign,
+                   mml_approx)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import condition_polytomous_response, _credit_partial_integral
-from girth import rasch_approx, onepl_approx
 
 
 def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
@@ -31,18 +31,18 @@ def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
     # Inline definition of cost function to minimize
     def min_func(difficulty, old_difficulty, partial_int, the_sign):
         otpt = integrate.fixed_quad(quadrature_function, -5, 5,
-                (difficulty, old_difficulty, partial_int, the_sign), n=61)[0] + 1e-23
+                                    (difficulty, old_difficulty, partial_int, the_sign), n=61)[0] + 1e-23
         return -np.log(otpt).dot(counts)
 
     # Get approximate guess to begin with
-    initial_guess = rasch_approx(dataset, discrimination=discrimination)
+    initial_guess = mml_approx(dataset, discrimination=discrimination)
 
     for iteration in range(max_iter):
         previous_guess = initial_guess.copy()
 
-        #Quadrature evaluation for values that do not change
+        # Quadrature evaluation for values that do not change
         partial_int = _compute_partial_integral(theta, initial_guess,
-                          discrimination, the_sign)
+                                                discrimination, the_sign)
 
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
@@ -138,19 +138,19 @@ def twopl_full(dataset, max_iter=25):
     # Inline definition of cost function to minimize
     def min_func(estimates, old_estimates, partial_int, the_sign):
         otpt = integrate.fixed_quad(quadrature_function, -5, 5,
-                (estimates, old_estimates, partial_int, the_sign), n=61)[0] + 1e-23
+                                    (estimates, old_estimates, partial_int, the_sign), n=61)[0] + 1e-23
         return -np.log(otpt).dot(counts)
 
     # Get approximate guess to begin with rasch model
-    a1, b1 = onepl_approx(dataset)
-    initial_guess = np.c_[np.full_like(b1, a1), b1]
+    b1 = mml_approx(dataset)
+    initial_guess = np.c_[np.ones_like(b1), b1]
 
     for iteration in range(max_iter):
         previous_guess = initial_guess.copy()
 
-        #Quadrature evaluation for values that do not change
+        # Quadrature evaluation for values that do not change
         partial_int = _compute_partial_integral(theta, initial_guess[:, 1],
-                          initial_guess[:, 0], the_sign)
+                                                initial_guess[:, 0], the_sign)
 
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
@@ -162,7 +162,8 @@ def twopl_full(dataset, max_iter=25):
                                 partial_int, the_sign[ndx])
 
             # Two parameter solver that doesn't need derivatives
-            initial_guess[ndx] = fmin_powell(min_func_local, value, xtol=1e-3, disp=0)
+            initial_guess[ndx] = fmin_powell(
+                min_func_local, value, xtol=1e-3, disp=0)
 
             # Update the integral for new found values
             partial_int = quadrature_function(theta, initial_guess[ndx],
@@ -188,14 +189,14 @@ def pcm_full(dataset, max_iter=25):
         array of discrimination parameters
         2d array of difficulty parameters, (NAN represents non response)
     """
-    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False, 
+    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
                                                            _reference=0.0)
     n_items = responses.shape[0]
 
     # Interpolation Locations
     theta = _get_quadrature_points(61, -5, 5)
     distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
-                    
+
     # Initialize difficulty parameters for estimation
     betas = np.full((n_items, item_counts.max()), np.nan)
     discrimination = np.ones((n_items,))
@@ -208,22 +209,22 @@ def pcm_full(dataset, max_iter=25):
         betas[ndx, 1:item_counts[ndx]] = np.linspace(-1, 1, item_counts[ndx]-1)
 
     #############
-    ## 1. Start the iteration loop
-    ## 2. Estimate Dicriminatin/Difficulty Jointly
-    ## 3. Integrate of theta
-    ## 4. minimize and repeat
+    # 1. Start the iteration loop
+    # 2. Estimate Dicriminatin/Difficulty Jointly
+    # 3. Integrate of theta
+    # 4. minimize and repeat
     #############
     for iteration in range(max_iter):
         previous_discrimination = discrimination.copy()
         previous_betas = betas.copy()
-        
+
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         # and for speed
         partial_int *= 0.0
         partial_int += distribution[None, :]
         for item_ndx in range(n_items):
-            partial_int *= _credit_partial_integral(theta, betas[item_ndx], 
+            partial_int *= _credit_partial_integral(theta, betas[item_ndx],
                                                     discrimination[item_ndx],
                                                     responses[item_ndx])
 
@@ -238,38 +239,39 @@ def pcm_full(dataset, max_iter=25):
                                                   previous_discrimination[item_ndx],
                                                   responses[item_ndx])
             partial_int /= old_values
-            
+
             def _local_min_func(estimate):
                 new_betas[1:] = estimate[1:]
                 new_values = _credit_partial_integral(theta, new_betas,
                                                       estimate[0],
                                                       responses[item_ndx])
-                
+
                 new_values *= partial_int
-                otpt = integrate.fixed_quad(lambda x: new_values, -5, 5, n=61)[0]
-                
+                otpt = integrate.fixed_quad(
+                    lambda x: new_values, -5, 5, n=61)[0]
+
                 return -np.log(otpt).sum()
-            
+
             # Univariate minimization for discrimination parameter
-            initial_guess = np.concatenate(([discrimination[item_ndx]], 
-                                             betas[item_ndx, 1:item_length]))
-            
+            initial_guess = np.concatenate(([discrimination[item_ndx]],
+                                            betas[item_ndx, 1:item_length]))
+
             otpt = fmin_slsqp(_local_min_func, initial_guess,
                               disp=False,
                               bounds=[(.25, 4)] + [(-6, 6)] * (item_length - 1))
-            
+
             discrimination[item_ndx] = otpt[0]
             betas[item_ndx, 1:item_length] = otpt[1:]
-            
+
             new_values = _credit_partial_integral(theta, betas[item_ndx],
                                                   discrimination[item_ndx],
                                                   responses[item_ndx])
 
             partial_int *= new_values
-        
+
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
-    
-    #TODO:  look where missing values are and place NAN there instead
+
+    # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
     return discrimination, betas[:, 1:]

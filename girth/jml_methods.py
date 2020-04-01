@@ -14,8 +14,8 @@ def _jml_abstract(dataset, _item_min_func,
     n_items, _ = unique_sets.shape
 
     # Use easy model to seed guess
-    alphas = np.full((n_items,), discrimination, 
-                      dtype='float')  # discrimination
+    alphas = np.full((n_items,), discrimination,
+                     dtype='float')  # discrimination
     betas = rasch_approx(dataset, alphas)  # difficulty
 
     # Remove the zero and full count values
@@ -52,10 +52,10 @@ def _jml_abstract(dataset, _item_min_func,
 
         #####################
         # STEP 2
-        # Estimate Item Parameters 
+        # Estimate Item Parameters
         # given Theta,
         #####################
-        alphas, betas = _item_min_func(n_items, alphas, thetas, 
+        alphas, betas = _item_min_func(n_items, alphas, thetas,
                                        betas, the_sign, counts)
 
         if(np.abs(previous_betas - betas).max() < 1e-3):
@@ -85,17 +85,17 @@ def rasch_jml(dataset, discrimination=1, max_iter=25):
             scalar = alphas[0] * the_sign[ndx, :]
 
             def _beta_min(beta):
-                otpt = 1.0 / (1.0 + np.exp(scalar * 
+                otpt = 1.0 / (1.0 + np.exp(scalar *
                                            (thetas - beta)))
                 return -np.log(otpt).dot(counts)
 
             # Solves for the beta parameters
             betas[ndx] = fminbound(_beta_min, -6, 6)
-    
+
         return alphas, betas
 
-    result = _jml_abstract(dataset, _item_min_func, 
-                        discrimination, max_iter)
+    result = _jml_abstract(dataset, _item_min_func,
+                           discrimination, max_iter)
 
     return result[1]
 
@@ -124,7 +124,7 @@ def onepl_jml(dataset, max_iter=25):
                 scalar = the_sign[ndx, :] * estimate
 
                 def _beta_min(beta):
-                    otpt = 1.0 / (1.0 + np.exp(scalar * 
+                    otpt = 1.0 / (1.0 + np.exp(scalar *
                                                (thetas - beta)))
                     return -np.log(otpt).dot(counts)
 
@@ -132,15 +132,15 @@ def onepl_jml(dataset, max_iter=25):
                 # a specific discrimination parameter
                 betas[ndx] = fminbound(_beta_min, -6, 6)
                 cost += _beta_min(betas[ndx])
-            
+
             return cost
-    
+
         min_alpha = fminbound(_alpha_min, 0.25, 5)
         alphas[:] = min_alpha
 
         return alphas, betas
 
-    result = _jml_abstract(dataset, _item_min_func, discrimination=1, 
+    result = _jml_abstract(dataset, _item_min_func, discrimination=1,
                            max_iter=max_iter)
 
     return result[0][0], result[1]
@@ -157,49 +157,10 @@ def twopl_jml(dataset, max_iter=25):
         Returns:
             array of discriminations, array of difficulty estimates
     """
-    unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    n_items, _ = unique_sets.shape
-
-    # Use easy model to seed guess
-    discrimination = np.ones((n_items,))
-    betas = rasch_approx(dataset, discrimination)
-
-    # Remove the zero and full count values
-    unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
-
-    n_takers = unique_sets.shape[1]
-    the_sign = convert_responses_to_kernel_sign(unique_sets)
-    thetas = np.zeros((n_takers,))
-
-    for iteration in range(max_iter):
-        previous_betas = betas.copy()
-
-        #####################
-        # STEP 1
-        # Estimate theta, given betas / alpha
-        # Loops over all persons
-        #####################
-        for ndx in range(n_takers):
-            # pylint: disable=cell-var-from-loop
-            scalar = the_sign[:, ndx] * discrimination
-
-            def _theta_min(theta):
-                otpt = 1.0 / (1.0 + np.exp(scalar *
-                                           (theta - betas)))
-
-                return -np.log(otpt).sum()
-            # Solves for ability parameters
-            thetas[ndx] = fminbound(_theta_min, -6, 6)
-
-        # Recenter theta to identify model
-        thetas -= thetas.mean()
-        thetas /= thetas.std(ddof=1)
-
-        #####################
-        # STEP 2
-        # Estimate Betas / alpha, given Theta
-        # Loops over all items
-        #####################
+    # Defines item parameter update function
+    def _item_min_func(n_items, alphas, thetas,
+                       betas, the_sign, counts):
+        # pylint: disable=cell-var-from-loop
         for ndx in range(n_items):
             def _alpha_beta_min(estimates):
                 otpt = 1.0 / (1.0 + np.exp((thetas - estimates[1]) *
@@ -207,15 +168,14 @@ def twopl_jml(dataset, max_iter=25):
                 return -np.log(otpt).dot(counts)
 
             # Solves jointly for parameters using numerical derivatives
-            otpt = fmin_slsqp(_alpha_beta_min, (discrimination[ndx], betas[ndx]),
+            otpt = fmin_slsqp(_alpha_beta_min, (alphas[ndx], betas[ndx]),
                               bounds=[(0.25, 4), (-6, 6)], disp=False)
-            discrimination[ndx], betas[ndx] = otpt
+            alphas[ndx], betas[ndx] = otpt
 
-        # Check termination criterion
-        if(np.abs(previous_betas - betas).max() < 1e-3):
-            break
+        return alphas, betas
 
-    return discrimination, betas
+    return _jml_abstract(dataset, _item_min_func, discrimination=1,
+                         max_iter=max_iter)
 
 
 def _jml_inequality(test):

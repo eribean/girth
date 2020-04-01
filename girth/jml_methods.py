@@ -3,7 +3,7 @@ from scipy.optimize import fmin_slsqp, fminbound
 
 from girth import (condition_polytomous_response,
                    convert_responses_to_kernel_sign, irt_evaluation,
-                   rasch_approx, trim_response_set_and_counts)
+                   mml_approx, trim_response_set_and_counts)
 
 
 def _jml_abstract(dataset, _item_min_func,
@@ -16,7 +16,7 @@ def _jml_abstract(dataset, _item_min_func,
     # Use easy model to seed guess
     alphas = np.full((n_items,), discrimination,
                      dtype='float')  # discrimination
-    betas = rasch_approx(dataset, alphas)  # difficulty
+    betas = mml_approx(dataset, alphas)  # difficulty
 
     # Remove the zero and full count values
     unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)

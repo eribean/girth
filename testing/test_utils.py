@@ -1,4 +1,4 @@
-import unittest # pylint: disable=cyclic-import
+import unittest  # pylint: disable=cyclic-import
 
 
 import numpy as np
@@ -8,9 +8,10 @@ from scipy import integrate
 from girth import (create_synthetic_irt_dichotomous,
                    irt_evaluation, trim_response_set_and_counts,
                    convert_responses_to_kernel_sign)
-from girth import condition_polytomous_response, get_true_false_counts
+from girth import (condition_polytomous_response, get_true_false_counts,
+                   mml_approx)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
-from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants, 
+from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral)
 
 
@@ -24,7 +25,8 @@ class TestUtilitiesMethods(unittest.TestCase):
         discrimination = 4.0
 
         # Expected output
-        expected_output = 1.0 / (1.0 + np.exp(discrimination * (difficuly[:, None] - theta)))
+        expected_output = 1.0 / \
+            (1.0 + np.exp(discrimination * (difficuly[:, None] - theta)))
         output = irt_evaluation(difficuly, discrimination, theta)
 
         np.testing.assert_allclose(output, expected_output)
@@ -36,7 +38,9 @@ class TestUtilitiesMethods(unittest.TestCase):
         discrimination = np.array([1.7, 2.3])
 
         # Expected output
-        expected_output = 1.0 / (1.0 + np.exp(discrimination[:, None] * (difficuly[:, None] - theta)))
+        expected_output = 1.0 / \
+            (1.0 + np.exp(discrimination[:, None]
+                          * (difficuly[:, None] - theta)))
         output = irt_evaluation(difficuly, discrimination, theta)
 
         np.testing.assert_allclose(output, expected_output)
@@ -134,10 +138,10 @@ class TestUtilitiesMethods(unittest.TestCase):
         # There are responses with zero variance
         locations = np.where(np.nanstd(dataset, axis=0) == 0)
         self.assertTrue(locations[0].size > 0)
-        
+
         new_set, new_counts = trim_response_set_and_counts(dataset, counts)
         locations = np.where(np.nanstd(new_set, axis=0) == 0)
-        self.assertTrue(locations[0].size == 0)        
+        self.assertTrue(locations[0].size == 0)
 
     def test_get_true_false_counts(self):
         """Testing the counting of true and false."""
@@ -146,7 +150,7 @@ class TestUtilitiesMethods(unittest.TestCase):
                                [0.0, 1.0, 1.0, 0.0, 1.0]])
 
         n_false, n_true = get_true_false_counts(test_array)
-        
+
         expected_true = [1, 0, 3]
         expected_false = [1, 0, 2]
 
@@ -163,10 +167,27 @@ class TestUtilitiesMethods(unittest.TestCase):
                                     [0, 0, 0, 0, 0],
                                     [1, -1, -1, 1, -1]])
 
-        result = convert_responses_to_kernel_sign(test_array)                                   
+        result = convert_responses_to_kernel_sign(test_array)
 
         np.testing.assert_array_equal(expected_output, result)
 
+    def test_mml_approx(self):
+        """Testing approximation of rasch model with normal distribution."""
+        dataset = np.random.randint(0, 2, (3, 100))
+        discrimination = 2.31
+        result = mml_approx(dataset, discrimination)
+
+        n_no = np.count_nonzero(dataset==0, axis=1)
+        n_yes = np.count_nonzero(dataset, axis=1)
+
+        scalar = np.log(n_no / n_yes)
+        
+        expected = (np.sqrt(1 + discrimination**2 / 3) * 
+                    scalar / discrimination)
+        result2 = mml_approx(dataset, discrimination, scalar)
+        
+        np.testing.assert_array_almost_equal(expected, result)
+        np.testing.assert_array_almost_equal(expected, result2)
 
 
 class TestPolytomousUtilities(unittest.TestCase):
@@ -194,16 +215,17 @@ class TestPolytomousUtilities(unittest.TestCase):
         # Trim First Column but not last
         dataset[:, 0] = 1
         output = condition_polytomous_response(dataset, trim_ends=True)
-        self.assertTupleEqual(output[0].shape, (dataset.shape[0], dataset.shape[1]-1))
+        self.assertTupleEqual(
+            output[0].shape, (dataset.shape[0], dataset.shape[1]-1))
         self.assertTrue(output[0].std(axis=0)[0] != 0)
- 
+
         # Trim First/Last Column but not last
         dataset[:, -1] = 1
         output = condition_polytomous_response(dataset, trim_ends=True)
-        self.assertTupleEqual(output[0].shape, (dataset.shape[0], dataset.shape[1]-2))
+        self.assertTupleEqual(
+            output[0].shape, (dataset.shape[0], dataset.shape[1]-2))
         self.assertTrue(output[0].std(axis=0)[0] != 0)
         self.assertTrue(output[0].std(axis=0)[-1] != 0)
-
 
     def test_solve_for_constants(self):
         """Testing solving for boundary constants."""
@@ -213,7 +235,7 @@ class TestPolytomousUtilities(unittest.TestCase):
 
         output = _solve_for_constants(dataset)
 
-        #Compare to hand calculations
+        # Compare to hand calculations
         b11 = counts[0] + counts[1]
         b12 = -counts[0]
         b13 = 0
@@ -229,7 +251,6 @@ class TestPolytomousUtilities(unittest.TestCase):
         hand_calcs = np.linalg.inv(b_matrix) @ np.array([counts[1], 0, 0]).T
         np.testing.assert_array_equal(output, hand_calcs)
 
-
     def test_integral_equations(self):
         """Tests solving for integral given a ratio."""
         np.random.seed(786)
@@ -238,16 +259,17 @@ class TestPolytomousUtilities(unittest.TestCase):
         difficulty = np.array([-.4, .1, .5])
 
         # Compare against dichotomous data
-        syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination, theta)
+        syn_data = create_synthetic_irt_dichotomous(
+            difficulty, discrimination, theta)
         n0 = np.count_nonzero(~syn_data, axis=1)
         n1 = np.count_nonzero(syn_data, axis=1)
         ratio = n1 / (n1 + n0)
 
         theta = _get_quadrature_points(61, -5, 5)
         distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
-        results = _solve_integral_equations(discrimination, ratio, distribution, theta)
+        results = _solve_integral_equations(
+            discrimination, ratio, distribution, theta)
         np.testing.assert_array_almost_equal(results, difficulty, decimal=2)
-
 
     def test_graded_partial_integral(self):
         """Testing the partial integral in the graded model."""
@@ -266,7 +288,7 @@ class TestPolytomousUtilities(unittest.TestCase):
         for ndx in range(responses.shape[1]):
             left_betas = betas[responses[:, ndx]]
             right_betas = betas_roll[responses[:, ndx]]
-            probability = (1.0 / (1.0 + np.exp(left_betas[:, None] - theta[None, :])) - 
+            probability = (1.0 / (1.0 + np.exp(left_betas[:, None] - theta[None, :])) -
                            1.0 / (1.0 + np.exp(right_betas[:, None] - theta[None, :])))
             hand_calc.append(probability.prod(0))
 
@@ -274,7 +296,6 @@ class TestPolytomousUtilities(unittest.TestCase):
         hand_calc *= distribution
 
         np.testing.assert_array_equal(hand_calc, output)
-
 
     def test_credit_partial_integration(self):
         """Testing the partial integral in the graded model."""
@@ -301,7 +322,7 @@ class TestPolytomousUtilities(unittest.TestCase):
                                           response_set)
 
         np.testing.assert_array_almost_equal(result, expected)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

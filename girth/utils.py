@@ -88,6 +88,27 @@ def get_true_false_counts(responses):
     return n_false, n_true
 
 
+def mml_approx(dataset, discrimination=1, scalar=None):
+    """
+        Estimates the difficulty parameters of an IRT
+        model assuming a normal distribution
+
+        Args:
+            dataset: [items x participants] matrix of True/False Values
+            discrimination: scalar of discrimination used in model (default to 1)
+            scalar: log(n_no / n_yes)
+
+        Returns:
+            array of discrimination estimates
+    """
+    if scalar is None:
+        n_no, n_yes = get_true_false_counts(dataset)
+        scalar = np.log(n_no / n_yes)
+
+    return (np.sqrt(1 + discrimination**2 / 3) *
+            scalar / discrimination)
+
+
 def convert_responses_to_kernel_sign(responses):
     """Converts dichotomous responses to the appropriate kernel sign.
 

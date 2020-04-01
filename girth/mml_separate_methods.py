@@ -2,10 +2,10 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound
 
-from girth import (irt_evaluation, rasch_approx, condition_polytomous_response,
+from girth import (irt_evaluation, mml_approx, condition_polytomous_response,
                    get_true_false_counts, convert_responses_to_kernel_sign)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
-from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants, 
+from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations)
 
 
@@ -27,7 +27,8 @@ def rasch_separate(dataset, discrimination=1, max_iter=25):
     scalar = n_yes / (n_yes + n_no)
 
     if np.ndim(discrimination) < 1:
-        discrimination = np.full(n_items, discrimination)
+        discrimination = np.full(n_items, discrimination, 
+                                 dtype='float')
 
     # Inline definition of quadrature function
     def quadrature_function(theta, difficulty, discrimination):
@@ -41,12 +42,12 @@ def rasch_separate(dataset, discrimination=1, max_iter=25):
     # Perform the minimization
     for ndx in range(n_items):
         # pylint: disable=cell-var-from-loop
-        
+
         # Minimize each item separately
         def min_zero_local(estimate):
             return (scalar[ndx] -
                     integrate.fixed_quad(quadrature_function, -10, 10,
-                    (estimate, discrimination[ndx]), n=101)[0])**2
+                                         (estimate, discrimination[ndx]), n=101)[0])**2
 
         the_parameters[ndx] = fminbound(min_zero_local, -6, 6)
 
@@ -68,7 +69,7 @@ def onepl_separate(dataset):
     """
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
-    
+
     # Inline definition of cost function to minimize
     def min_func(estimate):
         difficulty = rasch_separate(dataset, estimate)
@@ -115,8 +116,8 @@ def twopl_separate(dataset, max_iter=25):
 
         return partial_int * (1 + np.exp(kernel2)) / (1 + np.exp(kernel1))
 
-
     # Inline definition of cost function to minimize
+
     def min_func(estimate, dataset, old_estimate, old_difficulty,
                  partial_int, the_sign):
         new_difficulty = rasch_separate(dataset, estimate)
@@ -128,7 +129,7 @@ def twopl_separate(dataset, max_iter=25):
 
     # Perform the minimization
     initial_guess = np.ones((dataset.shape[0],))
-    difficulties = rasch_approx(dataset)
+    difficulties = mml_approx(dataset)
 
     for iteration in range(max_iter):
         previous_guess = initial_guess.copy()
@@ -137,7 +138,7 @@ def twopl_separate(dataset, max_iter=25):
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         partial_int = _compute_partial_integral(theta, difficulties,
-                          initial_guess, the_sign)
+                                                initial_guess, the_sign)
 
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
@@ -151,7 +152,7 @@ def twopl_separate(dataset, max_iter=25):
             # Solve for the discrimination parameters
             initial_guess[ndx] = fminbound(min_func_local, 0.25, 6, xtol=1e-3)
             difficulties[ndx] = rasch_separate(dataset[ndx].reshape(1, -1),
-                                                   initial_guess[ndx])
+                                               initial_guess[ndx])
 
             # Update the partial integral based on the new found values
             partial_int = quadrature_function(theta, initial_guess[ndx],
@@ -179,20 +180,21 @@ def grm_separate(dataset, max_iter=25):
         array of discrimination parameters
         2d array of difficulty parameters, (NAN represents non response)
     """
-    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False)    
+    responses, item_counts = condition_polytomous_response(
+        dataset, trim_ends=False)
     n_items = responses.shape[0]
-    
+
     # Interpolation Locations
     theta = _get_quadrature_points(61, -5, 5)
     distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
     ones_distribution = np.ones_like(distribution)
-    
+
     # Compute the values needed for integral equations
     integral_counts = list()
     for ndx in range(n_items):
         temp_output = _solve_for_constants(responses[ndx])
         integral_counts.append(temp_output)
-                    
+
     # Initialize difficulty parameters for estimation
     betas = np.full((item_counts.sum(),), -10000.0)
     discrimination = np.ones_like(betas)
@@ -203,81 +205,81 @@ def grm_separate(dataset, max_iter=25):
     for ndx in range(n_items):
         end_ndx = cumulative_item_counts[ndx]
         start_ndx = start_indices[ndx] + 1
-        betas[start_ndx:end_ndx] = np.linspace(-1, 1, 
+        betas[start_ndx:end_ndx] = np.linspace(-1, 1,
                                                item_counts[ndx] - 1)
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = 10000
 
     #############
-    ## 1. Start the iteration loop
-    ## 2. estimate discrimination
-    ## 3. solve for difficulties
-    ## 4. minimize and repeat
+    # 1. Start the iteration loop
+    # 2. estimate discrimination
+    # 3. solve for difficulties
+    # 4. minimize and repeat
     #############
     for iteration in range(max_iter):
         previous_discrimination = discrimination.copy()
         previous_betas = betas.copy()
         previous_betas_roll = betas_roll.copy()
-        
+
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         partial_int = _graded_partial_integral(theta, betas, betas_roll,
                                                discrimination, responses,
                                                distribution)
-        
+
         for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
 
             # Indices into linearized difficulty parameters
             start_ndx = start_indices[item_ndx]
             end_ndx = cumulative_item_counts[item_ndx]
-            
+
             old_values = _graded_partial_integral(theta, previous_betas,
-                                                  previous_betas_roll, 
+                                                  previous_betas_roll,
                                                   previous_discrimination,
                                                   responses[item_ndx][None, :],
                                                   ones_distribution)
             partial_int /= old_values
-            
+
             def _local_min_func(estimate):
                 # Solve integrals for diffiulty estimates
-                new_betas = _solve_integral_equations(estimate, 
+                new_betas = _solve_integral_equations(estimate,
                                                       integral_counts[item_ndx],
                                                       distribution,
                                                       theta)
                 betas[start_ndx+1:end_ndx] = new_betas
                 betas_roll[start_ndx:end_ndx-1] = new_betas
                 discrimination[start_ndx:end_ndx] = estimate
-                
+
                 new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                       discrimination,
                                                       responses[item_ndx][None, :],
                                                       ones_distribution)
-                
+
                 new_values *= partial_int
-                otpt = integrate.fixed_quad(lambda x: new_values, -5, 5, n=61)[0]
-                
+                otpt = integrate.fixed_quad(
+                    lambda x: new_values, -5, 5, n=61)[0]
+
                 return -np.log(otpt).sum()
-            
+
             # Univariate minimization for discrimination parameter
             fminbound(_local_min_func, 0.2, 5.0)
-            
+
             new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                   discrimination,
                                                   responses[item_ndx][None, :],
                                                   ones_distribution)
 
             partial_int *= new_values
-            
-        
+
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
-    
+
     # Trim difficulties to conform to standard output
-    #TODO:  look where missing values are and place NAN there instead
+    # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
     output_betas = np.full((n_items, item_counts.max()-1), np.nan)
     for ndx, (start_ndx, end_ndx) in enumerate(zip(start_indices, cumulative_item_counts)):
         output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
-        
+
     return discrimination[start_indices], output_betas

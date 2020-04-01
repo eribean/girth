@@ -7,10 +7,10 @@ from numpy import linspace, ones
 from scipy.stats import distributions
 
 
-_available_models = ["rasch_conditional", "rasch_approx",
+_available_models = ["rasch_conditional",
                      "rasch_separate", "rasch_full", "rasch_jml", 
-                     "onepl_approx", "onepl_separate", "onepl_full", 
-                     "onepl_jml", "twopl_approx", "twopl_full",
+                     "onepl_separate", "onepl_full", 
+                     "onepl_jml", "twopl_full",
                      "twopl_separate", "twopl_jml", "grm_jml",
                      "grm_separate", "pcm_full", "pcm_jml"]
 

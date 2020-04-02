@@ -73,13 +73,12 @@ class TestUtilitiesMethods(unittest.TestCase):
         value = integrate.fixed_quad(lambda x: dataset, -6, 6, n=61)[0]
 
         discrrm = discrimination * the_sign * -1
-        xx = np.linspace(-6, 6, 1001)
+        xx = np.linspace(-6, 6, 5001)
         yy = irt_evaluation(difficuly, discrrm.squeeze(), xx)
         yy = yy.prod(axis=0)
-        yy *= np.exp(-np.square(xx) / 2) / np.sqrt(2*np.pi)
-        expected = yy.sum() * 12 / 1001
+        expected = yy.sum() * 12 / 5001
 
-        self.assertAlmostEqual(value[0], expected.sum(), places=3)
+        self.assertAlmostEqual(value, expected.sum(), places=3)
 
     def test_partial_integration_array(self):
         """Tests the integration quadrature function on array."""
@@ -98,13 +97,12 @@ class TestUtilitiesMethods(unittest.TestCase):
         value = integrate.fixed_quad(lambda x: dataset, -6, 6, n=61)[0]
 
         discrrm = discrimination * the_sign.squeeze() * -1
-        xx = np.linspace(-6, 6, 1001)
+        xx = np.linspace(-6, 6, 5001)
         yy = irt_evaluation(difficuly, discrrm, xx)
         yy = yy.prod(axis=0)
-        yy *= np.exp(-np.square(xx) / 2) / np.sqrt(2*np.pi)
-        expected = yy.sum() * 12 / 1001
+        expected = yy.sum() * 12 / 5001
 
-        self.assertAlmostEqual(value[0], expected.sum(), places=3)
+        self.assertAlmostEqual(value, expected.sum(), places=3)
 
     def test_trim_response_set(self):
         """Testing trim of all yes/no values."""
@@ -177,15 +175,15 @@ class TestUtilitiesMethods(unittest.TestCase):
         discrimination = 2.31
         result = mml_approx(dataset, discrimination)
 
-        n_no = np.count_nonzero(dataset==0, axis=1)
+        n_no = np.count_nonzero(dataset == 0, axis=1)
         n_yes = np.count_nonzero(dataset, axis=1)
 
         scalar = np.log(n_no / n_yes)
-        
-        expected = (np.sqrt(1 + discrimination**2 / 3) * 
+
+        expected = (np.sqrt(1 + discrimination**2 / 3) *
                     scalar / discrimination)
         result2 = mml_approx(dataset, discrimination, scalar)
-        
+
         np.testing.assert_array_almost_equal(expected, result)
         np.testing.assert_array_almost_equal(expected, result2)
 

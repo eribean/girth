@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import integrate
+from scipy import integrate, stats
 from scipy.optimize import fminbound, brentq, fmin_powell, fmin_slsqp
 
 from girth import (irt_evaluation, convert_responses_to_kernel_sign,
@@ -17,6 +17,7 @@ def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     theta = _get_quadrature_points(61, -5, 5)
+    distribution = stats.norm(0, 1).pdf(theta)
 
     # Inline definition of quadrature function
     def quadrature_function(theta, difficulty, old_difficulty, partial_int, the_sign):
@@ -43,6 +44,7 @@ def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
         # Quadrature evaluation for values that do not change
         partial_int = _compute_partial_integral(theta, initial_guess,
                                                 discrimination, the_sign)
+        partial_int *= distribution
 
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
@@ -124,6 +126,7 @@ def twopl_full(dataset, max_iter=25):
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     theta = _get_quadrature_points(61, -5, 5)
+    distribution = stats.norm(0, 1).pdf(theta)
 
     # Inline definition of quadrature function
     def quadrature_function(theta, estimates, old_estimates, partial_int, the_sign):
@@ -151,7 +154,8 @@ def twopl_full(dataset, max_iter=25):
         # Quadrature evaluation for values that do not change
         partial_int = _compute_partial_integral(theta, initial_guess[:, 1],
                                                 initial_guess[:, 0], the_sign)
-
+        partial_int *= distribution
+        
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
             # Minimize each one separately

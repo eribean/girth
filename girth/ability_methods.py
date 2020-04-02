@@ -121,10 +121,8 @@ def ability_eap(dataset, difficulty, discrimination, distribution=None):
     theta = _get_quadrature_points(61, -5, 5)
     partial_int = _compute_partial_integral(theta, difficulty, discrimination, the_sign)
 
-    # Need to remove guassian distribution that is appended in the partial integration
-    remove_disribution = np.sqrt(2 * np.pi) / np.exp(-np.square(theta) / 2)
-    new_distribution = distribution(theta) * remove_disribution
-    partial_int *= new_distribution
+    # Weight by the input ability distribution
+    partial_int *= distribution(theta)
 
     # Compute the denominator
     denominator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]

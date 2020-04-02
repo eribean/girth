@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import integrate
+from scipy import integrate, stats
 from scipy.optimize import fminbound
 
 from girth import (irt_evaluation, mml_approx, condition_polytomous_response,
@@ -7,6 +7,29 @@ from girth import (irt_evaluation, mml_approx, condition_polytomous_response,
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations)
+
+
+def _separate_abstract(difficulty, scalar, discrimination,
+                       theta, distribution):
+    """ Abstraction of base functionality in separable
+        mml estimation methods."""
+    # Assumes calling function has vetted arguments
+
+    for item_ndx in range(difficulty.shape[0]):
+        # pylint: disable=cell-var-from-loop
+        def min_zero_local(estimate):
+            kernel = discrimination[item_ndx] * (estimate - theta)
+            kernel = 1.0 / (1.0 + np.exp(kernel))
+            kernel *= distribution
+
+            integral = integrate.fixed_quad(lambda x : kernel, 
+                                            -5, 5, n=61)[0]
+            
+            return np.square(integral - scalar[item_ndx])
+
+        difficulty[item_ndx] = fminbound(min_zero_local, -6, 6)
+    
+    return difficulty
 
 
 def rasch_separate(dataset, discrimination=1, max_iter=25):
@@ -26,32 +49,16 @@ def rasch_separate(dataset, discrimination=1, max_iter=25):
     n_no, n_yes = get_true_false_counts(dataset)
     scalar = n_yes / (n_yes + n_no)
 
-    if np.ndim(discrimination) < 1:
+    difficulty = np.zeros((n_items,))
+    if np.atleast_1d(discrimination).size == 1:
         discrimination = np.full(n_items, discrimination, 
                                  dtype='float')
 
-    # Inline definition of quadrature function
-    def quadrature_function(theta, difficulty, discrimination):
-        gauss = 1.0 / np.sqrt(2 * np.pi) * np.exp(-np.square(theta) / 2)
-        return irt_evaluation(np.array([difficulty]),
-                              np.array([discrimination]), theta) * gauss
+    theta = _get_quadrature_points(61, -5, 5)
+    distribution = stats.norm(0, 1).pdf(theta)
 
-    # Initialize the discrimination parameters
-    the_parameters = np.zeros((n_items,))
-
-    # Perform the minimization
-    for ndx in range(n_items):
-        # pylint: disable=cell-var-from-loop
-
-        # Minimize each item separately
-        def min_zero_local(estimate):
-            return (scalar[ndx] -
-                    integrate.fixed_quad(quadrature_function, -10, 10,
-                                         (estimate, discrimination[ndx]), n=101)[0])**2
-
-        the_parameters[ndx] = fminbound(min_zero_local, -6, 6)
-
-    return the_parameters
+    return _separate_abstract(difficulty, scalar, discrimination, theta,
+                              distribution)
 
 
 def onepl_separate(dataset):
@@ -67,21 +74,40 @@ def onepl_separate(dataset):
         Returns:
             array of discrimination, difficulty estimates
     """
+    # Difficulty Estimation parameters
+    n_items = dataset.shape[0]
+    n_no, n_yes = get_true_false_counts(dataset)
+    scalar = n_yes / (n_yes + n_no)
+    
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
+    discrimination = np.ones((n_items,))
+
+    # Quadrature Locations
+    theta = _get_quadrature_points(61, -5, 5)
+    distribution = stats.norm(0, 1).pdf(theta)
+
     # Inline definition of cost function to minimize
     def min_func(estimate):
-        difficulty = rasch_separate(dataset, estimate)
-        otpt = integrate.fixed_quad(_compute_partial_integral, -5, 5,
-                                    (difficulty, estimate, the_sign), n=61)[0]
+        discrimination[:] = estimate
+        difficulty = np.zeros_like(discrimination)
+        difficulty = _separate_abstract(difficulty, scalar, discrimination, 
+                                        theta, distribution)
+        
+        partial_int = _compute_partial_integral(theta, difficulty, 
+                                                discrimination, the_sign)
+
+        # add distribution
+        partial_int *= distribution
+        otpt = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
 
         return -np.log(otpt).dot(counts)
 
     # Perform the minimization
-    discrimination = fminbound(min_func, 0.25, 10)
+    alpha = fminbound(min_func, 0.25, 10)
 
-    return discrimination, rasch_separate(dataset, discrimination)
+    return alpha, rasch_separate(dataset, alpha)
 
 
 def twopl_separate(dataset, max_iter=25):
@@ -103,6 +129,7 @@ def twopl_separate(dataset, max_iter=25):
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     theta = _get_quadrature_points(61, -5, 5)
+    distribution = stats.norm(0, 1).pdf(theta)
 
     # Inline definition of quadrature function
     def quadrature_function(theta, discrimination, old_discrimination,
@@ -139,7 +166,8 @@ def twopl_separate(dataset, max_iter=25):
         # This is done during the outer loop to address rounding errors
         partial_int = _compute_partial_integral(theta, difficulties,
                                                 initial_guess, the_sign)
-
+        partial_int *= distribution
+        
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
 

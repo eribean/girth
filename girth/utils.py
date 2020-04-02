@@ -45,12 +45,11 @@ def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
         Notes:
             Implicitly multiplies the data by the gaussian distribution
 
-        TODO:
-            add address handle to vary the types of ability distributions
     """
     # Size single discrimination into full array
-    if np.ndim(discrimination) < 1:
-        discrimination = np.full(the_sign.shape[0], discrimination)
+    if np.atleast_1d(discrimination).size == 1:
+        discrimination = np.full(the_sign.shape[0], discrimination,
+                                 dtype='float')
 
     # This represents a 3-dimensional array
     # [Response Set, Person, Theta]
@@ -60,11 +59,7 @@ def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
     kernel *= discrimination[:, None, None]
     kernel *= (theta[None, None, :] - difficulty[:, None, None])
 
-    # Distribution assumption
-    # TODO: Make it a function pointer to allow various types
-    gauss = 1.0 / np.sqrt(2 * np.pi) * np.exp(-np.square(theta) / 2)
-
-    return  gauss[None, :] * (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
+    return (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
 
 
 def get_true_false_counts(responses):

@@ -31,8 +31,8 @@ class TestMMLRaschMethods(unittest.TestCase):
         """Testing rasch separate methods."""
         syn_data = self.data.copy()
         output = rasch_separate(syn_data, self.discrimination)
-        expected_output = np.array([-1.32474665, -0.81460991, -0.08221992,
-                                    0.65867573,  1.47055368])
+        expected_output = np.array([-1.32474732, -0.81461152, -0.08222081,  
+                                    0.6586734, 1.47055251])
 
         np.testing.assert_allclose(expected_output, output, rtol=1e-5)
 
@@ -79,10 +79,10 @@ class TestMMLOnePLMethods(unittest.TestCase):
         """Testing onepl separate methods."""
         syn_data = self.data.copy()
         output = onepl_separate(syn_data)
-        expected_output = np.array([-1.37650733, -0.64900392, -0.03933326,
-                                    0.77918889,  1.38618695])
+        expected_output = np.array([-1.37650899, -0.64900501, -0.03933423,  
+                                     0.77918774,  1.38618528])
 
-        self.assertAlmostEqual(output[0], 1.901703384, places=5)
+        self.assertAlmostEqual(output[0], 1.9017036760, places=5)
         np.testing.assert_allclose(expected_output, output[1], rtol=1e-5)
 
     def test_onepl_regression_full(self):
@@ -95,8 +95,8 @@ class TestMMLOnePLMethods(unittest.TestCase):
         self.assertAlmostEqual(output[0], 1.9017531986)
         np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
 
-    def test_oneple_close(self):
-        """Testing rasch converging methods."""
+    def test_onepl_close(self):
+        """Testing onepl converging methods."""
         np.random.seed(843)
         difficulty = np.linspace(-1.25, 1.25, 10)
         discrimination = 0.87
@@ -131,10 +131,10 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         syn_data = self.data.copy()
         output = twopl_separate(syn_data)
 
-        expected_discrimination = np.array([0.99973958, 1.86359282, 1.35543477,
-                                            0.52934393, 0.90911332])
-        expected_output = np.array([-1.31515501, -0.64828062, -0.07980151,
-                                    0.77407585,  1.66774338])
+        expected_discrimination = np.array([0.99981316, 1.86369226, 1.35526711, 
+                                            0.52935723, 0.90899136])
+        expected_output = np.array([-1.31508773, -0.6482668 , -0.07980827,  
+                                     0.77405645,  1.66790766])
 
         np.testing.assert_allclose(
             expected_discrimination, output[0], rtol=1e-6)

@@ -131,10 +131,10 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         syn_data = self.data.copy()
         output = twopl_separate(syn_data)
 
-        expected_discrimination = np.array([0.99973958, 1.86359282, 1.35543477,
-                                            0.52934393, 0.90911332])
-        expected_output = np.array([-1.31515501, -0.64828062, -0.07980151,
-                                    0.77407585,  1.66774338])
+        expected_discrimination = np.array([0.99981316, 1.86369226, 1.35526711, 
+                                            0.52935723, 0.90899136])
+        expected_output = np.array([-1.31508773, -0.6482668 , -0.07980827,  
+                                     0.77405645,  1.66790766])
 
         np.testing.assert_allclose(
             expected_discrimination, output[0], rtol=1e-6)

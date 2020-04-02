@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate, stats
 from scipy.optimize import fminbound
 
-from girth import (irt_evaluation, mml_approx, condition_polytomous_response,
+from girth import (condition_polytomous_response,
                    get_true_false_counts, convert_responses_to_kernel_sign)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
@@ -22,13 +22,13 @@ def _separate_abstract(difficulty, scalar, discrimination,
             kernel = 1.0 / (1.0 + np.exp(kernel))
             kernel *= distribution
 
-            integral = integrate.fixed_quad(lambda x : kernel, 
+            integral = integrate.fixed_quad(lambda x: kernel,
                                             -5, 5, n=61)[0]
-            
+
             return np.square(integral - scalar[item_ndx])
 
         difficulty[item_ndx] = fminbound(min_zero_local, -6, 6)
-    
+
     return difficulty
 
 
@@ -51,7 +51,7 @@ def rasch_separate(dataset, discrimination=1, max_iter=25):
 
     difficulty = np.zeros((n_items,))
     if np.atleast_1d(discrimination).size == 1:
-        discrimination = np.full(n_items, discrimination, 
+        discrimination = np.full(n_items, discrimination,
                                  dtype='float')
 
     theta = _get_quadrature_points(61, -5, 5)
@@ -78,12 +78,12 @@ def onepl_separate(dataset):
     n_items = dataset.shape[0]
     n_no, n_yes = get_true_false_counts(dataset)
     scalar = n_yes / (n_yes + n_no)
-    
+
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     discrimination = np.ones((n_items,))
-
+    difficulty = np.zeros((n_items,))
     # Quadrature Locations
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)
@@ -91,11 +91,10 @@ def onepl_separate(dataset):
     # Inline definition of cost function to minimize
     def min_func(estimate):
         discrimination[:] = estimate
-        difficulty = np.zeros_like(discrimination)
-        difficulty = _separate_abstract(difficulty, scalar, discrimination, 
-                                        theta, distribution)
-        
-        partial_int = _compute_partial_integral(theta, difficulty, 
+        _separate_abstract(difficulty, scalar, discrimination,
+                           theta, distribution)
+
+        partial_int = _compute_partial_integral(theta, difficulty,
                                                 discrimination, the_sign)
 
         # add distribution
@@ -107,7 +106,7 @@ def onepl_separate(dataset):
     # Perform the minimization
     alpha = fminbound(min_func, 0.25, 10)
 
-    return alpha, rasch_separate(dataset, alpha)
+    return alpha, difficulty
 
 
 def twopl_separate(dataset, max_iter=25):
@@ -125,73 +124,64 @@ def twopl_separate(dataset, max_iter=25):
             array of discrimination, difficulty estimates
     """
     n_items = dataset.shape[0]
+    n_no, n_yes = get_true_false_counts(dataset)
+    scalar = n_yes / (n_yes + n_no)
+
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)
 
-    # Inline definition of quadrature function
-    def quadrature_function(theta, discrimination, old_discrimination,
-                            difficulty, old_difficulty,
-                            partial_int, the_sign):
-        kernel1 = the_sign[:, None] * (theta[None, :] - difficulty)
-        kernel1 *= discrimination
-
-        kernel2 = the_sign[:, None] * (theta[None, :] - old_difficulty)
-        kernel2 *= old_discrimination
-
-        return partial_int * (1 + np.exp(kernel2)) / (1 + np.exp(kernel1))
-
-    # Inline definition of cost function to minimize
-
-    def min_func(estimate, dataset, old_estimate, old_difficulty,
-                 partial_int, the_sign):
-        new_difficulty = rasch_separate(dataset, estimate)
-        otpt = integrate.fixed_quad(quadrature_function, -5, 5,
-                                    (estimate, old_estimate,
-                                     new_difficulty, old_difficulty,
-                                     partial_int, the_sign), n=61)[0]
-        return -np.log(otpt).dot(counts)
-
     # Perform the minimization
-    initial_guess = np.ones((dataset.shape[0],))
-    difficulties = mml_approx(dataset)
+    discrimination = np.ones((n_items,))
+    difficulty = np.zeros((n_items,))
 
     for iteration in range(max_iter):
-        previous_guess = initial_guess.copy()
-        previous_difficulty = difficulties.copy()
+        previous_discrimination = discrimination.copy()
 
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
-        partial_int = _compute_partial_integral(theta, difficulties,
-                                                initial_guess, the_sign)
+        partial_int = _compute_partial_integral(theta, difficulty,
+                                                discrimination, the_sign)
         partial_int *= distribution
-        
+
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
 
+            # remove contribution from current item
+            local_int = _compute_partial_integral(theta, difficulty[ndx, None],
+                                                  discrimination[ndx, None], the_sign[ndx, None])
+
+            partial_int /= local_int
+
             def min_func_local(estimate):
-                return min_func(estimate, dataset[ndx].reshape(1, -1),
-                                previous_guess[ndx],
-                                previous_difficulty[ndx],
-                                partial_int, the_sign[ndx])
+                discrimination[ndx] = estimate
+                _separate_abstract(difficulty[ndx, None], scalar[ndx, None],
+                                   discrimination[ndx, None], theta, distribution)
+                estimate_int = _compute_partial_integral(theta, difficulty[ndx, None],
+                                                         discrimination[ndx, None],
+                                                         the_sign[ndx, None])
+
+                estimate_int *= partial_int
+                otpt = integrate.fixed_quad(
+                    lambda x: estimate_int, -5, 5, n=61)[0]
+                return -np.log(otpt).dot(counts)
 
             # Solve for the discrimination parameters
-            initial_guess[ndx] = fminbound(min_func_local, 0.25, 6, xtol=1e-3)
-            difficulties[ndx] = rasch_separate(dataset[ndx].reshape(1, -1),
-                                               initial_guess[ndx])
+            fminbound(min_func_local, 0.25, 6)
 
             # Update the partial integral based on the new found values
-            partial_int = quadrature_function(theta, initial_guess[ndx],
-                                              previous_guess[ndx], difficulties[ndx],
-                                              previous_difficulty[ndx],
-                                              partial_int, the_sign[ndx])
+            estimate_int = _compute_partial_integral(theta, difficulty[ndx, None],
+                                                     discrimination[ndx, None],
+                                                     the_sign[ndx, None])
+            # update partial integral
+            partial_int *= estimate_int
 
-        if np.abs(initial_guess - previous_guess).max() < 1e-3:
+        if np.abs(discrimination - previous_discrimination).max() < 1e-3:
             break
 
-    return initial_guess, difficulties
+    return discrimination, difficulty
 
 
 def grm_separate(dataset, max_iter=25):

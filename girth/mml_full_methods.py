@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import integrate, stats
-from scipy.optimize import fminbound, brentq, fmin_powell, fmin_slsqp
+from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import (irt_evaluation, convert_responses_to_kernel_sign,
                    mml_approx)
@@ -8,10 +8,8 @@ from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import condition_polytomous_response, _credit_partial_integral
 
 
-def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
-    """
-        Method used by several functions during the estimation process
-    """
+def onepl_full(dataset, alpha=None, max_iter=25):
+    """ Abstraction of base functionality in joint estimation methods."""
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
@@ -19,59 +17,65 @@ def _rasch_full_abstract(dataset, discrimination=1, max_iter=25):
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)
 
-    # Inline definition of quadrature function
-    def quadrature_function(theta, difficulty, old_difficulty, partial_int, the_sign):
-        kernel1 = the_sign[:, None] * (theta[None, :] - difficulty)
-        kernel1 *= discrimination
+    discrimination = np.ones((n_items,))
+    difficulty = np.zeros((n_items,))
 
-        kernel2 = the_sign[:, None] * (theta[None, :] - old_difficulty)
-        kernel2 *= discrimination
+    def alpha_min_func(alpha_estimate):
+        discrimination[:] = alpha_estimate
 
-        return partial_int * (1 + np.exp(kernel2)) / (1 + np.exp(kernel1))
+        for iteration in range(max_iter):
+            previous_difficulty = difficulty.copy()
 
-    # Inline definition of cost function to minimize
-    def min_func(difficulty, old_difficulty, partial_int, the_sign):
-        otpt = integrate.fixed_quad(quadrature_function, -5, 5,
-                                    (difficulty, old_difficulty, partial_int, the_sign), n=61)[0] + 1e-23
-        return -np.log(otpt).dot(counts)
+            # Quadrature evaluation for values that do not change
+            partial_int = _compute_partial_integral(theta, difficulty,
+                                                    discrimination, the_sign)
+            partial_int *= distribution
 
-    # Get approximate guess to begin with
-    initial_guess = mml_approx(dataset, discrimination=discrimination)
+            for item_ndx in range(n_items):
+                # pylint: disable=cell-var-from-loop
 
-    for iteration in range(max_iter):
-        previous_guess = initial_guess.copy()
+                # remove contribution from current item
+                local_int = _compute_partial_integral(theta, difficulty[item_ndx, None],
+                                                      discrimination[item_ndx, None],
+                                                      the_sign[item_ndx, None])
 
-        # Quadrature evaluation for values that do not change
-        partial_int = _compute_partial_integral(theta, initial_guess,
-                                                discrimination, the_sign)
-        partial_int *= distribution
+                partial_int /= local_int
 
-        for ndx in range(n_items):
-            # pylint: disable=cell-var-from-loop
-            # Minimize each one separately
-            value = initial_guess[ndx] * 1.0
+                def min_local_func(beta_estimate):
+                    difficulty[item_ndx] = beta_estimate
 
-            def min_func_local(estimate):
-                return min_func(estimate, previous_guess[ndx],
-                                partial_int, the_sign[ndx])
+                    estimate_int = _compute_partial_integral(theta, difficulty[item_ndx, None],
+                                                             discrimination[item_ndx, None],
+                                                             the_sign[item_ndx, None])
 
-            # Given an estimate of discrimination parameter, compute the
-            # discrimination parameters
-            initial_guess[ndx] = fminbound(min_func_local,
-                                           value-0.75,
-                                           value+0.75)
+                    estimate_int *= partial_int
 
-            # Update the integral with the new found vaolues
-            partial_int = quadrature_function(theta, initial_guess[ndx],
-                                              previous_guess[ndx], partial_int, the_sign[ndx])
+                    otpt = integrate.fixed_quad(
+                        lambda x: estimate_int, -5, 5, n=61)[0]
 
-        if(np.abs(initial_guess - previous_guess).max() < 0.001):
-            break
+                    return -np.log(otpt).dot(counts)
 
-    # Get the value of the cost function
-    cost = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+                fminbound(min_local_func, -4, 4)
 
-    return initial_guess, -np.log(cost).dot(counts)
+                # Update the partial integral based on the new found values
+                estimate_int = _compute_partial_integral(theta, difficulty[item_ndx, None],
+                                                         discrimination[item_ndx, None],
+                                                         the_sign[item_ndx, None])
+                # update partial integral
+                partial_int *= estimate_int
+
+            if(np.abs(previous_difficulty - difficulty).max() < 1e-3):
+                break
+
+        cost = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+        return -np.log(cost).dot(counts)
+
+    if alpha is None:  # OnePl Solver
+        alpha = fminbound(alpha_min_func, 0.1, 4)
+    else:  # Rasch Solver
+        alpha_min_func(alpha)
+
+    return alpha, difficulty
 
 
 def rasch_full(dataset, discrimination=1, max_iter=25):
@@ -87,28 +91,7 @@ def rasch_full(dataset, discrimination=1, max_iter=25):
         Returns:
             array of discrimination estimates
     """
-    return _rasch_full_abstract(dataset, discrimination, max_iter)[0]
-
-
-def onepl_full(dataset, max_iter=25):
-    """
-        Estimates difficulty and discrimination parameters in a one pl IRT model
-
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-
-        Returns:
-            array of discrimination, difficulty estimates
-    """
-    # Use the rasch model and minimize over the singel discrimination paramter
-    def min_func_local(estimate):
-        _, cost = _rasch_full_abstract(dataset, estimate, max_iter)
-        return cost
-
-    # Solve for the discrimination parameter
-    discrimination = fminbound(min_func_local, 0.5, 4)
-
-    return discrimination, rasch_full(dataset, discrimination)
+    return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]
 
 
 def twopl_full(dataset, max_iter=25):
@@ -155,7 +138,7 @@ def twopl_full(dataset, max_iter=25):
         partial_int = _compute_partial_integral(theta, initial_guess[:, 1],
                                                 initial_guess[:, 0], the_sign)
         partial_int *= distribution
-        
+
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
             # Minimize each one separately

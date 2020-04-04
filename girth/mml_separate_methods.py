@@ -84,6 +84,7 @@ def onepl_separate(dataset):
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
+ 
     # Quadrature Locations
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)

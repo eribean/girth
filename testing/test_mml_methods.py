@@ -40,8 +40,8 @@ class TestMMLRaschMethods(unittest.TestCase):
         """Testing rasch full methods."""
         syn_data = self.data.copy()
         output = rasch_full(syn_data, self.discrimination)
-        expected_output = np.array([-1.3221573, -0.81445556, -0.08485538,
-                                    0.65457445,  1.4664268])
+        expected_output = np.array([-1.32206195, -0.81438101, -0.0847999, 
+                                     0.65460933,  1.4664586])
 
         np.testing.assert_allclose(expected_output, output)
 
@@ -89,10 +89,10 @@ class TestMMLOnePLMethods(unittest.TestCase):
         """Testing onepl full methods."""
         syn_data = self.data.copy()
         output = onepl_full(syn_data)
-        expected_output = np.array([-1.37891489, -0.64731397, -0.03576614,
-                                    0.78093483,  1.38451727])
+        expected_output = np.array([-1.37825764, -0.64679736, -0.03537104, 
+                                     0.78121678,  1.38471631])
 
-        self.assertAlmostEqual(output[0], 1.9017531986)
+        self.assertAlmostEqual(output[0], 1.90187164)
         np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
 
     def test_onepl_close(self):

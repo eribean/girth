@@ -32,36 +32,7 @@ def _separate_abstract(difficulty, scalar, discrimination,
     return difficulty
 
 
-def rasch_separate(dataset, discrimination=1, max_iter=25):
-    """
-        Estimates parameters in an IRT model with full
-        gaussian quadrature
-
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
-
-        Returns:
-            array of discrimination estimates
-    """
-    n_items = dataset.shape[0]
-    n_no, n_yes = get_true_false_counts(dataset)
-    scalar = n_yes / (n_yes + n_no)
-
-    difficulty = np.zeros((n_items,))
-    if np.atleast_1d(discrimination).size == 1:
-        discrimination = np.full(n_items, discrimination,
-                                 dtype='float')
-
-    theta = _get_quadrature_points(61, -5, 5)
-    distribution = stats.norm(0, 1).pdf(theta)
-
-    return _separate_abstract(difficulty, scalar, discrimination, theta,
-                              distribution)
-
-
-def onepl_separate(dataset):
+def onepl_separate(dataset, alpha=None):
     """
         Estimates the difficulty and single discrimination parameter
 
@@ -84,6 +55,7 @@ def onepl_separate(dataset):
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
+ 
     # Quadrature Locations
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)
@@ -104,11 +76,29 @@ def onepl_separate(dataset):
         return -np.log(otpt).dot(counts)
 
     # Perform the minimization
-    alpha = fminbound(min_func, 0.25, 10)
+    if alpha is None:  # OnePL Method
+        alpha = fminbound(min_func, 0.25, 10)
+    else:  # Rasch Method
+        min_func(alpha)
 
     return alpha, difficulty
 
 
+def rasch_separate(dataset, discrimination=1):
+    """
+        Estimates parameters in an IRT model with full
+        gaussian quadrature
+
+        Args:
+            dataset: [items x participants] matrix of True/False Values
+            discrimination: scalar of discrimination used in model (default to 1)
+
+        Returns:
+            array of discrimination estimates
+    """
+    return onepl_separate(dataset, alpha=discrimination)[1]
+    
+    
 def twopl_separate(dataset, max_iter=25):
     """
         Estimates the difficulty and discrimination parameters

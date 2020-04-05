@@ -40,8 +40,8 @@ class TestMMLRaschMethods(unittest.TestCase):
         """Testing rasch full methods."""
         syn_data = self.data.copy()
         output = rasch_full(syn_data, self.discrimination)
-        expected_output = np.array([-1.3221573, -0.81445556, -0.08485538,
-                                    0.65457445,  1.4664268])
+        expected_output = np.array([-1.32206195, -0.81438101, -0.0847999, 
+                                     0.65460933,  1.4664586])
 
         np.testing.assert_allclose(expected_output, output)
 
@@ -89,10 +89,10 @@ class TestMMLOnePLMethods(unittest.TestCase):
         """Testing onepl full methods."""
         syn_data = self.data.copy()
         output = onepl_full(syn_data)
-        expected_output = np.array([-1.37891489, -0.64731397, -0.03576614,
-                                    0.78093483,  1.38451727])
+        expected_output = np.array([-1.37825764, -0.64679736, -0.03537104, 
+                                     0.78121678,  1.38471631])
 
-        self.assertAlmostEqual(output[0], 1.9017531986)
+        self.assertAlmostEqual(output[0], 1.90187164)
         np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
 
     def test_onepl_close(self):
@@ -145,14 +145,14 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         syn_data = self.data.copy()
         output = twopl_full(syn_data)
 
-        expected_discrimination = np.array([0.99977652, 1.86293411, 1.35540218,
-                                            0.52931284, 0.9121385])
-        expected_output = np.array([-1.31491812, -0.64812546, -0.08017531,
-                                    0.77399569,  1.66336578])
+        expected_discrimination = np.array([0.99979828, 1.86386639, 1.35529227, 
+                                            0.5293589 , 0.90905802])
+        expected_output = np.array([-1.31527794, -0.6482246 , -0.08031856, 
+                                     0.77397527,  1.66750714])
 
         np.testing.assert_allclose(
-            expected_discrimination, output[0], rtol=1e-6)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+            expected_discrimination, output[0], rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-5)
 
     def test_twopl_close(self):
         """Testing twopl converging methods."""

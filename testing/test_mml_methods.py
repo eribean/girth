@@ -151,8 +151,8 @@ class TestMMLTwoPLMethods(unittest.TestCase):
                                      0.77397527,  1.66750714])
 
         np.testing.assert_allclose(
-            expected_discrimination, output[0], rtol=1e-6)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+            expected_discrimination, output[0], rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-5)
 
     def test_twopl_close(self):
         """Testing twopl converging methods."""

@@ -110,56 +110,57 @@ def twopl_full(dataset, max_iter=25):
 
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)
-
-    # Inline definition of quadrature function
-    def quadrature_function(theta, estimates, old_estimates, partial_int, the_sign):
-        kernel1 = the_sign[:, None] * (theta[None, :] - estimates[1])
-        kernel1 *= estimates[0]
-
-        kernel2 = the_sign[:, None] * (theta[None, :] - old_estimates[1])
-        kernel2 *= old_estimates[0]
-
-        return partial_int * (1 + np.exp(kernel2)) / (1 + np.exp(kernel1))
-
-    # Inline definition of cost function to minimize
-    def min_func(estimates, old_estimates, partial_int, the_sign):
-        otpt = integrate.fixed_quad(quadrature_function, -5, 5,
-                                    (estimates, old_estimates, partial_int, the_sign), n=61)[0] + 1e-23
-        return -np.log(otpt).dot(counts)
-
-    # Get approximate guess to begin with rasch model
-    b1 = mml_approx(dataset)
-    initial_guess = np.c_[np.ones_like(b1), b1]
+    
+    discrimination = np.ones((n_items,))
+    difficulty = np.zeros((n_items,))
 
     for iteration in range(max_iter):
-        previous_guess = initial_guess.copy()
+        previous_discrimination = discrimination.copy()
 
         # Quadrature evaluation for values that do not change
-        partial_int = _compute_partial_integral(theta, initial_guess[:, 1],
-                                                initial_guess[:, 0], the_sign)
+        partial_int = _compute_partial_integral(theta, difficulty,
+                                                discrimination, the_sign)
         partial_int *= distribution
 
-        for ndx in range(n_items):
+        for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
-            # Minimize each one separately
-            value = initial_guess[ndx] * 1.0
+            local_int = _compute_partial_integral(theta, difficulty[item_ndx, None],
+                                                  discrimination[item_ndx, None], 
+                                                  the_sign[item_ndx, None])
+         
+            partial_int /= local_int
 
             def min_func_local(estimate):
-                return min_func(estimate, previous_guess[ndx],
-                                partial_int, the_sign[ndx])
+                discrimination[item_ndx] = estimate[0]
+                difficulty[item_ndx] = estimate[1]
+                
+                estimate_int = _compute_partial_integral(theta, 
+                                                         difficulty[item_ndx, None],
+                                                         discrimination[item_ndx, None],
+                                                         the_sign[item_ndx, None])
+
+                estimate_int *= partial_int
+                otpt = integrate.fixed_quad(lambda x: estimate_int, -5, 5, n=61)[0]
+                
+                return -np.log(otpt).dot(counts)
 
             # Two parameter solver that doesn't need derivatives
-            initial_guess[ndx] = fmin_powell(
-                min_func_local, value, xtol=1e-3, disp=0)
+            initial_guess = np.concatenate((discrimination[item_ndx, None],
+                                            difficulty[item_ndx, None]))
+            fmin_slsqp(min_func_local, initial_guess, disp=False,
+                       bounds=[(0.25, 4), (-4, 4)])
 
-            # Update the integral for new found values
-            partial_int = quadrature_function(theta, initial_guess[ndx],
-                                              previous_guess[ndx], partial_int, the_sign[ndx])
+             # Update the partial integral based on the new found values
+            estimate_int = _compute_partial_integral(theta, difficulty[item_ndx, None],
+                                                     discrimination[item_ndx, None],
+                                                     the_sign[item_ndx, None])
+            # update partial integral
+            partial_int *= estimate_int
 
-        if(np.abs(initial_guess - previous_guess).max() < 0.001):
+        if(np.abs(discrimination - previous_discrimination).max() < 1e-3):
             break
 
-    return initial_guess[:, 0], initial_guess[:, 1]
+    return discrimination, difficulty
 
 
 def pcm_full(dataset, max_iter=25):

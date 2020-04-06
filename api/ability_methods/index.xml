@@ -1,0 +1,245 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Ability Methods</title><link>https://eribean.github.io/girth/api/ability_methods/</link><description>Recent content in Ability Methods on GIRTH</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 04 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://eribean.github.io/girth/api/ability_methods/index.xml" rel="self" type="application/rss+xml"/><item><title>Api: ability_mle</title><link>https://eribean.github.io/girth/api/ability_methods/ability_mle/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/ability_methods/ability_mle/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.ability_methods.ability_mle" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >ability_mle&lt;/span>&lt;/span>(&lt;span >dataset, difficulty, discrimination, no_estimate=nan)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Estimates the abilities for dichotomous models.&lt;/p>
+&lt;p >Estimates the ability parameters (theta) for dichotomous models via
+maximum likelihood estimation.
+Response sets with no variance are trimmed
+from evaluation&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[n_items, n_participants] (2d Array) of measured responses&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d Array) of difficulty parameters for each item&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d Array) of disrimination parameters for each item&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >no_estimate&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >value to use for response sets that cannot be estimated
+defaults to numpy.nan, if a number is used then
+-no_estimate -&amp;gt; 0 and no_estimate -&amp;gt; 1&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >estimated&lt;/code> &lt;code >abilities&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;/dl>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
+&amp;#34;&amp;#34;&amp;#34;Estimates the abilities for dichotomous models.
+Estimates the ability parameters (theta) for dichotomous models via
+maximum likelihood estimation. Response sets with no variance are trimmed
+from evaluation
+Args:
+dataset: [n_items, n_participants] (2d Array) of measured responses
+difficulty: (1d Array) of difficulty parameters for each item
+discrimination: (1d Array) of disrimination parameters for each item
+no_estimate: value to use for response sets that cannot be estimated
+defaults to numpy.nan, if a number is used then
+-no_estimate -&amp;gt; 0 and no_estimate -&amp;gt; 1
+Returns:
+1d array of estimated abilities
+&amp;#34;&amp;#34;&amp;#34;
+# Locations where endorsement isn&amp;#39;t constant
+mask = np.nanvar(dataset, axis=0) &amp;gt; 0
+# Use only appropriate data
+valid_dataset = dataset[:, mask]
+# Call MAP with uniform distribution
+trimmed_theta = ability_map(valid_dataset, difficulty, discrimination,
+uniform(-7, 14).pdf)
+# Replace no_estimate values
+thetas = np.full((dataset.shape[1],), np.abs(no_estimate), dtype=&amp;#39;float&amp;#39;)
+thetas[mask] = trimmed_theta
+# Convert all zeros to negative estimate
+mask2 = ~mask &amp;amp; (dataset.min(axis=0) == 0)
+thetas[mask2] *= -1
+return thetas&lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item><item><title>Api: ability_map</title><link>https://eribean.github.io/girth/api/ability_methods/ability_map/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/ability_methods/ability_map/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.ability_methods.ability_map" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >ability_map&lt;/span>&lt;/span>(&lt;span >dataset, difficulty, discrimination, distribution=None)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Estimates the abilities for dichotomous models.&lt;/p>
+&lt;p >Estimates the ability parameters (theta) for dichotomous models via
+maximum a posterior likelihood estimation.&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[n_items, n_participants] (2d Array) of measured responses&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d Array) of difficulty parameters for each item&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d Array) of disrimination parameters for each item&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >distribution&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >function handle to PDF of ability distribution, p = f(theta)
+the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >estimated&lt;/code> &lt;code >abilities&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;/dl>
+&lt;h2 id="notes" >Notes&lt;/h2>
+&lt;p >If distribution is uniform, MAP is equivalent to MLE. A large set of
+probability distributions can be found in scipy.stats
+&lt;a href="https://docs.scipy.org/doc/scipy/reference/stats.html" >https://docs.scipy.org/doc/scipy/reference/stats.html&lt;/a>&lt;/p>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def ability_map(dataset, difficulty, discrimination, distribution=None):
+&amp;#34;&amp;#34;&amp;#34;Estimates the abilities for dichotomous models.
+Estimates the ability parameters (theta) for dichotomous models via
+maximum a posterior likelihood estimation.
+Args:
+dataset: [n_items, n_participants] (2d Array) of measured responses
+difficulty: (1d Array) of difficulty parameters for each item
+discrimination: (1d Array) of disrimination parameters for each item
+distribution: function handle to PDF of ability distribution, p = f(theta)
+the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)
+Returns:
+1d array of estimated abilities
+Notes:
+If distribution is uniform, MAP is equivalent to MLE. A large set of
+probability distributions can be found in scipy.stats
+https://docs.scipy.org/doc/scipy/reference/stats.html
+&amp;#34;&amp;#34;&amp;#34;
+if distribution is None:
+distribution = gaussian(0, 1).pdf
+discrimination = np.atleast_1d(discrimination)
+if discrimination.size == 1:
+discrimination = np.full(dataset.shape[0], discrimination)
+n_takers = dataset.shape[1]
+the_sign = convert_responses_to_kernel_sign(dataset)
+thetas = np.zeros((n_takers,))
+for ndx in range(n_takers):
+# pylint: disable=cell-var-from-loop
+scalar = the_sign[:, ndx] * discrimination
+def _theta_min(theta):
+otpt = 1.0 / (1.0 + np.exp(scalar * (theta - difficulty)))
+return -(np.log(otpt).sum() + np.log(distribution(theta)))
+# Solves for the ability for each person
+thetas[ndx] = fminbound(_theta_min, -6, 6)
+return thetas&lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item><item><title>Api: ability_eap</title><link>https://eribean.github.io/girth/api/ability_methods/ability_eap/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/ability_methods/ability_eap/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.ability_methods.ability_eap" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >ability_eap&lt;/span>&lt;/span>(&lt;span >dataset, difficulty, discrimination, distribution=None)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Estimates the abilities for dichotomous models.&lt;/p>
+&lt;p >Estimates the ability parameters (theta) for dichotomous models via
+expaected a posterior likelihood estimation.&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[n_items, n_participants] (2d Array) of measured responses&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d Array) of difficulty parameters for each item&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d Array) of disrimination parameters for each item&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >distribution&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >function handle to PDF of ability distribution, p = f(theta)
+the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >estimated&lt;/code> &lt;code >abilities&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;/dl>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def ability_eap(dataset, difficulty, discrimination, distribution=None):
+&amp;#34;&amp;#34;&amp;#34;Estimates the abilities for dichotomous models.
+Estimates the ability parameters (theta) for dichotomous models via
+expaected a posterior likelihood estimation.
+Args:
+dataset: [n_items, n_participants] (2d Array) of measured responses
+difficulty: (1d Array) of difficulty parameters for each item
+discrimination: (1d Array) of disrimination parameters for each item
+distribution: function handle to PDF of ability distribution, p = f(theta)
+the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)
+Returns:
+1d array of estimated abilities
+&amp;#34;&amp;#34;&amp;#34;
+if distribution is None:
+distribution = gaussian(0, 1).pdf
+discrimination = np.atleast_1d(discrimination)
+if discrimination.size == 1:
+discrimination = np.full(dataset.shape[0], discrimination)
+the_sign = convert_responses_to_kernel_sign(dataset)
+theta = _get_quadrature_points(61, -5, 5)
+partial_int = _compute_partial_integral(
+theta, difficulty, discrimination, the_sign)
+# Weight by the input ability distribution
+partial_int *= distribution(theta)
+# Compute the denominator
+denominator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+# compute the numerator
+partial_int *= theta
+numerator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+return numerator / denominator&lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item></channel></rss>

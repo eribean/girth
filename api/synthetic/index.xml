@@ -1,0 +1,339 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Synthetic Data Creation</title><link>https://eribean.github.io/girth/api/synthetic/</link><description>Recent content in Synthetic Data Creation on GIRTH</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 04 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://eribean.github.io/girth/api/synthetic/index.xml" rel="self" type="application/rss+xml"/><item><title>Api: create_correlated_abilities</title><link>https://eribean.github.io/girth/api/synthetic/create_correlated_abilities/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/synthetic/create_correlated_abilities/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.synthetic.create_correlated_abilities" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >create_correlated_abilities&lt;/span>&lt;/span>(&lt;span >correlation_matrix, n_participants)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Creates correlated ability parameters based on an input correlation matrix.&lt;/p>
+&lt;p >This is a helper function for use in synthesizing multi-dimensional data&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >correlation_matrix&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[2D Array, NxN] Symmetric matrix defining
+the correlation between the abilities&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >n_participants&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >number of participants to synthesize&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;p >[N, n_participants] array of ability parameters&lt;/p>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def create_correlated_abilities(correlation_matrix, n_participants):
+&amp;#34;&amp;#34;&amp;#34; Creates correlated ability parameters based on an input correlation matrix.
+This is a helper function for use in synthesizing multi-dimensional data
+Args:
+correlation_matrix: [2D Array, NxN] Symmetric matrix defining
+the correlation between the abilities
+n_participants: number of participants to synthesize
+Returns:
+[N, n_participants] array of ability parameters
+&amp;#34;&amp;#34;&amp;#34;
+lower = np.linalg.cholesky(correlation_matrix)
+return lower @ np.random.randn(correlation_matrix.shape[0], n_participants)&lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item><item><title>Api: create_synthetic_irt_dichotomous</title><link>https://eribean.github.io/girth/api/synthetic/create_synthetic_irt_dichotomous/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/synthetic/create_synthetic_irt_dichotomous/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.synthetic.create_synthetic_irt_dichotomous" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >create_synthetic_irt_dichotomous&lt;/span>&lt;/span>(&lt;span >difficulty, discrimination, thetas, guessing=0, seed=None)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Creates synthetic IRT data to test parameters estimation
+functions.
+Only for use with dichotomous outputs&lt;/p>
+&lt;p >Assumes the model
+P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[array] of difficulty parameters&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[array | number] of discrimination parameters&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >thetas&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[array] of person abilities&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >guessing&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[array | number] of guessing parameters associated with items&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >seed&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >Optional setting to reproduce results&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;code >dichotomous&lt;/code> &lt;code >matrix&lt;/code> of [&lt;code >difficulty.size&lt;/code> &lt;code >x&lt;/code> &lt;code >thetas.size&lt;/code>] &lt;code >representing&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;code >synthetic&lt;/code> &lt;code >data&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;/dl>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
+guessing=0, seed=None):
+&amp;#34;&amp;#34;&amp;#34;
+Creates synthetic IRT data to test parameters estimation
+functions. Only for use with dichotomous outputs
+Assumes the model
+P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
+Args:
+difficulty: [array] of difficulty parameters
+discrimination: [array | number] of discrimination parameters
+thetas: [array] of person abilities
+guessing: [array | number] of guessing parameters associated with items
+seed: Optional setting to reproduce results
+Returns:
+dichotomous matrix of [difficulty.size x thetas.size] representing
+synthetic data
+&amp;#34;&amp;#34;&amp;#34;
+if seed:
+np.random.seed(seed)
+if np.ndim(guessing) &amp;lt; 1:
+guessing = np.full_like(difficulty, guessing)
+continuous_output = irt_evaluation(difficulty, discrimination, thetas)
+# Add guessing parameters
+continuous_output *= (1.0 - guessing[:, None])
+continuous_output += guessing[:, None]
+# convert to binary based on probability
+random_compare = np.random.rand(*continuous_output.shape)
+return random_compare &amp;lt;= continuous_output&lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item><item><title>Api: create_synthetic_mirt_dichotomous</title><link>https://eribean.github.io/girth/api/synthetic/create_synthetic_mirt_dichotomous/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/synthetic/create_synthetic_mirt_dichotomous/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.synthetic.create_synthetic_mirt_dichotomous" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >create_synthetic_mirt_dichotomous&lt;/span>&lt;/span>(&lt;span >difficulty, discrimination, thetas, seed=None)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Creates synthetic multidimensional IRT data to test
+parameters estimation functions.
+Only for use with
+dichotomous outputs&lt;/p>
+&lt;p >Assumes the model
+P(theta) = 1.0 / (1 + exp(-1 * (dot(discrimination,theta) + difficulty)))&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[array, M] of difficulty parameters&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[2-D array, MxN] of discrimination parameters&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >thetas&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[2-D array, NxP] of person abilities&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >seed&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >Optional setting to reproduce results&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;code >dichotomous&lt;/code> &lt;code >matrix&lt;/code> of [&lt;code >difficulty.size&lt;/code> &lt;code >x&lt;/code> &lt;code >thetas.size&lt;/code>] &lt;code >representing&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;code >synthetic&lt;/code> &lt;code >data&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;/dl>
+&lt;h2 id="example" >Example&lt;/h2>
+&lt;p >n_factors = 3
+n_items = 15
+n_people = 500
+difficulty = np.linspace(-2.5, 2.5, n_items)
+discrimination = np.random.randn(n_items, n_factors)
+thetas = np.random.randn(n_factors, n_people)&lt;/p>
+&lt;p >synthetic_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)&lt;/p>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
+seed=None):
+&amp;#34;&amp;#34;&amp;#34;
+Creates synthetic multidimensional IRT data to test
+parameters estimation functions. Only for use with
+dichotomous outputs
+Assumes the model
+P(theta) = 1.0 / (1 + exp(-1 * (dot(discrimination,theta) + difficulty)))
+Args:
+difficulty: [array, M] of difficulty parameters
+discrimination: [2-D array, MxN] of discrimination parameters
+thetas: [2-D array, NxP] of person abilities
+seed: Optional setting to reproduce results
+Returns:
+dichotomous matrix of [difficulty.size x thetas.size] representing
+synthetic data
+Example:
+n_factors = 3
+n_items = 15
+n_people = 500
+difficulty = np.linspace(-2.5, 2.5, n_items)
+discrimination = np.random.randn(n_items, n_factors)
+thetas = np.random.randn(n_factors, n_people)
+synthetic_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
+&amp;#34;&amp;#34;&amp;#34;
+if seed:
+np.random.seed(seed)
+# If the input is just a vector of discriminations
+if (np.ndim(discrimination) == 1) or (discrimination.shape[0] == 1):
+discrimination = np.vstack((discrimination,) * difficulty.shape[0])
+# Inline computation of the logistic kernel
+kernel_terms = discrimination @ thetas
+kernel_terms += difficulty[:, None]
+continuous_output = 1.0 / (1.0 + np.exp(-kernel_terms))
+# convert to binary based on probability
+random_compare = np.random.rand(*continuous_output.shape)
+return random_compare &amp;lt;= continuous_output&lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item><item><title>Api: create_synthetic_irt_polytomous</title><link>https://eribean.github.io/girth/api/synthetic/create_synthetic_irt_polytomous/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/synthetic/create_synthetic_irt_polytomous/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.synthetic.create_synthetic_irt_polytomous" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >create_synthetic_irt_polytomous&lt;/span>&lt;/span>(&lt;span >difficulty, discrimination, thetas, model='grm', seed=None)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Creates synthetic IRT data to test parameters estimation
+functions.
+Creates polytomous output with specified number
+of levels from [1, levels]&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[2D array (items x n_levels-1)] of difficulty parameters&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[array | number] of discrimination parameters&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >thetas&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[array] of person abilities&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >model&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >["grm", "pcm", "gum"] string specifying which polytomous model to use
+'grm': Graded Response Model
+'pcm': Generalized Partial Credit Model
+'gum': Generalized Graded Unfolding Model&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >seed&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >Optional setting to reproduce results&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;code >dichotomous&lt;/code> &lt;code >matrix&lt;/code> of [&lt;code >difficulty.size&lt;/code> &lt;code >x&lt;/code> &lt;code >thetas.size&lt;/code>] &lt;code >representing&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;code >synthetic&lt;/code> &lt;code >data&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;/dl>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
+model=&amp;#39;grm&amp;#39;, seed=None):
+&amp;#34;&amp;#34;&amp;#34;
+Creates synthetic IRT data to test parameters estimation
+functions. Creates polytomous output with specified number
+of levels from [1, levels]
+Args:
+difficulty: [2D array (items x n_levels-1)] of difficulty parameters
+discrimination: [array | number] of discrimination parameters
+thetas: [array] of person abilities
+model: [&amp;#34;grm&amp;#34;, &amp;#34;pcm&amp;#34;, &amp;#34;gum&amp;#34;] string specifying which polytomous model to use
+&amp;#39;grm&amp;#39;: Graded Response Model
+&amp;#39;pcm&amp;#39;: Generalized Partial Credit Model
+&amp;#39;gum&amp;#39;: Generalized Graded Unfolding Model
+seed: Optional setting to reproduce results
+Returns:
+dichotomous matrix of [difficulty.size x thetas.size] representing
+synthetic data
+&amp;#34;&amp;#34;&amp;#34;
+difficulty = np.atleast_2d(difficulty)
+n_items, n_levels = difficulty.shape
+if n_levels == 1:
+raise AssertionError(&amp;#34;Polytomous items must have more than 1 threshold&amp;#34;)
+if seed:
+np.random.seed(seed)
+# Check for single input of discrimination
+if np.atleast_1d(discrimination).size == 1:
+discrimination = np.full((n_items,), discrimination)
+# Get the model to use, will throw error if not supported
+probability_func = {&amp;#39;grm&amp;#39;: _graded_func,
+&amp;#39;pcm&amp;#39;: _credit_func,
+&amp;#39;gum&amp;#39;: _unfold_func}[model.lower()]
+# Check difficulty parameters for validity
+clip_high = _check_difficulty_parameters(difficulty, model.lower())
+# Initialize output for memory concerns
+level_scratch = np.zeros((n_levels + 2, thetas.size))
+output = np.zeros((n_items, thetas.size), dtype=&amp;#39;int&amp;#39;)
+# Loop over items and compute probability estimates
+# for each of the levels and assign level based on
+# those probabilities
+for item_ndx in range(n_items):
+# Obtain the probabilities for the data (in-place)
+probability_func(difficulty[item_ndx], discrimination[item_ndx],
+thetas, level_scratch[1:, :])
+# Get the thresholds of the levels
+np.cumsum(level_scratch[1:, :], axis=0, out=level_scratch[1:, :])
+level_scratch[0] = np.random.rand(thetas.size)
+# Discritize the outputs based on the thresholds
+output[item_ndx] = np.apply_along_axis(_my_digitize, axis=0, arr=level_scratch)
+# Add 1 to return [1, n_levels]
+output += 1
+np.clip(output, 0, clip_high, out=output)
+return output &lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item></channel></rss>

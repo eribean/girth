@@ -8,8 +8,39 @@ from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import condition_polytomous_response, _credit_partial_integral
 
 
+def rasch_full(dataset, discrimination=1, max_iter=25):
+    """
+        Estimates parameters in an IRT model with full
+        gaussian quadrature
+
+        Args:
+            dataset: [items x participants] matrix of True/False Values
+            discrimination: scalar of discrimination used in model (default to 1)
+            max_iter: maximum number of iterations to run
+
+        Returns:
+            array of discrimination estimates
+    """
+    return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]
+
+
 def onepl_full(dataset, alpha=None, max_iter=25):
-    """ Abstraction of base functionality in joint estimation methods."""
+    """
+        Estimates parameters in an 1PL IRT Model
+
+        This function is slow, please use onepl_separate
+
+        Args:
+            dataset: [items x participants] matrix of True/False Values
+            alpha: scalar of discrimination used in model (default to 1)
+            max_iter: maximum number of iterations to run
+
+        Returns:
+            array of discrimination estimates
+        
+        Notes:
+            If alpha is supplied then this solves a Rasch model
+    """
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
@@ -78,22 +109,6 @@ def onepl_full(dataset, alpha=None, max_iter=25):
     return alpha, difficulty
 
 
-def rasch_full(dataset, discrimination=1, max_iter=25):
-    """
-        Estimates parameters in an IRT model with full
-        gaussian quadrature
-
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
-
-        Returns:
-            array of discrimination estimates
-    """
-    return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]
-
-
 def twopl_full(dataset, max_iter=25):
     """
         Estimates parameters in a 2PL IRT model with marginal likelihood
@@ -110,7 +125,7 @@ def twopl_full(dataset, max_iter=25):
 
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)
-    
+
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
 
@@ -125,23 +140,24 @@ def twopl_full(dataset, max_iter=25):
         for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
             local_int = _compute_partial_integral(theta, difficulty[item_ndx, None],
-                                                  discrimination[item_ndx, None], 
+                                                  discrimination[item_ndx, None],
                                                   the_sign[item_ndx, None])
-         
+
             partial_int /= local_int
 
             def min_func_local(estimate):
                 discrimination[item_ndx] = estimate[0]
                 difficulty[item_ndx] = estimate[1]
-                
-                estimate_int = _compute_partial_integral(theta, 
+
+                estimate_int = _compute_partial_integral(theta,
                                                          difficulty[item_ndx, None],
                                                          discrimination[item_ndx, None],
                                                          the_sign[item_ndx, None])
 
                 estimate_int *= partial_int
-                otpt = integrate.fixed_quad(lambda x: estimate_int, -5, 5, n=61)[0]
-                
+                otpt = integrate.fixed_quad(
+                    lambda x: estimate_int, -5, 5, n=61)[0]
+
                 return -np.log(otpt).dot(counts)
 
             # Two parameter solver that doesn't need derivatives
@@ -150,7 +166,7 @@ def twopl_full(dataset, max_iter=25):
             fmin_slsqp(min_func_local, initial_guess, disp=False,
                        bounds=[(0.25, 4), (-4, 4)])
 
-             # Update the partial integral based on the new found values
+            # Update the partial integral based on the new found values
             estimate_int = _compute_partial_integral(theta, difficulty[item_ndx, None],
                                                      discrimination[item_ndx, None],
                                                      the_sign[item_ndx, None])

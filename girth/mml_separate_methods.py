@@ -12,8 +12,10 @@ from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constan
 def _separate_abstract(difficulty, scalar, discrimination,
                        theta, distribution):
     """ Abstraction of base functionality in separable
-        mml estimation methods."""
-    # Assumes calling function has vetted arguments
+        mml estimation methods.
+
+        Assumes calling function has vetted arguments
+    """
 
     for item_ndx in range(difficulty.shape[0]):
         # pylint: disable=cell-var-from-loop
@@ -30,6 +32,21 @@ def _separate_abstract(difficulty, scalar, discrimination,
         difficulty[item_ndx] = fminbound(min_zero_local, -6, 6)
 
     return difficulty
+
+
+def rasch_separate(dataset, discrimination=1):
+    """
+        Estimates parameters in an IRT model with full
+        gaussian quadrature
+
+        Args:
+            dataset: [items x participants] matrix of True/False Values
+            discrimination: scalar of discrimination used in model (default to 1)
+
+        Returns:
+            array of discrimination estimates
+    """
+    return onepl_separate(dataset, alpha=discrimination)[1]
 
 
 def onepl_separate(dataset, alpha=None):
@@ -55,7 +72,7 @@ def onepl_separate(dataset, alpha=None):
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
- 
+
     # Quadrature Locations
     theta = _get_quadrature_points(61, -5, 5)
     distribution = stats.norm(0, 1).pdf(theta)
@@ -84,21 +101,6 @@ def onepl_separate(dataset, alpha=None):
     return alpha, difficulty
 
 
-def rasch_separate(dataset, discrimination=1):
-    """
-        Estimates parameters in an IRT model with full
-        gaussian quadrature
-
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-
-        Returns:
-            array of discrimination estimates
-    """
-    return onepl_separate(dataset, alpha=discrimination)[1]
-    
-    
 def twopl_separate(dataset, max_iter=25):
     """
         Estimates the difficulty and discrimination parameters

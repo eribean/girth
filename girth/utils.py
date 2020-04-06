@@ -143,7 +143,7 @@ def trim_response_set_and_counts(response_sets, counts):
                             numpy.unique
             counts:  counts associated with response set
 
-        Returns
+        Returns:
             response_set, counts updated to reflect removal of response patterns
     """
     # Remove response sets where output is all true/false

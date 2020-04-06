@@ -199,7 +199,6 @@ def grm_jml(dataset, max_iter=25):
         Returns:
             array of discriminations, 
             array of difficulty estimates (np.nan is a null value)
-            array of person ability estimates
     """
     responses, item_counts = condition_polytomous_response(dataset)
     n_items, n_takers = responses.shape
@@ -291,7 +290,7 @@ def grm_jml(dataset, max_iter=25):
     for ndx, (start_ndx, end_ndx) in enumerate(zip(start_indices, cumulative_item_counts)):
         output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
 
-    return discrimination[start_indices], output_betas, thetas
+    return discrimination[start_indices], output_betas
 
 
 def pcm_jml(dataset, max_iter=25):
@@ -306,9 +305,8 @@ def pcm_jml(dataset, max_iter=25):
             max_iter: maximum number of iterations to run
 
         Returns:
-            array of discriminations, 
+            array of discriminations
             array of difficulty estimates (np.nan is a null value)
-            array of person ability estimates
     """
     responses, item_counts = condition_polytomous_response(
         dataset, _reference=0.0)

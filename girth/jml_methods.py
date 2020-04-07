@@ -3,7 +3,8 @@ from scipy.optimize import fmin_slsqp, fminbound
 
 from girth import (condition_polytomous_response,
                    convert_responses_to_kernel_sign, irt_evaluation,
-                   mml_approx, trim_response_set_and_counts)
+                   mml_approx, trim_response_set_and_counts,
+                   validate_estimation_options)
 
 
 def _jml_abstract(dataset, _item_min_func,
@@ -64,18 +65,22 @@ def _jml_abstract(dataset, _item_min_func,
     return alphas, betas
 
 
-def rasch_jml(dataset, discrimination=1, max_iter=25):
-    """
-        Estimates difficulty parameters in an IRT model
+def rasch_jml(dataset, discrimination=1, options=None):
+    """ Estimates difficulty parameters in an IRT model
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        discrimination: scalar of discrimination used in model (default to 1)
+        options: dictionary with updates to default options
 
-        Returns:
-            array of difficulty estimates
+    Returns:
+        difficulty: (1d array) estimates of item difficulties
+
+    Options:
+        * max_iterations: int
     """
+    options = validate_estimation_options(options)
+
     # Defines item parameter update function
     def _item_min_func(n_items, alphas, thetas,
                        betas, the_sign, counts):
@@ -95,22 +100,27 @@ def rasch_jml(dataset, discrimination=1, max_iter=25):
         return alphas, betas
 
     result = _jml_abstract(dataset, _item_min_func,
-                           discrimination, max_iter)
+                           discrimination, options['max_iteration'])
 
     return result[1]
 
 
-def onepl_jml(dataset, max_iter=25):
-    """
-        Estimates difficulty and discrimination paramters in 1PL IRT model
+def onepl_jml(dataset, options=None):
+    """ Estimates parameters in an 1PL IRT Model.
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            max_iter: maximum number of iterations to run
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        options: dictionary with updates to default options
 
-        Returns:
-            discrimination, array of difficulty estimates
-    """
+    Returns:
+        discrimination: (float) estimate of test discrimination
+        difficulty: (1d array) estimates of item diffiulties
+
+    Options:
+        * max_iteration: int
+"""
+    options = validate_estimation_options(options)
+
     # Defines item parameter update function
     def _item_min_func(n_items, alphas, thetas,
                        betas, the_sign, counts):
@@ -141,22 +151,27 @@ def onepl_jml(dataset, max_iter=25):
         return alphas, betas
 
     result = _jml_abstract(dataset, _item_min_func, discrimination=1,
-                           max_iter=max_iter)
+                           max_iter=options['max_iteration'])
 
     return result[0][0], result[1]
 
 
-def twopl_jml(dataset, max_iter=25):
-    """
-        Estimates difficulty and discrimination paramters in 2PL IRT model
+def twopl_jml(dataset, options=None):
+    """ Estimates parameters in a 2PL IRT model.
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            max_iter: maximum number of iterations to run
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        options: dictionary with updates to default options
 
-        Returns:
-            array of discriminations, array of difficulty estimates
+    Returns:
+        discrimination: (1d array) estimates of item discrimination
+        difficulty: (1d array) estimates of item difficulties
+
+    Options:
+        * max_iteration: int
     """
+    options = validate_estimation_options(options)
+
     # Defines item parameter update function
     def _item_min_func(n_items, alphas, thetas,
                        betas, the_sign, counts):
@@ -175,7 +190,7 @@ def twopl_jml(dataset, max_iter=25):
         return alphas, betas
 
     return _jml_abstract(dataset, _item_min_func, discrimination=1,
-                         max_iter=max_iter)
+                         max_iter=options['max_iteration'])
 
 
 def _jml_inequality(test):
@@ -184,22 +199,25 @@ def _jml_inequality(test):
     return np.concatenate(([1, 1], np.diff(test)[1:]))
 
 
-def grm_jml(dataset, max_iter=25):
+def grm_jml(dataset, options=None):
+    """Estimate parameters for graded response model.
+
+    Estimate the discrimination and difficulty parameters for
+    a graded response model using joint maximum likelihood.
+
+    Args:
+        dataset: [n_items, n_participants] 2d array of measured responses
+        options: dictionary with updates to default options
+
+    Returns:
+        discrimination: (1d array) estimate of item discriminations
+        difficulty: (2d array) estimates of item diffiulties by item thresholds
+
+    Options:
+        * max_iteration: int
     """
-        Estimates difficulty and discrimination paramaters
-        for a graded response two parameter model
+    options = validate_estimation_options(options)
 
-        difficulty parameters are category boundaries and by
-        definition must be ordered
-
-        Args:
-            dataset: [items x participants] matrix of ordinal values
-            max_iter: maximum number of iterations to run
-
-        Returns:
-            array of discriminations, 
-            array of difficulty estimates (np.nan is a null value)
-    """
     responses, item_counts = condition_polytomous_response(dataset)
     n_items, n_takers = responses.shape
 
@@ -221,7 +239,7 @@ def grm_jml(dataset, max_iter=25):
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = 10000
 
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_betas = betas.copy()
 
         #####################
@@ -293,21 +311,25 @@ def grm_jml(dataset, max_iter=25):
     return discrimination[start_indices], output_betas
 
 
-def pcm_jml(dataset, max_iter=25):
+def pcm_jml(dataset, options=None):
+    """Estimate parameters for partial credit model.
+
+    Estimate the discrimination and difficulty parameters for
+    the partial credit model using joint maximum likelihood.
+
+    Args:
+        dataset: [n_items, n_participants] 2d array of measured responses
+        options: dictionary with updates to default options
+
+    Returns:
+        discrimination: (1d array) estimates of item discrimination
+        difficulty: (2d array) estimates of item difficulties x item thresholds
+
+    Options:
+        * max_iteration: int
     """
-        Estimates difficulty and discrimination paramaters
-        for a partial credit response two parameter model
+    options = validate_estimation_options(options)
 
-        difficulty parameters can be disordered
-
-        Args:
-            dataset: [items x participants] matrix of ordinal values
-            max_iter: maximum number of iterations to run
-
-        Returns:
-            array of discriminations
-            array of difficulty estimates (np.nan is a null value)
-    """
     responses, item_counts = condition_polytomous_response(
         dataset, _reference=0.0)
     n_items, n_takers = responses.shape
@@ -324,7 +346,7 @@ def pcm_jml(dataset, max_iter=25):
         item_length = item_counts[ndx] - 1
         betas[ndx, :item_length] = np.linspace(-1, 1, item_length)
 
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
 
         #####################

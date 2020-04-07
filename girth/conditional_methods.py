@@ -2,7 +2,8 @@ import numpy as np
 
 from scipy.optimize import fminbound
 
-from girth import trim_response_set_and_counts
+from girth import (trim_response_set_and_counts,
+                   validate_estimation_options)
 
 
 def _symmetric_functions(betas):
@@ -21,23 +22,25 @@ def _symmetric_functions(betas):
     return otpt
 
 
-def rasch_conditional(dataset, discrimination=1, max_iter=25):
+def rasch_conditional(dataset, discrimination=1, options=None):
+    """ Estimates the difficulty parameters in a Rasch IRT model
+
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        discrimination: scalar of discrimination used in model (default to 1)
+        options: dictionary with updates to default options
+
+    Returns:
+        difficulty: (1d array) estimates of item difficulties
+
+    Options:
+        * max_iteration: int
+
+    Notes:
+        This function sets the sum of difficulty parameters to 
+        zero for identification purposes
     """
-        Estimates the difficulty parameters in a rasch model
-
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
-
-        Returns:
-            array of discrimination estimates
-
-        Notes:
-            This uses conditional likelihood and requires setting an
-            identifying value,  this functions requires the mean of the
-            difficulty estimates to be zero
-    """
+    options = validate_estimation_options(options)
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
 
@@ -52,7 +55,7 @@ def rasch_conditional(dataset, discrimination=1, max_iter=25):
 
     response_set_sums = unique_sets.sum(axis=0)
 
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_betas = betas.copy()
 
         for ndx in range(n_items):

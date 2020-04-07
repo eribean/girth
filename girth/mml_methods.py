@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate, stats
 from scipy.optimize import fminbound
 
-from girth import (condition_polytomous_response,
+from girth import (condition_polytomous_response, validate_estimation_options,
                    get_true_false_counts, convert_responses_to_kernel_sign)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
@@ -10,7 +10,7 @@ from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constan
 
 
 def _mml_abstract(difficulty, scalar, discrimination,
-                       theta, distribution):
+                  theta, distribution, options):
     """ Abstraction of base functionality in separable
         mml estimation methods.
 
@@ -25,7 +25,9 @@ def _mml_abstract(difficulty, scalar, discrimination,
             kernel *= distribution
 
             integral = integrate.fixed_quad(lambda x: kernel,
-                                            -5, 5, n=61)[0]
+                                            options['quadrature_bounds'][0],
+                                            options['quadrature_bounds'][1],
+                                            n=options['quadrature_n'])[0]
 
             return np.square(integral - scalar[item_ndx])
 
@@ -34,34 +36,46 @@ def _mml_abstract(difficulty, scalar, discrimination,
     return difficulty
 
 
-def rasch_mml(dataset, discrimination=1):
+def rasch_mml(dataset, discrimination=1, options=None):
+    """ Estimates parameters in a Rasch IRT model
+
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        discrimination: scalar of discrimination used in model (default to 1)
+        options: dictionary with updates to default options
+
+    Returns:
+        difficulty: (1d array) estimates of item difficulties
+
+    Options:
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
-        Estimates parameters in an IRT model with full
-        gaussian quadrature
+    return onepl_mml(dataset, alpha=discrimination, options=options)[1]
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
 
-        Returns:
-            array of discrimination estimates
+def onepl_mml(dataset, alpha=None, options=None):
+    """ Estimates parameters in an 1PL IRT Model.
+
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        alpha: [int] discrimination constraint
+        options: dictionary with updates to default options
+
+    Returns:
+        discrimination: (float) estimate of test discrimination
+        difficulty: (1d array) estimates of item diffiulties
+
+    Options:
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
-    return onepl_mml(dataset, alpha=discrimination)[1]
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
 
-
-def onepl_mml(dataset, alpha=None):
-    """
-        Estimates the difficulty and single discrimination parameter
-
-        Separates the difficulty estimation from the discrimination
-        parameters
-
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-
-        Returns:
-            array of discrimination, difficulty estimates
-    """
     # Difficulty Estimation parameters
     n_items = dataset.shape[0]
     n_no, n_yes = get_true_false_counts(dataset)
@@ -74,21 +88,22 @@ def onepl_mml(dataset, alpha=None):
     difficulty = np.zeros((n_items,))
 
     # Quadrature Locations
-    theta = _get_quadrature_points(61, -5, 5)
-    distribution = stats.norm(0, 1).pdf(theta)
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
 
     # Inline definition of cost function to minimize
     def min_func(estimate):
         discrimination[:] = estimate
         _mml_abstract(difficulty, scalar, discrimination,
-                           theta, distribution)
+                      theta, distribution, options)
 
         partial_int = _compute_partial_integral(theta, difficulty,
                                                 discrimination, the_sign)
 
         # add distribution
         partial_int *= distribution
-        otpt = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+        otpt = integrate.fixed_quad(
+            lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
 
         return -np.log(otpt).dot(counts)
 
@@ -101,20 +116,27 @@ def onepl_mml(dataset, alpha=None):
     return alpha, difficulty
 
 
-def twopl_mml(dataset, max_iter=25):
+def twopl_mml(dataset, options=None):
+    """ Estimates parameters in a 2PL IRT model.
+
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        options: dictionary with updates to default options
+
+    Returns:
+        discrimination: (1d array) estimate of item discriminations
+        difficulty: (1d array) estimates of item diffiulties
+    
+    Options:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
-        Estimates the difficulty and discrimination parameters
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
 
-        Separates the difficulty estimation from the discrimination
-        parameters
-
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            max_iter:  maximum number of iterations to run
-
-        Returns:
-            array of discrimination, difficulty estimates
-    """
     n_items = dataset.shape[0]
     n_no, n_yes = get_true_false_counts(dataset)
     scalar = n_yes / (n_yes + n_no)
@@ -122,14 +144,14 @@ def twopl_mml(dataset, max_iter=25):
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
-    theta = _get_quadrature_points(61, -5, 5)
-    distribution = stats.norm(0, 1).pdf(theta)
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
 
     # Perform the minimization
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
 
-    for iteration in range(max_iter):
+    for iteration in range(options['quadrature_n']):
         previous_discrimination = discrimination.copy()
 
         # Quadrature evaluation for values that do not change
@@ -150,14 +172,14 @@ def twopl_mml(dataset, max_iter=25):
             def min_func_local(estimate):
                 discrimination[ndx] = estimate
                 _mml_abstract(difficulty[ndx, None], scalar[ndx, None],
-                                   discrimination[ndx, None], theta, distribution)
+                              discrimination[ndx, None], theta, distribution, options)
                 estimate_int = _compute_partial_integral(theta, difficulty[ndx, None],
                                                          discrimination[ndx, None],
                                                          the_sign[ndx, None])
 
                 estimate_int *= partial_int
                 otpt = integrate.fixed_quad(
-                    lambda x: estimate_int, -5, 5, n=61)[0]
+                    lambda x: estimate_int, quad_start, quad_stop, n=quad_n)[0]
                 return -np.log(otpt).dot(counts)
 
             # Solve for the discrimination parameters
@@ -176,7 +198,7 @@ def twopl_mml(dataset, max_iter=25):
     return discrimination, difficulty
 
 
-def grm_mml(dataset, max_iter=25):
+def grm_mml(dataset, options=None):
     """Estimate parameters for graded response model.
 
     Estimate the discrimination and difficulty parameters for
@@ -184,20 +206,28 @@ def grm_mml(dataset, max_iter=25):
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
-        max_iter: (optional) maximum number of iterations to perform
+        options: dictionary with updates to default options
 
     Returns:
-        array of discrimination parameters
-        2d array of difficulty parameters, (NAN represents non response)
+        discrimination: (1d array) estimate of item discriminations
+        difficulty: (2d array) estimates of item diffiulties by item thresholds
+
+    Options:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
-    responses, item_counts = condition_polytomous_response(
-        dataset, trim_ends=False)
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
+
+    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False)
     n_items = responses.shape[0]
 
     # Interpolation Locations
-    theta = _get_quadrature_points(61, -5, 5)
-    distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
-    ones_distribution = np.ones_like(distribution)
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
 
     # Compute the values needed for integral equations
     integral_counts = list()
@@ -226,7 +256,7 @@ def grm_mml(dataset, max_iter=25):
     # 3. solve for difficulties
     # 4. minimize and repeat
     #############
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
         previous_betas = betas.copy()
         previous_betas_roll = betas_roll.copy()
@@ -234,8 +264,8 @@ def grm_mml(dataset, max_iter=25):
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         partial_int = _graded_partial_integral(theta, betas, betas_roll,
-                                               discrimination, responses,
-                                               distribution)
+                                               discrimination, responses)
+        partial_int *= distribution
 
         for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
@@ -247,8 +277,7 @@ def grm_mml(dataset, max_iter=25):
             old_values = _graded_partial_integral(theta, previous_betas,
                                                   previous_betas_roll,
                                                   previous_discrimination,
-                                                  responses[item_ndx][None, :],
-                                                  ones_distribution)
+                                                  responses[item_ndx][None, :])
             partial_int /= old_values
 
             def _local_min_func(estimate):
@@ -263,12 +292,11 @@ def grm_mml(dataset, max_iter=25):
 
                 new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                       discrimination,
-                                                      responses[item_ndx][None, :],
-                                                      ones_distribution)
+                                                      responses[item_ndx][None, :])
 
                 new_values *= partial_int
                 otpt = integrate.fixed_quad(
-                    lambda x: new_values, -5, 5, n=61)[0]
+                    lambda x: new_values, quad_start, quad_stop, n=quad_n)[0]
 
                 return -np.log(otpt).sum()
 
@@ -277,8 +305,7 @@ def grm_mml(dataset, max_iter=25):
 
             new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                   discrimination,
-                                                  responses[item_ndx][None, :],
-                                                  ones_distribution)
+                                                  responses[item_ndx][None, :])
 
             partial_int *= new_values
 

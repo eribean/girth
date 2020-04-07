@@ -4,7 +4,7 @@ from scipy import integrate
 from scipy.stats import uniform
 from scipy.stats import norm as gaussian
 from scipy.optimize import fminbound
-from girth import convert_responses_to_kernel_sign
+from girth import convert_responses_to_kernel_sign, validate_estimation_options
 from girth.utils import _compute_partial_integral, _get_quadrature_points
 
 
@@ -24,7 +24,7 @@ def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
                      -no_estimate -> 0 and no_estimate -> 1
 
     Returns:
-        1d array of estimated abilities
+        abilities: (1d array) estimated abilities
     """
     # Locations where endorsement isn't constant
     mask = np.nanvar(dataset, axis=0) > 0
@@ -34,7 +34,7 @@ def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
 
     # Call MAP with uniform distribution
     trimmed_theta = ability_map(valid_dataset, difficulty, discrimination,
-                                uniform(-7, 14).pdf)
+                                {'distribution': uniform(-7, 14).pdf})
 
     # Replace no_estimate values
     thetas = np.full((dataset.shape[1],), np.abs(no_estimate), dtype='float')
@@ -47,7 +47,7 @@ def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
     return thetas
 
 
-def ability_map(dataset, difficulty, discrimination, distribution=None):
+def ability_map(dataset, difficulty, discrimination, options=None):
     """Estimates the abilities for dichotomous models.
 
     Estimates the ability parameters (theta) for dichotomous models via
@@ -57,23 +57,25 @@ def ability_map(dataset, difficulty, discrimination, distribution=None):
         dataset: [n_items, n_participants] (2d Array) of measured responses
         difficulty: (1d Array) of difficulty parameters for each item
         discrimination: (1d Array) of disrimination parameters for each item
-        distribution: function handle to PDF of ability distribution, p = f(theta)
-                      the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)
+        options: dictionary with updates to default options
 
     Returns:
-        1d array of estimated abilities
+        abilities: (1d array) estimated abilities
+
+    Options:
+        distribution: 
 
     Notes:
-        If distribution is uniform, MAP is equivalent to MLE. A large set of
-        probability distributions can be found in scipy.stats
+        If distribution is uniform, please use ability_mle instead. A large set 
+        of probability distributions can be found in scipy.stats
         https://docs.scipy.org/doc/scipy/reference/stats.html
     """
-    if distribution is None:
-        distribution = gaussian(0, 1).pdf
+    options = validate_estimation_options(options)
+    distribution = options['distribution']
 
-    discrimination = np.atleast_1d(discrimination)
-    if discrimination.size == 1:
-        discrimination = np.full(dataset.shape[0], discrimination)
+    if np.atleast_1d(discrimination).size == 1:
+        discrimination = np.full(dataset.shape[0], discrimination,
+                                 dtype="float")
 
     n_takers = dataset.shape[1]
     the_sign = convert_responses_to_kernel_sign(dataset)
@@ -94,7 +96,7 @@ def ability_map(dataset, difficulty, discrimination, distribution=None):
     return thetas
 
 
-def ability_eap(dataset, difficulty, discrimination, distribution=None):
+def ability_eap(dataset, difficulty, discrimination, options=None):
     """Estimates the abilities for dichotomous models.
 
     Estimates the ability parameters (theta) for dichotomous models via
@@ -104,34 +106,42 @@ def ability_eap(dataset, difficulty, discrimination, distribution=None):
         dataset: [n_items, n_participants] (2d Array) of measured responses
         difficulty: (1d Array) of difficulty parameters for each item
         discrimination: (1d Array) of disrimination parameters for each item
-        distribution: function handle to PDF of ability distribution, p = f(theta)
-                      the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)
+        options: dictionary with updates to default options
 
     Returns:
-        1d array of estimated abilities
-    """
-    if distribution is None:
-        distribution = gaussian(0, 1).pdf
+        abilities: (1d array) estimated abilities
 
-    discrimination = np.atleast_1d(discrimination)
-    if discrimination.size == 1:
-        discrimination = np.full(dataset.shape[0], discrimination)
+    Options:
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
+
+    """
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
+
+    if np.atleast_1d(discrimination).size == 1:
+        discrimination = np.full(dataset.shape[0], discrimination,
+                                 dtype='float')
 
     the_sign = convert_responses_to_kernel_sign(dataset)
 
-    theta = _get_quadrature_points(61, -5, 5)
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
     partial_int = _compute_partial_integral(
         theta, difficulty, discrimination, the_sign)
 
     # Weight by the input ability distribution
-    partial_int *= distribution(theta)
+    partial_int *= options['distribution'](theta)
 
     # Compute the denominator
-    denominator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+    denominator = integrate.fixed_quad(
+        lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
 
     # compute the numerator
     partial_int *= theta
 
-    numerator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+    numerator = integrate.fixed_quad(
+        lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
 
     return numerator / denominator

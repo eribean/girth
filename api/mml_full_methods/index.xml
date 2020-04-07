@@ -1,4 +1,4 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Maximum Marginal Likelihood Methods</title><link>https://eribean.github.io/girth/api/mml_full_methods/</link><description>Recent content in Maximum Marginal Likelihood Methods on GIRTH</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 04 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://eribean.github.io/girth/api/mml_full_methods/index.xml" rel="self" type="application/rss+xml"/><item><title>Api: rasch_full</title><link>https://eribean.github.io/girth/api/mml_full_methods/rasch_full/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_full_methods/rasch_full/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Legacy Marginal Likelihood Methods</title><link>https://eribean.github.io/girth/api/mml_full_methods/</link><description>Recent content in Legacy Marginal Likelihood Methods on GIRTH</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 04 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://eribean.github.io/girth/api/mml_full_methods/index.xml" rel="self" type="application/rss+xml"/><item><title>Api: rasch_full</title><link>https://eribean.github.io/girth/api/mml_full_methods/rasch_full/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_full_methods/rasch_full/</guid><description>
 &lt;head>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -70,7 +70,7 @@ return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]&lt;/code>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimates parameters in an 1PL IRT Model&lt;/p>
-&lt;p >This function is slow, please use onepl_separate&lt;/p>
+&lt;p >This function is slow, please use onepl_mml&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
@@ -94,7 +94,7 @@ return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]&lt;/code>
 &lt;pre >&lt;code class="python" >def onepl_full(dataset, alpha=None, max_iter=25):
 &amp;#34;&amp;#34;&amp;#34;
 Estimates parameters in an 1PL IRT Model
-This function is slow, please use onepl_separate
+This function is slow, please use onepl_mml
 Args:
 dataset: [items x participants] matrix of True/False Values
 alpha: scalar of discrimination used in model (default to 1)
@@ -288,6 +288,131 @@ the partial credit model using marginal maximum likelihood.&lt;/p>
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def pcm_full(dataset, max_iter=25):
+&amp;#34;&amp;#34;&amp;#34;Estimate parameters for partial credit model.
+Estimate the discrimination and difficulty parameters for
+the partial credit model using marginal maximum likelihood.
+Args:
+dataset: [n_items, n_participants] 2d array of measured responses
+max_iter: (optional) maximum number of iterations to perform
+Returns:
+array of discrimination parameters
+2d array of difficulty parameters, (NAN represents non response)
+&amp;#34;&amp;#34;&amp;#34;
+responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
+_reference=0.0)
+n_items = responses.shape[0]
+# Interpolation Locations
+theta = _get_quadrature_points(61, -5, 5)
+distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
+# Initialize difficulty parameters for estimation
+betas = np.full((n_items, item_counts.max()), np.nan)
+discrimination = np.ones((n_items,))
+partial_int = np.ones((responses.shape[1], theta.size))
+# Not all items need to have the same
+# number of response categories
+betas[:, 0] = 0
+for ndx in range(n_items):
+betas[ndx, 1:item_counts[ndx]] = np.linspace(-1, 1, item_counts[ndx]-1)
+#############
+# 1. Start the iteration loop
+# 2. Estimate Dicriminatin/Difficulty Jointly
+# 3. Integrate of theta
+# 4. minimize and repeat
+#############
+for iteration in range(max_iter):
+previous_discrimination = discrimination.copy()
+previous_betas = betas.copy()
+# Quadrature evaluation for values that do not change
+# This is done during the outer loop to address rounding errors
+# and for speed
+partial_int *= 0.0
+partial_int += distribution[None, :]
+for item_ndx in range(n_items):
+partial_int *= _credit_partial_integral(theta, betas[item_ndx],
+discrimination[item_ndx],
+responses[item_ndx])
+# Loop over each item and solve for the alpha / beta parameters
+for item_ndx in range(n_items):
+# pylint: disable=cell-var-from-loop
+item_length = item_counts[item_ndx]
+new_betas = np.zeros((item_length))
+# Remove the previous output
+old_values = _credit_partial_integral(theta, previous_betas[item_ndx],
+previous_discrimination[item_ndx],
+responses[item_ndx])
+partial_int /= old_values
+def _local_min_func(estimate):
+new_betas[1:] = estimate[1:]
+new_values = _credit_partial_integral(theta, new_betas,
+estimate[0],
+responses[item_ndx])
+new_values *= partial_int
+otpt = integrate.fixed_quad(
+lambda x: new_values, -5, 5, n=61)[0]
+return -np.log(otpt).sum()
+# Univariate minimization for discrimination parameter
+initial_guess = np.concatenate(([discrimination[item_ndx]],
+betas[item_ndx, 1:item_length]))
+otpt = fmin_slsqp(_local_min_func, initial_guess,
+disp=False,
+bounds=[(.25, 4)] + [(-6, 6)] * (item_length - 1))
+discrimination[item_ndx] = otpt[0]
+betas[item_ndx, 1:item_length] = otpt[1:]
+new_values = _credit_partial_integral(theta, betas[item_ndx],
+discrimination[item_ndx],
+responses[item_ndx])
+partial_int *= new_values
+if np.abs(previous_discrimination - discrimination).max() &amp;lt; 1e-3:
+break
+# TODO: look where missing values are and place NAN there instead
+# of appending them to the end
+return discrimination, betas[:, 1:]&lt;/code>&lt;/pre>
+&lt;/details>
+&lt;/dd>
+&lt;/dl>
+&lt;/section>
+&lt;footer id="footer">
+&lt;p>Generated by &lt;a href="https://pdoc3.github.io/pdoc">&lt;cite>pdoc&lt;/cite> 0.7.5&lt;/a>.&lt;/p>
+&lt;/footer>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
+&lt;script>hljs.initHighlightingOnLoad()&lt;/script>
+&lt;/body></description></item><item><title>Api: pcm_mml</title><link>https://eribean.github.io/girth/api/mml_full_methods/pcm_mml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_full_methods/pcm_mml/</guid><description>
+&lt;head>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+&lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+&lt;link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+&lt;style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',2'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}&lt;/style>
+&lt;style>code{color:#000}&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;section >
+&lt;dl >
+&lt;dt id="girth.mml_full_methods.pcm_mml" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >pcm_mml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;/code>&lt;/dt>
+&lt;dd >
+&lt;section class="desc" >&lt;p >Estimate parameters for partial credit model.&lt;/p>
+&lt;p >Estimate the discrimination and difficulty parameters for
+the partial credit model using marginal maximum likelihood.&lt;/p>
+&lt;h2 id="args" >Args&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >[n_items, n_participants] 2d array of measured responses&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(optional) maximum number of iterations to perform&lt;/dd>
+&lt;/dl>
+&lt;h2 id="returns" >Returns&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;code >array&lt;/code> of &lt;code >discrimination&lt;/code> &lt;code >parameters&lt;/code>&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;code >2d&lt;/code> &lt;code >array&lt;/code> of &lt;code >difficulty&lt;/code> &lt;code >parameters&lt;/code>, (&lt;code >NAN&lt;/code> &lt;code >represents&lt;/code> &lt;code >non&lt;/code> &lt;code >response&lt;/code>)&lt;/dt>
+&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;/dl>&lt;/section>
+&lt;details class="source" >
+&lt;summary >
+&lt;span >Expand source code&lt;/span>
+&lt;/summary>
+&lt;pre >&lt;code class="python" >def pcm_mml(dataset, max_iter=25):
 &amp;#34;&amp;#34;&amp;#34;Estimate parameters for partial credit model.
 Estimate the discrimination and difficulty parameters for
 the partial credit model using marginal maximum likelihood.

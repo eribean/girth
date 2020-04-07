@@ -1,4 +1,4 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Separate Marginal Likelihood Methods</title><link>https://eribean.github.io/girth/api/mml_separate_methods/</link><description>Recent content in Separate Marginal Likelihood Methods on GIRTH</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 04 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://eribean.github.io/girth/api/mml_separate_methods/index.xml" rel="self" type="application/rss+xml"/><item><title>Api: rasch_separate</title><link>https://eribean.github.io/girth/api/mml_separate_methods/rasch_separate/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_separate_methods/rasch_separate/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>GIRTH – Maximum Marginal Likelihood Methods</title><link>https://eribean.github.io/girth/api/mml_methods/</link><description>Recent content in Maximum Marginal Likelihood Methods on GIRTH</description><generator>Hugo -- gohugo.io</generator><lastBuildDate>Sat, 04 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://eribean.github.io/girth/api/mml_methods/index.xml" rel="self" type="application/rss+xml"/><item><title>Api: rasch_mml</title><link>https://eribean.github.io/girth/api/mml_methods/rasch_mml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_methods/rasch_mml/</guid><description>
 &lt;head>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -9,8 +9,8 @@
 &lt;body>
 &lt;section >
 &lt;dl >
-&lt;dt id="girth.mml_separate_methods.rasch_separate" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >rasch_separate&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1)&lt;/span>
+&lt;dt id="girth.mml_methods.rasch_mml" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >rasch_mml&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimates parameters in an IRT model with full
@@ -31,7 +31,7 @@ gaussian quadrature&lt;/p>
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def rasch_separate(dataset, discrimination=1):
+&lt;pre >&lt;code class="python" >def rasch_mml(dataset, discrimination=1):
 &amp;#34;&amp;#34;&amp;#34;
 Estimates parameters in an IRT model with full
 gaussian quadrature
@@ -41,7 +41,7 @@ discrimination: scalar of discrimination used in model (default to 1)
 Returns:
 array of discrimination estimates
 &amp;#34;&amp;#34;&amp;#34;
-return onepl_separate(dataset, alpha=discrimination)[1]&lt;/code>&lt;/pre>
+return onepl_mml(dataset, alpha=discrimination)[1]&lt;/code>&lt;/pre>
 &lt;/details>
 &lt;/dd>
 &lt;/dl>
@@ -51,7 +51,7 @@ return onepl_separate(dataset, alpha=discrimination)[1]&lt;/code>&lt;/pre>
 &lt;/footer>
 &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
 &lt;script>hljs.initHighlightingOnLoad()&lt;/script>
-&lt;/body></description></item><item><title>Api: onepl_separate</title><link>https://eribean.github.io/girth/api/mml_separate_methods/onepl_separate/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_separate_methods/onepl_separate/</guid><description>
+&lt;/body></description></item><item><title>Api: onepl_mml</title><link>https://eribean.github.io/girth/api/mml_methods/onepl_mml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_methods/onepl_mml/</guid><description>
 &lt;head>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -62,8 +62,8 @@ return onepl_separate(dataset, alpha=discrimination)[1]&lt;/code>&lt;/pre>
 &lt;body>
 &lt;section >
 &lt;dl >
-&lt;dt id="girth.mml_separate_methods.onepl_separate" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >onepl_separate&lt;/span>&lt;/span>(&lt;span >dataset, alpha=None)&lt;/span>
+&lt;dt id="girth.mml_methods.onepl_mml" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >onepl_mml&lt;/span>&lt;/span>(&lt;span >dataset, alpha=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimates the difficulty and single discrimination parameter&lt;/p>
@@ -83,7 +83,7 @@ parameters&lt;/p>
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def onepl_separate(dataset, alpha=None):
+&lt;pre >&lt;code class="python" >def onepl_mml(dataset, alpha=None):
 &amp;#34;&amp;#34;&amp;#34;
 Estimates the difficulty and single discrimination parameter
 Separates the difficulty estimation from the discrimination
@@ -107,7 +107,7 @@ distribution = stats.norm(0, 1).pdf(theta)
 # Inline definition of cost function to minimize
 def min_func(estimate):
 discrimination[:] = estimate
-_separate_abstract(difficulty, scalar, discrimination,
+_mml_abstract(difficulty, scalar, discrimination,
 theta, distribution)
 partial_int = _compute_partial_integral(theta, difficulty,
 discrimination, the_sign)
@@ -130,7 +130,7 @@ return alpha, difficulty&lt;/code>&lt;/pre>
 &lt;/footer>
 &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
 &lt;script>hljs.initHighlightingOnLoad()&lt;/script>
-&lt;/body></description></item><item><title>Api: twopl_separate</title><link>https://eribean.github.io/girth/api/mml_separate_methods/twopl_separate/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_separate_methods/twopl_separate/</guid><description>
+&lt;/body></description></item><item><title>Api: twopl_mml</title><link>https://eribean.github.io/girth/api/mml_methods/twopl_mml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_methods/twopl_mml/</guid><description>
 &lt;head>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -141,8 +141,8 @@ return alpha, difficulty&lt;/code>&lt;/pre>
 &lt;body>
 &lt;section >
 &lt;dl >
-&lt;dt id="girth.mml_separate_methods.twopl_separate" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >twopl_separate&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;dt id="girth.mml_methods.twopl_mml" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >twopl_mml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimates the difficulty and discrimination parameters&lt;/p>
@@ -164,7 +164,7 @@ parameters&lt;/p>
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def twopl_separate(dataset, max_iter=25):
+&lt;pre >&lt;code class="python" >def twopl_mml(dataset, max_iter=25):
 &amp;#34;&amp;#34;&amp;#34;
 Estimates the difficulty and discrimination parameters
 Separates the difficulty estimation from the discrimination
@@ -200,7 +200,7 @@ discrimination[ndx, None], the_sign[ndx, None])
 partial_int /= local_int
 def min_func_local(estimate):
 discrimination[ndx] = estimate
-_separate_abstract(difficulty[ndx, None], scalar[ndx, None],
+_mml_abstract(difficulty[ndx, None], scalar[ndx, None],
 discrimination[ndx, None], theta, distribution)
 estimate_int = _compute_partial_integral(theta, difficulty[ndx, None],
 discrimination[ndx, None],
@@ -229,7 +229,7 @@ return discrimination, difficulty&lt;/code>&lt;/pre>
 &lt;/footer>
 &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">&lt;/script>
 &lt;script>hljs.initHighlightingOnLoad()&lt;/script>
-&lt;/body></description></item><item><title>Api: grm_separate</title><link>https://eribean.github.io/girth/api/mml_separate_methods/grm_separate/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_separate_methods/grm_separate/</guid><description>
+&lt;/body></description></item><item><title>Api: grm_mml</title><link>https://eribean.github.io/girth/api/mml_methods/grm_mml/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://eribean.github.io/girth/api/mml_methods/grm_mml/</guid><description>
 &lt;head>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 &lt;link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -240,8 +240,8 @@ return discrimination, difficulty&lt;/code>&lt;/pre>
 &lt;body>
 &lt;section >
 &lt;dl >
-&lt;dt id="girth.mml_separate_methods.grm_separate" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >grm_separate&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;dt id="girth.mml_methods.grm_mml" >&lt;code class="name flex" >
+&lt;span >def &lt;span class="ident" >grm_mml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimate parameters for graded response model.&lt;/p>
@@ -265,7 +265,7 @@ a graded response model using marginal maximum likelihood.&lt;/p>
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def grm_separate(dataset, max_iter=25):
+&lt;pre >&lt;code class="python" >def grm_mml(dataset, max_iter=25):
 &amp;#34;&amp;#34;&amp;#34;Estimate parameters for graded response model.
 Estimate the discrimination and difficulty parameters for
 a graded response model using marginal maximum likelihood.

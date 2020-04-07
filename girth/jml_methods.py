@@ -68,16 +68,16 @@ def _jml_abstract(dataset, _item_min_func,
 def rasch_jml(dataset, discrimination=1, options=None):
     """ Estimates difficulty parameters in an IRT model
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        discrimination: scalar of discrimination used in model (default to 1)
+        options: dictionary with updates to default options
 
-        Returns:
-            difficulty: (1d array) estimates of item difficulties
+    Returns:
+        difficulty: (1d array) estimates of item difficulties
 
-        Options:
-            max_iterations:
+    Options:
+        * max_iterations: int
     """
     options = validate_estimation_options(options)
 
@@ -108,17 +108,17 @@ def rasch_jml(dataset, discrimination=1, options=None):
 def onepl_jml(dataset, options=None):
     """ Estimates parameters in an 1PL IRT Model.
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        options: dictionary with updates to default options
 
-        Returns:
-            discrimination: (float) estimate of test discrimination
-            difficulty: (1d array) estimates of item diffiulties
+    Returns:
+        discrimination: (float) estimate of test discrimination
+        difficulty: (1d array) estimates of item diffiulties
 
-        Options:
-            max_iteration:
-    """
+    Options:
+        * max_iteration: int
+"""
     options = validate_estimation_options(options)
 
     # Defines item parameter update function
@@ -159,16 +159,16 @@ def onepl_jml(dataset, options=None):
 def twopl_jml(dataset, options=None):
     """ Estimates parameters in a 2PL IRT model.
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        options: dictionary with updates to default options
 
-        Returns:
-            discrimination: (1d array) estimates of item discrimination
-            difficulty: (1d array) estimates of item difficulties
+    Returns:
+        discrimination: (1d array) estimates of item discrimination
+        difficulty: (1d array) estimates of item difficulties
 
-       Options:
-            max_iteration:
+    Options:
+        * max_iteration: int
     """
     options = validate_estimation_options(options)
 
@@ -207,14 +207,14 @@ def grm_jml(dataset, options=None):
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
-        options: dictionary of overriding parameters
+        options: dictionary with updates to default options
 
     Returns:
         discrimination: (1d array) estimate of item discriminations
         difficulty: (2d array) estimates of item diffiulties by item thresholds
 
     Options:
-        max_iteration:
+        * max_iteration: int
     """
     options = validate_estimation_options(options)
 
@@ -319,14 +319,14 @@ def pcm_jml(dataset, options=None):
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
-        options: dictionary of overriding parameters
+        options: dictionary with updates to default options
 
     Returns:
         discrimination: (1d array) estimates of item discrimination
         difficulty: (2d array) estimates of item difficulties x item thresholds
 
     Options:
-        max_iteration:
+        * max_iteration: int
     """
     options = validate_estimation_options(options)
 

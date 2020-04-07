@@ -11,19 +11,19 @@ from girth.polytomous_utils import condition_polytomous_response, _credit_partia
 def rasch_full(dataset, discrimination=1, options=None):
     """ Estimates difficulty parameters in Rash IRT model.
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        discrimination: scalar of discrimination used in model (default to 1)
+        options: dictionary with updates to default options
 
-        Returns:
-            difficulty: (1d array) difficulty estimates
+    Returns:
+        difficulty: (1d array) difficulty estimates
 
-        Options:
-            max_iteration:
-            distribution:
-            quadrature_bounds:
-            quadrature_n:
+    Options:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
     return onepl_full(dataset, alpha=discrimination, options=options)[1]
 
@@ -31,25 +31,25 @@ def rasch_full(dataset, discrimination=1, options=None):
 def onepl_full(dataset, alpha=None, options=None):
     """ Estimates parameters in an 1PL IRT Model.
 
-        This function is slow, please use onepl_mml
+    This function is slow, please use onepl_mml
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            alpha: scalar of discrimination used in model (default to 1)
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        alpha: scalar of discrimination used in model (default to 1)
+        options: dictionary with updates to default options
 
-        Returns:
-            discrimination: (float) estimate of test discrimination
-            difficulty: (1d array) estimates of item diffiulties
+    Returns:
+        discrimination: (float) estimate of test discrimination
+        difficulty: (1d array) estimates of item diffiulties
 
-        Options:
-            max_iteration:
-            distribution:
-            quadrature_bounds:
-            quadrature_n:
+    Options:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
 
-        Notes:
-            If alpha is supplied then this solves a Rasch model
+    Notes:
+        If alpha is supplied then this solves a Rasch model
     """
     options = validate_estimation_options(options)
     quad_start, quad_stop = options['quadrature_bounds']
@@ -127,22 +127,22 @@ def onepl_full(dataset, alpha=None, options=None):
 def twopl_full(dataset, options=None):
     """ Estimates parameters in a 2PL IRT model.
 
-        Please use twopl_mml instead.
+    Please use twopl_mml instead.
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        options: dictionary with updates to default options
 
-        Returns:
-            discrimination: (1d array) estimates of item discrimination
-            difficulty: (1d array) estimates of item difficulties
+    Returns:
+        discrimination: (1d array) estimates of item discrimination
+        difficulty: (1d array) estimates of item difficulties
 
-       Options:
-            max_iteration:
-            distribution:
-            quadrature_bounds:
-            quadrature_n:
-    """
+    Options:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
+"""
     options = validate_estimation_options(options)
     quad_start, quad_stop = options['quadrature_bounds']
     quad_n = options['quadrature_n']
@@ -215,17 +215,17 @@ def pcm_mml(dataset, options=None):
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
-        options: dictionary of overriding parameters
+        options: dictionary with updates to default options
 
     Returns:
         discrimination: (1d array) estimates of item discrimination
         difficulty: (2d array) estimates of item difficulties x item thresholds
 
     Options:
-        max_iteration:
-        distribution:
-        quadrature_bounds:
-        quadrature_n:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
     options = validate_estimation_options(options)
     quad_start, quad_stop = options['quadrature_bounds']

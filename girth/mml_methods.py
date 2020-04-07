@@ -39,18 +39,18 @@ def _mml_abstract(difficulty, scalar, discrimination,
 def rasch_mml(dataset, discrimination=1, options=None):
     """ Estimates parameters in a Rasch IRT model
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        discrimination: scalar of discrimination used in model (default to 1)
+        options: dictionary with updates to default options
 
-        Returns:
-            difficulty: (1d array) estimates of item difficulties
+    Returns:
+        difficulty: (1d array) estimates of item difficulties
 
-        Options:
-            distribution:
-            quadrature_bounds:
-            quadrature_n:
+    Options:
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
     return onepl_mml(dataset, alpha=discrimination, options=options)[1]
 
@@ -58,19 +58,19 @@ def rasch_mml(dataset, discrimination=1, options=None):
 def onepl_mml(dataset, alpha=None, options=None):
     """ Estimates parameters in an 1PL IRT Model.
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            alpha: [int] discrimination constraint
-            options: dictionary of overriding parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        alpha: [int] discrimination constraint
+        options: dictionary with updates to default options
 
-        Returns:
-            discrimination: (float) estimate of test discrimination
-            difficulty: (1d array) estimates of item diffiulties
+    Returns:
+        discrimination: (float) estimate of test discrimination
+        difficulty: (1d array) estimates of item diffiulties
 
-        Options:
-            distribution:
-            quadrature_bounds:
-            quadrature_n:
+    Options:
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
     options = validate_estimation_options(options)
     quad_start, quad_stop = options['quadrature_bounds']
@@ -119,22 +119,19 @@ def onepl_mml(dataset, alpha=None, options=None):
 def twopl_mml(dataset, options=None):
     """ Estimates parameters in a 2PL IRT model.
 
-        Separates the difficulty estimation from the discrimination
-        parameters
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        options: dictionary with updates to default options
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            options: dictionary of overriding parameters
-
-        Returns:
-            discrimination: (1d array) estimate of item discriminations
-            difficulty: (1d array) estimates of item diffiulties
-        
-        Options:
-            max_iteration:
-            distribution:
-            quadrature_bounds:
-            quadrature_n:
+    Returns:
+        discrimination: (1d array) estimate of item discriminations
+        difficulty: (1d array) estimates of item diffiulties
+    
+    Options:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
     options = validate_estimation_options(options)
     quad_start, quad_stop = options['quadrature_bounds']
@@ -209,17 +206,17 @@ def grm_mml(dataset, options=None):
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
-        options: dictionary of overriding parameters
+        options: dictionary with updates to default options
 
     Returns:
         discrimination: (1d array) estimate of item discriminations
         difficulty: (2d array) estimates of item diffiulties by item thresholds
 
     Options:
-        max_iteration:
-        distribution:
-        quadrature_bounds:
-        quadrature_n:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
     options = validate_estimation_options(options)
     quad_start, quad_stop = options['quadrature_bounds']

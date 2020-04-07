@@ -112,9 +112,9 @@ def ability_eap(dataset, difficulty, discrimination, options=None):
         abilities: (1d array) estimated abilities
 
     Options:
-        distribution:
-        quadrature_bounds:
-        quadrature_n:
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
 
     """
     options = validate_estimation_options(options)

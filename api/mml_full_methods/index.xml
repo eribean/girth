@@ -10,41 +10,50 @@
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.mml_full_methods.rasch_full" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >rasch_full&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >rasch_full&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates parameters in an IRT model with full
-gaussian quadrature&lt;/p>
+&lt;section class="desc" >&lt;p >Estimates difficulty parameters in Rash IRT model.&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >[items x participants] matrix of True/False Values&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >scalar of discrimination used in model (default to 1)&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discrimination&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) difficulty estimates&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;li >distribution: callable&lt;/li>
+&lt;li >quadrature_bounds: (float, float)&lt;/li>
+&lt;li >quadrature_n: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def rasch_full(dataset, discrimination=1, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates parameters in an IRT model with full
-gaussian quadrature
+&lt;pre >&lt;code class="python" >def rasch_full(dataset, discrimination=1, options=None):
+&amp;#34;&amp;#34;&amp;#34; Estimates difficulty parameters in Rash IRT model.
 Args:
 dataset: [items x participants] matrix of True/False Values
 discrimination: scalar of discrimination used in model (default to 1)
-max_iter: maximum number of iterations to run
+options: dictionary with updates to default options
 Returns:
-array of discrimination estimates
+difficulty: (1d array) difficulty estimates
+Options:
+* max_iteration: int
+* distribution: callable
+* quadrature_bounds: (float, float)
+* quadrature_n: int
 &amp;#34;&amp;#34;&amp;#34;
-return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]&lt;/code>&lt;/pre>
+return onepl_full(dataset, alpha=discrimination, options=options)[1]&lt;/code>&lt;/pre>
 &lt;/details>
 &lt;/dd>
 &lt;/dl>
@@ -66,10 +75,10 @@ return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]&lt;/code>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.mml_full_methods.onepl_full" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >onepl_full&lt;/span>&lt;/span>(&lt;span >dataset, alpha=None, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >onepl_full&lt;/span>&lt;/span>(&lt;span >dataset, alpha=None, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates parameters in an 1PL IRT Model&lt;/p>
+&lt;section class="desc" >&lt;p >Estimates parameters in an 1PL IRT Model.&lt;/p>
 &lt;p >This function is slow, please use onepl_mml&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
@@ -77,43 +86,60 @@ return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]&lt;/code>
 &lt;dd >[items x participants] matrix of True/False Values&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >alpha&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >scalar of discrimination used in model (default to 1)&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discrimination&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(float) estimate of test discrimination&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item diffiulties&lt;/dd>
 &lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;li >distribution: callable&lt;/li>
+&lt;li >quadrature_bounds: (float, float)&lt;/li>
+&lt;li >quadrature_n: int&lt;/li>
+&lt;/ul>
 &lt;h2 id="notes" >Notes&lt;/h2>
 &lt;p >If alpha is supplied then this solves a Rasch model&lt;/p>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def onepl_full(dataset, alpha=None, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates parameters in an 1PL IRT Model
+&lt;pre >&lt;code class="python" >def onepl_full(dataset, alpha=None, options=None):
+&amp;#34;&amp;#34;&amp;#34; Estimates parameters in an 1PL IRT Model.
 This function is slow, please use onepl_mml
 Args:
 dataset: [items x participants] matrix of True/False Values
 alpha: scalar of discrimination used in model (default to 1)
-max_iter: maximum number of iterations to run
+options: dictionary with updates to default options
 Returns:
-array of discrimination estimates
+discrimination: (float) estimate of test discrimination
+difficulty: (1d array) estimates of item diffiulties
+Options:
+* max_iteration: int
+* distribution: callable
+* quadrature_bounds: (float, float)
+* quadrature_n: int
 Notes:
 If alpha is supplied then this solves a Rasch model
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
+quad_start, quad_stop = options[&amp;#39;quadrature_bounds&amp;#39;]
+quad_n = options[&amp;#39;quadrature_n&amp;#39;]
 n_items = dataset.shape[0]
 unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
 the_sign = convert_responses_to_kernel_sign(unique_sets)
-theta = _get_quadrature_points(61, -5, 5)
-distribution = stats.norm(0, 1).pdf(theta)
+theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+distribution = options[&amp;#39;distribution&amp;#39;](theta)
 discrimination = np.ones((n_items,))
 difficulty = np.zeros((n_items,))
 def alpha_min_func(alpha_estimate):
 discrimination[:] = alpha_estimate
-for iteration in range(max_iter):
+for iteration in range(options[&amp;#39;max_iteration&amp;#39;]):
 previous_difficulty = difficulty.copy()
 # Quadrature evaluation for values that do not change
 partial_int = _compute_partial_integral(theta, difficulty,
@@ -133,7 +159,7 @@ discrimination[item_ndx, None],
 the_sign[item_ndx, None])
 estimate_int *= partial_int
 otpt = integrate.fixed_quad(
-lambda x: estimate_int, -5, 5, n=61)[0]
+lambda x: estimate_int, quad_start, quad_stop, n=quad_n)[0]
 return -np.log(otpt).dot(counts)
 fminbound(min_local_func, -4, 4)
 # Update the partial integral based on the new found values
@@ -144,7 +170,8 @@ the_sign[item_ndx, None])
 partial_int *= estimate_int
 if(np.abs(previous_difficulty - difficulty).max() &amp;lt; 1e-3):
 break
-cost = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+cost = integrate.fixed_quad(
+lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
 return -np.log(cost).dot(counts)
 if alpha is None: # OnePl Solver
 alpha = fminbound(alpha_min_func, 0.1, 4)
@@ -172,40 +199,62 @@ return alpha, difficulty&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.mml_full_methods.twopl_full" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >twopl_full&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >twopl_full&lt;/span>&lt;/span>(&lt;span >dataset, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates parameters in a 2PL IRT model with marginal likelihood&lt;/p>
+&lt;section class="desc" >&lt;p >Estimates parameters in a 2PL IRT model.&lt;/p>
+&lt;p >Please use twopl_mml instead.&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >[items x participants] matrix of True/False Values&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discrimination&lt;/code>, &lt;code >difficulty&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item discrimination&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item difficulties&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;li >distribution: callable&lt;/li>
+&lt;li >quadrature_bounds: (float, float)&lt;/li>
+&lt;li >quadrature_n: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def twopl_full(dataset, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates parameters in a 2PL IRT model with marginal likelihood
+&lt;pre >&lt;code class="python" >def twopl_full(dataset, options=None):
+&amp;#34;&amp;#34;&amp;#34; Estimates parameters in a 2PL IRT model.
+Please use twopl_mml instead.
 Args:
 dataset: [items x participants] matrix of True/False Values
+options: dictionary with updates to default options
 Returns:
-array of discrimination, difficulty estimates
+discrimination: (1d array) estimates of item discrimination
+difficulty: (1d array) estimates of item difficulties
+Options:
+* max_iteration: int
+* distribution: callable
+* quadrature_bounds: (float, float)
+* quadrature_n: int
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
+quad_start, quad_stop = options[&amp;#39;quadrature_bounds&amp;#39;]
+quad_n = options[&amp;#39;quadrature_n&amp;#39;]
 n_items = dataset.shape[0]
 unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
 the_sign = convert_responses_to_kernel_sign(unique_sets)
-theta = _get_quadrature_points(61, -5, 5)
-distribution = stats.norm(0, 1).pdf(theta)
+theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+distribution = options[&amp;#39;distribution&amp;#39;](theta)
 discrimination = np.ones((n_items,))
 difficulty = np.zeros((n_items,))
-for iteration in range(max_iter):
+for iteration in range(options[&amp;#39;max_iteration&amp;#39;]):
 previous_discrimination = discrimination.copy()
 # Quadrature evaluation for values that do not change
 partial_int = _compute_partial_integral(theta, difficulty,
@@ -226,7 +275,7 @@ discrimination[item_ndx, None],
 the_sign[item_ndx, None])
 estimate_int *= partial_int
 otpt = integrate.fixed_quad(
-lambda x: estimate_int, -5, 5, n=61)[0]
+lambda x: estimate_int, quad_start, quad_stop, n=quad_n)[0]
 return -np.log(otpt).dot(counts)
 # Two parameter solver that doesn&amp;#39;t need derivatives
 initial_guess = np.concatenate((discrimination[item_ndx, None],
@@ -263,7 +312,7 @@ return discrimination, difficulty&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.mml_full_methods.pcm_mml" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >pcm_mml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >pcm_mml&lt;/span>&lt;/span>(&lt;span >dataset, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimate parameters for partial credit model.&lt;/p>
@@ -273,37 +322,52 @@ the partial credit model using marginal maximum likelihood.&lt;/p>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >[n_items, n_participants] 2d array of measured responses&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >(optional) maximum number of iterations to perform&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discrimination&lt;/code> &lt;code >parameters&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >2d&lt;/code> &lt;code >array&lt;/code> of &lt;code >difficulty&lt;/code> &lt;code >parameters&lt;/code>, (&lt;code >NAN&lt;/code> &lt;code >represents&lt;/code> &lt;code >non&lt;/code> &lt;code >response&lt;/code>)&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item discrimination&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) estimates of item difficulties x item thresholds&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;li >distribution: callable&lt;/li>
+&lt;li >quadrature_bounds: (float, float)&lt;/li>
+&lt;li >quadrature_n: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def pcm_mml(dataset, max_iter=25):
+&lt;pre >&lt;code class="python" >def pcm_mml(dataset, options=None):
 &amp;#34;&amp;#34;&amp;#34;Estimate parameters for partial credit model.
 Estimate the discrimination and difficulty parameters for
 the partial credit model using marginal maximum likelihood.
 Args:
 dataset: [n_items, n_participants] 2d array of measured responses
-max_iter: (optional) maximum number of iterations to perform
+options: dictionary with updates to default options
 Returns:
-array of discrimination parameters
-2d array of difficulty parameters, (NAN represents non response)
+discrimination: (1d array) estimates of item discrimination
+difficulty: (2d array) estimates of item difficulties x item thresholds
+Options:
+* max_iteration: int
+* distribution: callable
+* quadrature_bounds: (float, float)
+* quadrature_n: int
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
+quad_start, quad_stop = options[&amp;#39;quadrature_bounds&amp;#39;]
+quad_n = options[&amp;#39;quadrature_n&amp;#39;]
 responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
 _reference=0.0)
 n_items = responses.shape[0]
 # Interpolation Locations
-theta = _get_quadrature_points(61, -5, 5)
-distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
+theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+distribution = options[&amp;#39;distribution&amp;#39;](theta)
 # Initialize difficulty parameters for estimation
 betas = np.full((n_items, item_counts.max()), np.nan)
 discrimination = np.ones((n_items,))
@@ -319,7 +383,7 @@ betas[ndx, 1:item_counts[ndx]] = np.linspace(-1, 1, item_counts[ndx]-1)
 # 3. Integrate of theta
 # 4. minimize and repeat
 #############
-for iteration in range(max_iter):
+for iteration in range(options[&amp;#39;max_iteration&amp;#39;]):
 previous_discrimination = discrimination.copy()
 previous_betas = betas.copy()
 # Quadrature evaluation for values that do not change
@@ -348,7 +412,7 @@ estimate[0],
 responses[item_ndx])
 new_values *= partial_int
 otpt = integrate.fixed_quad(
-lambda x: new_values, -5, 5, n=61)[0]
+lambda x: new_values, quad_start, quad_stop, n=quad_n)[0]
 return -np.log(otpt).sum()
 # Univariate minimization for discrimination parameter
 initial_guess = np.concatenate(([discrimination[item_ndx]],

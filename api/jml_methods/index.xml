@@ -10,7 +10,7 @@
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.jml_methods.rasch_jml" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >rasch_jml&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >rasch_jml&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimates difficulty parameters in an IRT model&lt;/p>
@@ -20,28 +20,34 @@
 &lt;dd >[items x participants] matrix of True/False Values&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >scalar of discrimination used in model (default to 1)&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >difficulty&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item difficulties&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iterations: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def rasch_jml(dataset, discrimination=1, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates difficulty parameters in an IRT model
+&lt;pre >&lt;code class="python" >def rasch_jml(dataset, discrimination=1, options=None):
+&amp;#34;&amp;#34;&amp;#34; Estimates difficulty parameters in an IRT model
 Args:
 dataset: [items x participants] matrix of True/False Values
 discrimination: scalar of discrimination used in model (default to 1)
-max_iter: maximum number of iterations to run
+options: dictionary with updates to default options
 Returns:
-array of difficulty estimates
+difficulty: (1d array) estimates of item difficulties
+Options:
+* max_iterations: int
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
 # Defines item parameter update function
 def _item_min_func(n_items, alphas, thetas,
 betas, the_sign, counts):
@@ -56,7 +62,7 @@ return -np.log(otpt).dot(counts)
 betas[ndx] = fminbound(_beta_min, -6, 6)
 return alphas, betas
 result = _jml_abstract(dataset, _item_min_func,
-discrimination, max_iter)
+discrimination, options[&amp;#39;max_iteration&amp;#39;])
 return result[1]&lt;/code>&lt;/pre>
 &lt;/details>
 &lt;/dd>
@@ -79,35 +85,44 @@ return result[1]&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.jml_methods.onepl_jml" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >onepl_jml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >onepl_jml&lt;/span>&lt;/span>(&lt;span >dataset, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates difficulty and discrimination paramters in 1PL IRT model&lt;/p>
+&lt;section class="desc" >&lt;p >Estimates parameters in an 1PL IRT Model.&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >[items x participants] matrix of True/False Values&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >discrimination&lt;/code>, &lt;code >array&lt;/code> of &lt;code >difficulty&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(float) estimate of test discrimination&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item diffiulties&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def onepl_jml(dataset, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates difficulty and discrimination paramters in 1PL IRT model
+&lt;pre >&lt;code class="python" >def onepl_jml(dataset, options=None):
+&amp;#34;&amp;#34;&amp;#34; Estimates parameters in an 1PL IRT Model.
 Args:
 dataset: [items x participants] matrix of True/False Values
-max_iter: maximum number of iterations to run
+options: dictionary with updates to default options
 Returns:
-discrimination, array of difficulty estimates
+discrimination: (float) estimate of test discrimination
+difficulty: (1d array) estimates of item diffiulties
+Options:
+* max_iteration: int
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
 # Defines item parameter update function
 def _item_min_func(n_items, alphas, thetas,
 betas, the_sign, counts):
@@ -131,7 +146,7 @@ min_alpha = fminbound(_alpha_min, 0.25, 5)
 alphas[:] = min_alpha
 return alphas, betas
 result = _jml_abstract(dataset, _item_min_func, discrimination=1,
-max_iter=max_iter)
+max_iter=options[&amp;#39;max_iteration&amp;#39;])
 return result[0][0], result[1]&lt;/code>&lt;/pre>
 &lt;/details>
 &lt;/dd>
@@ -154,35 +169,44 @@ return result[0][0], result[1]&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.jml_methods.twopl_jml" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >twopl_jml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >twopl_jml&lt;/span>&lt;/span>(&lt;span >dataset, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates difficulty and discrimination paramters in 2PL IRT model&lt;/p>
+&lt;section class="desc" >&lt;p >Estimates parameters in a 2PL IRT model.&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >[items x participants] matrix of True/False Values&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discriminations&lt;/code>, &lt;code >array&lt;/code> of &lt;code >difficulty&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item discrimination&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item difficulties&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def twopl_jml(dataset, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates difficulty and discrimination paramters in 2PL IRT model
+&lt;pre >&lt;code class="python" >def twopl_jml(dataset, options=None):
+&amp;#34;&amp;#34;&amp;#34; Estimates parameters in a 2PL IRT model.
 Args:
 dataset: [items x participants] matrix of True/False Values
-max_iter: maximum number of iterations to run
+options: dictionary with updates to default options
 Returns:
-array of discriminations, array of difficulty estimates
+discrimination: (1d array) estimates of item discrimination
+difficulty: (1d array) estimates of item difficulties
+Options:
+* max_iteration: int
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
 # Defines item parameter update function
 def _item_min_func(n_items, alphas, thetas,
 betas, the_sign, counts):
@@ -198,7 +222,7 @@ bounds=[(0.25, 4), (-6, 6)], disp=False)
 alphas[ndx], betas[ndx] = otpt
 return alphas, betas
 return _jml_abstract(dataset, _item_min_func, discrimination=1,
-max_iter=max_iter)&lt;/code>&lt;/pre>
+max_iter=options[&amp;#39;max_iteration&amp;#39;])&lt;/code>&lt;/pre>
 &lt;/details>
 &lt;/dd>
 &lt;/dl>
@@ -220,44 +244,48 @@ max_iter=max_iter)&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.jml_methods.grm_jml" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >grm_jml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >grm_jml&lt;/span>&lt;/span>(&lt;span >dataset, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates difficulty and discrimination paramaters
-for a graded response two parameter model&lt;/p>
-&lt;p >difficulty parameters are category boundaries and by
-definition must be ordered&lt;/p>
+&lt;section class="desc" >&lt;p >Estimate parameters for graded response model.&lt;/p>
+&lt;p >Estimate the discrimination and difficulty parameters for
+a graded response model using joint maximum likelihood.&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >[items x participants] matrix of ordinal values&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dd >[n_items, n_participants] 2d array of measured responses&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discriminations&lt;/code>,&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >difficulty&lt;/code> &lt;code >estimates&lt;/code> (&lt;code >np.nan&lt;/code> &lt;code >is&lt;/code> &lt;code >a&lt;/code> &lt;code >null&lt;/code> &lt;code >value&lt;/code>)&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimate of item discriminations&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) estimates of item diffiulties by item thresholds&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def grm_jml(dataset, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates difficulty and discrimination paramaters
-for a graded response two parameter model
-difficulty parameters are category boundaries and by
-definition must be ordered
+&lt;pre >&lt;code class="python" >def grm_jml(dataset, options=None):
+&amp;#34;&amp;#34;&amp;#34;Estimate parameters for graded response model.
+Estimate the discrimination and difficulty parameters for
+a graded response model using joint maximum likelihood.
 Args:
-dataset: [items x participants] matrix of ordinal values
-max_iter: maximum number of iterations to run
+dataset: [n_items, n_participants] 2d array of measured responses
+options: dictionary with updates to default options
 Returns:
-array of discriminations,
-array of difficulty estimates (np.nan is a null value)
+discrimination: (1d array) estimate of item discriminations
+difficulty: (2d array) estimates of item diffiulties by item thresholds
+Options:
+* max_iteration: int
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
 responses, item_counts = condition_polytomous_response(dataset)
 n_items, n_takers = responses.shape
 # Set initial parameter estimates to default
@@ -275,7 +303,7 @@ betas[start_ndx:end_ndx] = np.linspace(-1, 1,
 item_counts[ndx] - 1)
 betas_roll = np.roll(betas, -1)
 betas_roll[cumulative_item_counts-1] = 10000
-for iteration in range(max_iter):
+for iteration in range(options[&amp;#39;max_iteration&amp;#39;]):
 previous_betas = betas.copy()
 #####################
 # STEP 1
@@ -354,42 +382,48 @@ return discrimination[start_indices], output_betas&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.jml_methods.pcm_jml" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >pcm_jml&lt;/span>&lt;/span>(&lt;span >dataset, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >pcm_jml&lt;/span>&lt;/span>(&lt;span >dataset, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates difficulty and discrimination paramaters
-for a partial credit response two parameter model&lt;/p>
-&lt;p >difficulty parameters can be disordered&lt;/p>
+&lt;section class="desc" >&lt;p >Estimate parameters for partial credit model.&lt;/p>
+&lt;p >Estimate the discrimination and difficulty parameters for
+the partial credit model using joint maximum likelihood.&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >[items x participants] matrix of ordinal values&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dd >[n_items, n_participants] 2d array of measured responses&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discriminations&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >difficulty&lt;/code> &lt;code >estimates&lt;/code> (&lt;code >np.nan&lt;/code> &lt;code >is&lt;/code> &lt;code >a&lt;/code> &lt;code >null&lt;/code> &lt;code >value&lt;/code>)&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item discrimination&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) estimates of item difficulties x item thresholds&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def pcm_jml(dataset, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates difficulty and discrimination paramaters
-for a partial credit response two parameter model
-difficulty parameters can be disordered
+&lt;pre >&lt;code class="python" >def pcm_jml(dataset, options=None):
+&amp;#34;&amp;#34;&amp;#34;Estimate parameters for partial credit model.
+Estimate the discrimination and difficulty parameters for
+the partial credit model using joint maximum likelihood.
 Args:
-dataset: [items x participants] matrix of ordinal values
-max_iter: maximum number of iterations to run
+dataset: [n_items, n_participants] 2d array of measured responses
+options: dictionary with updates to default options
 Returns:
-array of discriminations
-array of difficulty estimates (np.nan is a null value)
+discrimination: (1d array) estimates of item discrimination
+difficulty: (2d array) estimates of item difficulties x item thresholds
+Options:
+* max_iteration: int
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
 responses, item_counts = condition_polytomous_response(
 dataset, _reference=0.0)
 n_items, n_takers = responses.shape
@@ -402,7 +436,7 @@ scratch = np.zeros((n_items, betas.shape[1] + 1))
 for ndx in range(n_items):
 item_length = item_counts[ndx] - 1
 betas[ndx, :item_length] = np.linspace(-1, 1, item_length)
-for iteration in range(max_iter):
+for iteration in range(options[&amp;#39;max_iteration&amp;#39;]):
 previous_discrimination = discrimination.copy()
 #####################
 # STEP 1

@@ -10,47 +10,50 @@
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.conditional_methods.rasch_conditional" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >rasch_conditional&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1, max_iter=25)&lt;/span>
+&lt;span >def &lt;span class="ident" >rasch_conditional&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates the difficulty parameters in a rasch model&lt;/p>
+&lt;section class="desc" >&lt;p >Estimates the difficulty parameters in a Rasch IRT model&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >[items x participants] matrix of True/False Values&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >scalar of discrimination used in model (default to 1)&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >max_iter&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >maximum number of iterations to run&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discrimination&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimates of item difficulties&lt;/dd>
 &lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >max_iteration: int&lt;/li>
+&lt;/ul>
 &lt;h2 id="notes" >Notes&lt;/h2>
-&lt;p >This uses conditional likelihood and requires setting an
-identifying value,
-this functions requires the mean of the
-difficulty estimates to be zero&lt;/p>&lt;/section>
+&lt;p >This function sets the sum of difficulty parameters to
+zero for identification purposes&lt;/p>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def rasch_conditional(dataset, discrimination=1, max_iter=25):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates the difficulty parameters in a rasch model
+&lt;pre >&lt;code class="python" >def rasch_conditional(dataset, discrimination=1, options=None):
+&amp;#34;&amp;#34;&amp;#34; Estimates the difficulty parameters in a Rasch IRT model
 Args:
 dataset: [items x participants] matrix of True/False Values
 discrimination: scalar of discrimination used in model (default to 1)
-max_iter: maximum number of iterations to run
+options: dictionary with updates to default options
 Returns:
-array of discrimination estimates
+difficulty: (1d array) estimates of item difficulties
+Options:
+* max_iteration: int
 Notes:
-This uses conditional likelihood and requires setting an
-identifying value, this functions requires the mean of the
-difficulty estimates to be zero
+This function sets the sum of difficulty parameters to
+zero for identification purposes
 &amp;#34;&amp;#34;&amp;#34;
+options = validate_estimation_options(options)
 n_items = dataset.shape[0]
 unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
 # Initialize all the difficulty parameters to zeros
@@ -61,7 +64,7 @@ identifying_mean = 0.0
 # Remove the zero and full count values
 unique_sets, counts = trim_response_set_and_counts(unique_sets, counts)
 response_set_sums = unique_sets.sum(axis=0)
-for iteration in range(max_iter):
+for iteration in range(options[&amp;#39;max_iteration&amp;#39;]):
 previous_betas = betas.copy()
 for ndx in range(n_items):
 partial_conv = _symmetric_functions(np.delete(betas, ndx))

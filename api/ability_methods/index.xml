@@ -33,8 +33,8 @@ defaults to numpy.nan, if a number is used then
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >estimated&lt;/code> &lt;code >abilities&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >abilities&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimated abilities&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
@@ -53,7 +53,7 @@ no_estimate: value to use for response sets that cannot be estimated
 defaults to numpy.nan, if a number is used then
 -no_estimate -&amp;gt; 0 and no_estimate -&amp;gt; 1
 Returns:
-1d array of estimated abilities
+abilities: (1d array) estimated abilities
 &amp;#34;&amp;#34;&amp;#34;
 # Locations where endorsement isn&amp;#39;t constant
 mask = np.nanvar(dataset, axis=0) &amp;gt; 0
@@ -61,7 +61,7 @@ mask = np.nanvar(dataset, axis=0) &amp;gt; 0
 valid_dataset = dataset[:, mask]
 # Call MAP with uniform distribution
 trimmed_theta = ability_map(valid_dataset, difficulty, discrimination,
-uniform(-7, 14).pdf)
+{&amp;#39;distribution&amp;#39;: uniform(-7, 14).pdf})
 # Replace no_estimate values
 thetas = np.full((dataset.shape[1],), np.abs(no_estimate), dtype=&amp;#39;float&amp;#39;)
 thetas[mask] = trimmed_theta
@@ -90,7 +90,7 @@ return thetas&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.ability_methods.ability_map" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >ability_map&lt;/span>&lt;/span>(&lt;span >dataset, difficulty, discrimination, distribution=None)&lt;/span>
+&lt;span >def &lt;span class="ident" >ability_map&lt;/span>&lt;/span>(&lt;span >dataset, difficulty, discrimination, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimates the abilities for dichotomous models.&lt;/p>
@@ -104,24 +104,28 @@ maximum a posterior likelihood estimation.&lt;/p>
 &lt;dd >(1d Array) of difficulty parameters for each item&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >(1d Array) of disrimination parameters for each item&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >distribution&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >function handle to PDF of ability distribution, p = f(theta)
-the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >estimated&lt;/code> &lt;code >abilities&lt;/code>&lt;/dt>
+&lt;dt >&lt;strong >&lt;code >abilities&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimated abilities&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >distribution&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >&amp;nbsp;&lt;/dd>
 &lt;/dl>
 &lt;h2 id="notes" >Notes&lt;/h2>
-&lt;p >If distribution is uniform, MAP is equivalent to MLE. A large set of
-probability distributions can be found in scipy.stats
+&lt;p >If distribution is uniform, please use ability_mle instead. A large set
+of probability distributions can be found in scipy.stats
 &lt;a href="https://docs.scipy.org/doc/scipy/reference/stats.html" >https://docs.scipy.org/doc/scipy/reference/stats.html&lt;/a>&lt;/p>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def ability_map(dataset, difficulty, discrimination, distribution=None):
+&lt;pre >&lt;code class="python" >def ability_map(dataset, difficulty, discrimination, options=None):
 &amp;#34;&amp;#34;&amp;#34;Estimates the abilities for dichotomous models.
 Estimates the ability parameters (theta) for dichotomous models via
 maximum a posterior likelihood estimation.
@@ -129,20 +133,21 @@ Args:
 dataset: [n_items, n_participants] (2d Array) of measured responses
 difficulty: (1d Array) of difficulty parameters for each item
 discrimination: (1d Array) of disrimination parameters for each item
-distribution: function handle to PDF of ability distribution, p = f(theta)
-the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)
+options: dictionary with updates to default options
 Returns:
-1d array of estimated abilities
+abilities: (1d array) estimated abilities
+Options:
+distribution:
 Notes:
-If distribution is uniform, MAP is equivalent to MLE. A large set of
-probability distributions can be found in scipy.stats
+If distribution is uniform, please use ability_mle instead. A large set
+of probability distributions can be found in scipy.stats
 https://docs.scipy.org/doc/scipy/reference/stats.html
 &amp;#34;&amp;#34;&amp;#34;
-if distribution is None:
-distribution = gaussian(0, 1).pdf
-discrimination = np.atleast_1d(discrimination)
-if discrimination.size == 1:
-discrimination = np.full(dataset.shape[0], discrimination)
+options = validate_estimation_options(options)
+distribution = options[&amp;#39;distribution&amp;#39;]
+if np.atleast_1d(discrimination).size == 1:
+discrimination = np.full(dataset.shape[0], discrimination,
+dtype=&amp;#34;float&amp;#34;)
 n_takers = dataset.shape[1]
 the_sign = convert_responses_to_kernel_sign(dataset)
 thetas = np.zeros((n_takers,))
@@ -176,7 +181,7 @@ return thetas&lt;/code>&lt;/pre>
 &lt;section >
 &lt;dl >
 &lt;dt id="girth.ability_methods.ability_eap" >&lt;code class="name flex" >
-&lt;span >def &lt;span class="ident" >ability_eap&lt;/span>&lt;/span>(&lt;span >dataset, difficulty, discrimination, distribution=None)&lt;/span>
+&lt;span >def &lt;span class="ident" >ability_eap&lt;/span>&lt;/span>(&lt;span >dataset, difficulty, discrimination, options=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Estimates the abilities for dichotomous models.&lt;/p>
@@ -190,20 +195,25 @@ expaected a posterior likelihood estimation.&lt;/p>
 &lt;dd >(1d Array) of difficulty parameters for each item&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >(1d Array) of disrimination parameters for each item&lt;/dd>
-&lt;dt >&lt;strong >&lt;code >distribution&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >function handle to PDF of ability distribution, p = f(theta)
-the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >options&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >dictionary with updates to default options&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >estimated&lt;/code> &lt;code >abilities&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;/dl>&lt;/section>
+&lt;dt >&lt;strong >&lt;code >abilities&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) estimated abilities&lt;/dd>
+&lt;/dl>
+&lt;h2 id="options" >Options&lt;/h2>
+&lt;ul >
+&lt;li >distribution: callable&lt;/li>
+&lt;li >quadrature_bounds: (float, float)&lt;/li>
+&lt;li >quadrature_n: int&lt;/li>
+&lt;/ul>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
-&lt;pre >&lt;code class="python" >def ability_eap(dataset, difficulty, discrimination, distribution=None):
+&lt;pre >&lt;code class="python" >def ability_eap(dataset, difficulty, discrimination, options=None):
 &amp;#34;&amp;#34;&amp;#34;Estimates the abilities for dichotomous models.
 Estimates the ability parameters (theta) for dichotomous models via
 expaected a posterior likelihood estimation.
@@ -211,27 +221,33 @@ Args:
 dataset: [n_items, n_participants] (2d Array) of measured responses
 difficulty: (1d Array) of difficulty parameters for each item
 discrimination: (1d Array) of disrimination parameters for each item
-distribution: function handle to PDF of ability distribution, p = f(theta)
-the default is gaussian (i.e: scipy.stats.norm(0, 1).pdf)
+options: dictionary with updates to default options
 Returns:
-1d array of estimated abilities
+abilities: (1d array) estimated abilities
+Options:
+* distribution: callable
+* quadrature_bounds: (float, float)
+* quadrature_n: int
 &amp;#34;&amp;#34;&amp;#34;
-if distribution is None:
-distribution = gaussian(0, 1).pdf
-discrimination = np.atleast_1d(discrimination)
-if discrimination.size == 1:
-discrimination = np.full(dataset.shape[0], discrimination)
+options = validate_estimation_options(options)
+quad_start, quad_stop = options[&amp;#39;quadrature_bounds&amp;#39;]
+quad_n = options[&amp;#39;quadrature_n&amp;#39;]
+if np.atleast_1d(discrimination).size == 1:
+discrimination = np.full(dataset.shape[0], discrimination,
+dtype=&amp;#39;float&amp;#39;)
 the_sign = convert_responses_to_kernel_sign(dataset)
-theta = _get_quadrature_points(61, -5, 5)
+theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
 partial_int = _compute_partial_integral(
 theta, difficulty, discrimination, the_sign)
 # Weight by the input ability distribution
-partial_int *= distribution(theta)
+partial_int *= options[&amp;#39;distribution&amp;#39;](theta)
 # Compute the denominator
-denominator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+denominator = integrate.fixed_quad(
+lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
 # compute the numerator
 partial_int *= theta
-numerator = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+numerator = integrate.fixed_quad(
+lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
 return numerator / denominator&lt;/code>&lt;/pre>
 &lt;/details>
 &lt;/dd>

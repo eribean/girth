@@ -11,7 +11,9 @@
 <a class="td-sidebar-link td-sidebar-link__page" id=m-girthapimml_methodsgrm_mml href=/girth/api/mml_methods/grm_mml/>grm_mml</a></li></ul></ul><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/girth/api/mml_full_methods/ class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Legacy Marginal Likelihood</a></li><ul><li class=collapse id=girthapimml_full_methods><a class="td-sidebar-link td-sidebar-link__page" id=m-girthapimml_full_methodsrasch_full href=/girth/api/mml_full_methods/rasch_full/>rasch_full</a>
 <a class="td-sidebar-link td-sidebar-link__page" id=m-girthapimml_full_methodsonepl_full href=/girth/api/mml_full_methods/onepl_full/>onepl_full</a>
 <a class="td-sidebar-link td-sidebar-link__page" id=m-girthapimml_full_methodstwopl_full href=/girth/api/mml_full_methods/twopl_full/>twopl_full</a>
-<a class="td-sidebar-link td-sidebar-link__page" id=m-girthapimml_full_methodspcm_mml href=/girth/api/mml_full_methods/pcm_mml/>pcm_mml</a></li></ul></ul><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/girth/api/polytomous_utils/ class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Polytomous Utils</a></li><ul><li class=collapse id=girthapipolytomous_utils><a class="td-sidebar-link td-sidebar-link__page" id=m-girthapipolytomous_utilscondition_polytomous_response href=/girth/api/polytomous_utils/condition_polytomous_response/>condition_polytomous_response</a></li></ul></ul><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/girth/api/utils/ class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Utilities</a></li><ul><li class=collapse id=girthapiutils><a class="td-sidebar-link td-sidebar-link__page" id=m-girthapiutilsget_true_false_counts href=/girth/api/utils/get_true_false_counts/>get_true_false_counts</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-girthapimml_full_methodspcm_mml href=/girth/api/mml_full_methods/pcm_mml/>pcm_mml</a></li></ul></ul><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/girth/api/polytomous_utils/ class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Polytomous Utils</a></li><ul><li class=collapse id=girthapipolytomous_utils><a class="td-sidebar-link td-sidebar-link__page" id=m-girthapipolytomous_utilscondition_polytomous_response href=/girth/api/polytomous_utils/condition_polytomous_response/>condition_polytomous_response</a></li></ul></ul><ul class="td-sidebar-nav__section pr-md-3"><li class=td-sidebar-nav__section-title><a href=/girth/api/utils/ class="align-left pl-0 pr-2 collapsed td-sidebar-link td-sidebar-link__section">Utilities</a></li><ul><li class=collapse id=girthapiutils><a class="td-sidebar-link td-sidebar-link__page" id=m-girthapiutilsdefault_options href=/girth/api/utils/default_options/>default_options</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-girthapiutilsvalidate_estimation_options href=/girth/api/utils/validate_estimation_options/>validate_estimation_options</a>
+<a class="td-sidebar-link td-sidebar-link__page" id=m-girthapiutilsget_true_false_counts href=/girth/api/utils/get_true_false_counts/>get_true_false_counts</a>
 <a class="td-sidebar-link td-sidebar-link__page" id=m-girthapiutilsmml_approx href=/girth/api/utils/mml_approx/>mml_approx</a>
 <a class="td-sidebar-link td-sidebar-link__page" id=m-girthapiutilsconvert_responses_to_kernel_sign href=/girth/api/utils/convert_responses_to_kernel_sign/>convert_responses_to_kernel_sign</a>
 <a class="td-sidebar-link td-sidebar-link__page" id=m-girthapiutilstrim_response_set_and_counts href=/girth/api/utils/trim_response_set_and_counts/>trim_response_set_and_counts</a>
@@ -24,7 +26,7 @@ maximum likelihood estimation.
 Response sets with no variance are trimmed
 from evaluation</p><h2 id=args>Args</h2><dl><dt><strong><code>dataset</code></strong></dt><dd>[n_items, n_participants] (2d Array) of measured responses</dd><dt><strong><code>difficulty</code></strong></dt><dd>(1d Array) of difficulty parameters for each item</dd><dt><strong><code>discrimination</code></strong></dt><dd>(1d Array) of disrimination parameters for each item</dd><dt><strong><code>no_estimate</code></strong></dt><dd>value to use for response sets that cannot be estimated
 defaults to numpy.nan, if a number is used then
--no_estimate -> 0 and no_estimate -> 1</dd></dl><h2 id=returns>Returns</h2><dl><dt><code>1d</code> <code>array</code> of <code>estimated</code> <code>abilities</code></dt><dd>&nbsp;</dd></dl></section><details class=source><summary><span>Expand source code</span></summary><pre><code class=python>def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
+-no_estimate -> 0 and no_estimate -> 1</dd></dl><h2 id=returns>Returns</h2><dl><dt><strong><code>abilities</code></strong></dt><dd>(1d array) estimated abilities</dd></dl></section><details class=source><summary><span>Expand source code</span></summary><pre><code class=python>def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
     &#34;&#34;&#34;Estimates the abilities for dichotomous models.
 
     Estimates the ability parameters (theta) for dichotomous models via
@@ -40,7 +42,7 @@ defaults to numpy.nan, if a number is used then
                      -no_estimate -&gt; 0 and no_estimate -&gt; 1
 
     Returns:
-        1d array of estimated abilities
+        abilities: (1d array) estimated abilities
     &#34;&#34;&#34;
     # Locations where endorsement isn&#39;t constant
     mask = np.nanvar(dataset, axis=0) &gt; 0
@@ -50,7 +52,7 @@ defaults to numpy.nan, if a number is used then
 
     # Call MAP with uniform distribution
     trimmed_theta = ability_map(valid_dataset, difficulty, discrimination,
-                                uniform(-7, 14).pdf)
+                                {&#39;distribution&#39;: uniform(-7, 14).pdf})
 
     # Replace no_estimate values
     thetas = np.full((dataset.shape[1],), np.abs(no_estimate), dtype=&#39;float&#39;)

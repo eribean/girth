@@ -3,14 +3,15 @@ import unittest  # pylint: disable=cyclic-import
 
 import numpy as np
 from scipy.special import roots_legendre
-from scipy import integrate
+from scipy import integrate, stats
 
 from girth import (create_synthetic_irt_dichotomous,
                    irt_evaluation, trim_response_set_and_counts,
-                   convert_responses_to_kernel_sign)
-from girth import (condition_polytomous_response, get_true_false_counts,
-                   mml_approx)
-from girth.utils import _get_quadrature_points, _compute_partial_integral
+                   convert_responses_to_kernel_sign, 
+                   validate_estimation_options,condition_polytomous_response, 
+                   get_true_false_counts, mml_approx)
+from girth.utils import (_get_quadrature_points, _compute_partial_integral, 
+                         default_options)
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral)
 
@@ -318,6 +319,101 @@ class TestPolytomousUtilities(unittest.TestCase):
                                           response_set)
 
         np.testing.assert_array_almost_equal(result, expected)
+
+
+class TestOptions(unittest.TestCase):
+    """Tests default options."""
+
+    def test_default_creation(self):
+        """Testing the default options."""
+        output = default_options()
+        x = np.linspace(-3, 3, 101)
+        expected = stats.norm(0, 1).pdf(x)
+
+        self.assertEqual(output['max_iteration'], 25)
+        self.assertEqual(output['quadrature_n'], 61)
+        self.assertTupleEqual(output['quadrature_bounds'], (-5, 5))
+        result = output['distribution'](x)
+        np.testing.assert_array_almost_equal(expected, 
+                                             result, decimal=6)
+        self.assertEqual(len(output.keys()), 4)
+
+    def test_no_input(self):
+        """Testing validation for No input."""
+        result = validate_estimation_options(None)
+        x = np.linspace(-3, 3, 101)
+        expected = stats.norm(0, 1).pdf(x)
+
+        self.assertEqual(len(result.keys()), 4)
+        self.assertEqual(result['max_iteration'], 25)
+        self.assertEqual(result['quadrature_n'], 61)
+        self.assertTupleEqual(result['quadrature_bounds'], (-5, 5))
+        result = result['distribution'](x)
+        np.testing.assert_array_almost_equal(expected, 
+                                             result, decimal=6)
+
+    def test_warnings(self):
+        """Testing validation when inputs are bad."""
+        test = {'Bad Key': "Come at me Bro"}
+        with self.assertRaises(KeyError):
+            validate_estimation_options(test)
+        
+        test = [21.0]
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+        test = {'max_iteration': 12.0}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+        test = {'max_iteration': -2}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+        test = {'distribution': stats.norm(0, 1)}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+        test = {'quadrature_bounds': 4.3}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+        test = {'quadrature_bounds': (4, -3)}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+        test = {'quadrature_n': 12.2}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+        test = {'quadrature_bounds': 2}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
+    def test_population_update(self):
+        """Testing update to options."""
+        x = np.linspace(-3, 3, 101)
+        expected = stats.norm(2, 1).pdf(x)
+
+        new_parameters = {'distribution': stats.norm(2, 1).pdf}
+        output = validate_estimation_options(new_parameters)
+        self.assertEqual(len(output.keys()), 4)
+        result = output['distribution'](x)
+        np.testing.assert_array_almost_equal(expected, 
+                                            result, decimal=6) 
+
+        new_parameters = {'quadrature_bounds': (-7, -5),
+                          'quadrature_n': 13}
+        output = validate_estimation_options(new_parameters)
+        self.assertEqual(output['max_iteration'], 25)
+        self.assertEqual(output['quadrature_n'], 13)
+        self.assertTupleEqual(output['quadrature_bounds'], (-7, -5))
+        self.assertEqual(len(output.keys()), 4)
+
+        new_parameters = {'max_iteration': 43}
+        output = validate_estimation_options(new_parameters)
+        self.assertEqual(output['max_iteration'], 43)
+        self.assertEqual(len(output.keys()), 4)
 
 
 if __name__ == '__main__':

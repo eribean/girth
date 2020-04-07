@@ -45,7 +45,7 @@ def validate_estimation_options(options_dict=None):
     full_options = default_options()
     
     if options_dict:
-        if type(options_dict) is not dict:
+        if not isinstance(options_dict, dict):
             raise AssertionError("Options must be a dictionary got: "
                                 f"{type(options_dict)}.")
 

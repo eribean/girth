@@ -40,6 +40,7 @@ def rasch_conditional(dataset, discrimination=1, options=None):
             This function sets the sum of difficulty parameters to 
             zero for identification purposes
     """
+    options = validate_estimation_options(options)
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
 

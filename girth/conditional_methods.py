@@ -2,7 +2,8 @@ import numpy as np
 
 from scipy.optimize import fminbound
 
-from girth import trim_response_set_and_counts
+from girth import (trim_response_set_and_counts,
+                   validate_estimation_options)
 
 
 def _symmetric_functions(betas):
@@ -21,7 +22,7 @@ def _symmetric_functions(betas):
     return otpt
 
 
-def rasch_conditional(dataset, discrimination=1, max_iter=25):
+def rasch_conditional(dataset, discrimination=1, options=None):
     """ Estimates the difficulty parameters in a Rasch IRT model
 
         Args:
@@ -53,7 +54,7 @@ def rasch_conditional(dataset, discrimination=1, max_iter=25):
 
     response_set_sums = unique_sets.sum(axis=0)
 
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_betas = betas.copy()
 
         for ndx in range(n_items):

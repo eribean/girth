@@ -225,14 +225,12 @@ def grm_mml(dataset, options=None):
     quad_start, quad_stop = options['quadrature_bounds']
     quad_n = options['quadrature_n']
 
-    responses, item_counts = condition_polytomous_response(
-        dataset, trim_ends=False)
+    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False)
     n_items = responses.shape[0]
 
     # Interpolation Locations
     theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
-    ones_distribution = np.ones_like(distribution)
 
     # Compute the values needed for integral equations
     integral_counts = list()
@@ -269,8 +267,8 @@ def grm_mml(dataset, options=None):
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         partial_int = _graded_partial_integral(theta, betas, betas_roll,
-                                               discrimination, responses,
-                                               distribution)
+                                               discrimination, responses)
+        partial_int *= distribution
 
         for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
@@ -282,8 +280,7 @@ def grm_mml(dataset, options=None):
             old_values = _graded_partial_integral(theta, previous_betas,
                                                   previous_betas_roll,
                                                   previous_discrimination,
-                                                  responses[item_ndx][None, :],
-                                                  ones_distribution)
+                                                  responses[item_ndx][None, :])
             partial_int /= old_values
 
             def _local_min_func(estimate):
@@ -298,8 +295,7 @@ def grm_mml(dataset, options=None):
 
                 new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                       discrimination,
-                                                      responses[item_ndx][None, :],
-                                                      ones_distribution)
+                                                      responses[item_ndx][None, :])
 
                 new_values *= partial_int
                 otpt = integrate.fixed_quad(
@@ -312,8 +308,7 @@ def grm_mml(dataset, options=None):
 
             new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                   discrimination,
-                                                  responses[item_ndx][None, :],
-                                                  ones_distribution)
+                                                  responses[item_ndx][None, :])
 
             partial_int *= new_values
 

@@ -22,21 +22,22 @@ def _symmetric_functions(betas):
 
 
 def rasch_conditional(dataset, discrimination=1, max_iter=25):
-    """
-        Estimates the difficulty parameters in a rasch model
+    """ Estimates the difficulty parameters in a Rasch IRT model
 
         Args:
             dataset: [items x participants] matrix of True/False Values
             discrimination: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
+            options: dictionary of overriding parameters
 
         Returns:
-            array of discrimination estimates
+            difficulty: (1d array) estimates of item difficulties
+
+        Options:
+            max_iteration:
 
         Notes:
-            This uses conditional likelihood and requires setting an
-            identifying value,  this functions requires the mean of the
-            difficulty estimates to be zero
+            This function sets the sum of difficulty parameters to 
+            zero for identification purposes
     """
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)

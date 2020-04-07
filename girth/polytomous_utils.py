@@ -64,14 +64,13 @@ def _solve_for_constants(item_responses):
     
 
 def _graded_partial_integral(theta, betas, betas_roll,
-                             discrimination, responses,
-                             distribution):
+                             discrimination, responses):
     """Computes the partial integral for the graded response."""
     graded_prob = (irt_evaluation(betas, discrimination, theta) - 
                    irt_evaluation(betas_roll, discrimination, theta))
 
     #TODO: Potential chunking for memory limited systems    
-    return distribution[None, :] * graded_prob[responses, :].prod(axis=0)
+    return graded_prob[responses, :].prod(axis=0)
 
 
 def _solve_integral_equations(discrimination, ratio, distribution, theta):

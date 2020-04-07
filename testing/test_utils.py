@@ -272,14 +272,13 @@ class TestPolytomousUtilities(unittest.TestCase):
     def test_graded_partial_integral(self):
         """Testing the partial integral in the graded model."""
         theta = _get_quadrature_points(61, -5, 5)
-        distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
         responses = np.random.randint(0, 3, (10, 100))
         betas = np.array([-10000, -.3, 0.1, 1.2])
         betas_roll = np.roll(betas, -1)
         betas_roll[-1] = 10000
 
         output = _graded_partial_integral(theta, betas, betas_roll,
-                                          1.0, responses, distribution)
+                                          1.0, responses)
 
         # Compare to hand calculations
         hand_calc = list()
@@ -291,7 +290,6 @@ class TestPolytomousUtilities(unittest.TestCase):
             hand_calc.append(probability.prod(0))
 
         hand_calc = np.asarray(hand_calc)
-        hand_calc *= distribution
 
         np.testing.assert_array_equal(hand_calc, output)
 

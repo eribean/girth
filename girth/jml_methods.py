@@ -199,22 +199,25 @@ def _jml_inequality(test):
     return np.concatenate(([1, 1], np.diff(test)[1:]))
 
 
-def grm_jml(dataset, max_iter=25):
+def grm_jml(dataset, options=None):
+    """Estimate parameters for graded response model.
+
+    Estimate the discrimination and difficulty parameters for
+    a graded response model using joint maximum likelihood.
+
+    Args:
+        dataset: [n_items, n_participants] 2d array of measured responses
+        options: dictionary of overriding parameters
+
+    Returns:
+        discrimination: (1d array) estimate of item discriminations
+        difficulty: (2d array) estimates of item diffiulties by item thresholds
+
+    Options:
+        max_iteration:
     """
-        Estimates difficulty and discrimination paramaters
-        for a graded response two parameter model
+    options = validate_estimation_options(options)
 
-        difficulty parameters are category boundaries and by
-        definition must be ordered
-
-        Args:
-            dataset: [items x participants] matrix of ordinal values
-            max_iter: maximum number of iterations to run
-
-        Returns:
-            array of discriminations, 
-            array of difficulty estimates (np.nan is a null value)
-    """
     responses, item_counts = condition_polytomous_response(dataset)
     n_items, n_takers = responses.shape
 
@@ -236,7 +239,7 @@ def grm_jml(dataset, max_iter=25):
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = 10000
 
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_betas = betas.copy()
 
         #####################
@@ -308,21 +311,25 @@ def grm_jml(dataset, max_iter=25):
     return discrimination[start_indices], output_betas
 
 
-def pcm_jml(dataset, max_iter=25):
+def pcm_jml(dataset, options=None):
+    """Estimate parameters for partial credit model.
+
+    Estimate the discrimination and difficulty parameters for
+    the partial credit model using joint maximum likelihood.
+
+    Args:
+        dataset: [n_items, n_participants] 2d array of measured responses
+        options: dictionary of overriding parameters
+
+    Returns:
+        discrimination: (1d array) estimates of item discrimination
+        difficulty: (2d array) estimates of item difficulties x item thresholds
+
+    Options:
+        max_iteration:
     """
-        Estimates difficulty and discrimination paramaters
-        for a partial credit response two parameter model
+    options = validate_estimation_options(options)
 
-        difficulty parameters can be disordered
-
-        Args:
-            dataset: [items x participants] matrix of ordinal values
-            max_iter: maximum number of iterations to run
-
-        Returns:
-            array of discriminations
-            array of difficulty estimates (np.nan is a null value)
-    """
     responses, item_counts = condition_polytomous_response(
         dataset, _reference=0.0)
     n_items, n_takers = responses.shape
@@ -339,7 +346,7 @@ def pcm_jml(dataset, max_iter=25):
         item_length = item_counts[ndx] - 1
         betas[ndx, :item_length] = np.linspace(-1, 1, item_length)
 
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
 
         #####################

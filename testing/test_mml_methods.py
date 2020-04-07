@@ -3,11 +3,11 @@ import unittest  # pylint: disable=cyclic-import
 import numpy as np
 
 from girth import create_synthetic_irt_dichotomous
-from girth import rasch_separate, onepl_separate, twopl_separate
+from girth import rasch_mml, onepl_mml, twopl_mml
 from girth import rasch_full, onepl_full, twopl_full
 
 from girth import create_synthetic_irt_polytomous
-from girth import grm_separate, pcm_full
+from girth import grm_mml, pcm_mml
 
 
 class TestMMLRaschMethods(unittest.TestCase):
@@ -27,10 +27,10 @@ class TestMMLRaschMethods(unittest.TestCase):
         self.data = syn_data
         self.discrimination = discrimination
 
-    def test_rasch_regression_separate(self):
+    def test_rasch_regression_mml(self):
         """Testing rasch separate methods."""
         syn_data = self.data.copy()
-        output = rasch_separate(syn_data, self.discrimination)
+        output = rasch_mml(syn_data, self.discrimination)
         expected_output = np.array([-1.32474732, -0.81461152, -0.08222081,  
                                     0.6586734, 1.47055251])
 
@@ -54,7 +54,7 @@ class TestMMLRaschMethods(unittest.TestCase):
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
                                                     thetas)
 
-        output = rasch_separate(syn_data, discrimination)
+        output = rasch_mml(syn_data, discrimination)
         np.testing.assert_array_almost_equal(difficulty, output, decimal=1)
 
 
@@ -75,10 +75,10 @@ class TestMMLOnePLMethods(unittest.TestCase):
         self.data = syn_data
         self.discrimination = discrimination
 
-    def test_onepl_regression_separate(self):
+    def test_onepl_regression_mml(self):
         """Testing onepl separate methods."""
         syn_data = self.data.copy()
-        output = onepl_separate(syn_data)
+        output = onepl_mml(syn_data)
         expected_output = np.array([-1.37650899, -0.64900501, -0.03933423,  
                                      0.77918774,  1.38618528])
 
@@ -104,7 +104,7 @@ class TestMMLOnePLMethods(unittest.TestCase):
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
                                                     thetas)
 
-        output = onepl_separate(syn_data)
+        output = onepl_mml(syn_data)
         self.assertLess(np.abs(output[0] - discrimination).max(), 0.1)
         self.assertLess(np.abs(output[1] - difficulty).max(), 0.2)
 
@@ -126,10 +126,10 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         self.data = syn_data
         self.discrimination = discrimination
 
-    def test_twopl_regression_separate(self):
+    def test_twopl_regression_mml(self):
         """Testing twopl separate methods."""
         syn_data = self.data.copy()
-        output = twopl_separate(syn_data)
+        output = twopl_mml(syn_data)
 
         expected_discrimination = np.array([0.99981316, 1.86369226, 1.35526711, 
                                             0.52935723, 0.90899136])
@@ -163,7 +163,7 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
                                                     thetas)
 
-        output = twopl_separate(syn_data)
+        output = twopl_mml(syn_data)
         self.assertLess(np.abs(output[0] - discrimination).mean(), 0.1)
         self.assertLess(np.abs(output[1] - difficulty).mean(), 0.1)
 
@@ -180,7 +180,7 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
                                                    thetas)
 
-        estimated_parameters = grm_separate(syn_data)
+        estimated_parameters = grm_mml(syn_data)
 
         # Regression test
         expected_discrimination = np.array([0.58291387, 1.38349382, 0.87993092,
@@ -209,7 +209,7 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
                                                    thetas)
 
-        estimated_parameters = grm_separate(syn_data)
+        estimated_parameters = grm_mml(syn_data)
 
         # Regression test
         expected_discrimination = np.array([1.72485717, 0.39305266, 0.82841429,
@@ -238,7 +238,7 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
                                                    thetas)
 
-        estimated_parameters = grm_separate(syn_data)
+        estimated_parameters = grm_mml(syn_data)
 
         rmse = np.sqrt(
             np.square(estimated_parameters[0] - discrimination).mean())
@@ -282,8 +282,8 @@ class TestMMLPartialCreditModel(unittest.TestCase):
 
     def test_pcm_gets_better(self):
         """Testing mml partial credit model improves with parameters."""
-        output_smol = pcm_full(self.syn_data_smol)
-        output_large = pcm_full(self.syn_data_larg)
+        output_smol = pcm_mml(self.syn_data_smol)
+        output_large = pcm_mml(self.syn_data_larg)
 
         def rmse(expected, result):
             return np.sqrt(np.nanmean(np.square(expected - result)))
@@ -352,7 +352,7 @@ class TestMMLPartialCreditModel(unittest.TestCase):
                                    1.30479874, 0.49527629, 1.01702145, 0.86596228,
                                    1.1954911, 0.51227604])
 
-        output = pcm_full(syn_data)
+        output = pcm_mml(syn_data)
         np.testing.assert_array_almost_equal(
             expected_diff, output[1], decimal=5)
         np.testing.assert_array_almost_equal(

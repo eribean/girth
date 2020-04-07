@@ -9,7 +9,7 @@ from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constan
                                     _solve_integral_equations)
 
 
-def _separate_abstract(difficulty, scalar, discrimination,
+def _mml_abstract(difficulty, scalar, discrimination,
                        theta, distribution):
     """ Abstraction of base functionality in separable
         mml estimation methods.
@@ -34,7 +34,7 @@ def _separate_abstract(difficulty, scalar, discrimination,
     return difficulty
 
 
-def rasch_separate(dataset, discrimination=1):
+def rasch_mml(dataset, discrimination=1):
     """
         Estimates parameters in an IRT model with full
         gaussian quadrature
@@ -46,10 +46,10 @@ def rasch_separate(dataset, discrimination=1):
         Returns:
             array of discrimination estimates
     """
-    return onepl_separate(dataset, alpha=discrimination)[1]
+    return onepl_mml(dataset, alpha=discrimination)[1]
 
 
-def onepl_separate(dataset, alpha=None):
+def onepl_mml(dataset, alpha=None):
     """
         Estimates the difficulty and single discrimination parameter
 
@@ -80,7 +80,7 @@ def onepl_separate(dataset, alpha=None):
     # Inline definition of cost function to minimize
     def min_func(estimate):
         discrimination[:] = estimate
-        _separate_abstract(difficulty, scalar, discrimination,
+        _mml_abstract(difficulty, scalar, discrimination,
                            theta, distribution)
 
         partial_int = _compute_partial_integral(theta, difficulty,
@@ -101,7 +101,7 @@ def onepl_separate(dataset, alpha=None):
     return alpha, difficulty
 
 
-def twopl_separate(dataset, max_iter=25):
+def twopl_mml(dataset, max_iter=25):
     """
         Estimates the difficulty and discrimination parameters
 
@@ -149,7 +149,7 @@ def twopl_separate(dataset, max_iter=25):
 
             def min_func_local(estimate):
                 discrimination[ndx] = estimate
-                _separate_abstract(difficulty[ndx, None], scalar[ndx, None],
+                _mml_abstract(difficulty[ndx, None], scalar[ndx, None],
                                    discrimination[ndx, None], theta, distribution)
                 estimate_int = _compute_partial_integral(theta, difficulty[ndx, None],
                                                          discrimination[ndx, None],
@@ -176,7 +176,7 @@ def twopl_separate(dataset, max_iter=25):
     return discrimination, difficulty
 
 
-def grm_separate(dataset, max_iter=25):
+def grm_mml(dataset, max_iter=25):
     """Estimate parameters for graded response model.
 
     Estimate the discrimination and difficulty parameters for

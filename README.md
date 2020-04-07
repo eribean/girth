@@ -56,7 +56,7 @@ python setup.py install --prefix=path/to/your/installation
 import numpy as np
 
 from girth import create_synthetic_irt_dichotomous
-from girth import twopl_separate
+from girth import twopl_mml
 
 # Create Synthetic Data
 difficuly = np.linspace(-2.5, 2.5, 10)
@@ -66,7 +66,7 @@ theta = np.random.randn(500)
 syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination, theta)
 
 # Solve for parameters
-estimates = twopl_separate(syn_data)
+estimates = twopl_mml(syn_data)
 
 # Unpack estimates
 discrimination_estimates = estimates[0]

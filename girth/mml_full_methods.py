@@ -28,7 +28,7 @@ def onepl_full(dataset, alpha=None, max_iter=25):
     """
         Estimates parameters in an 1PL IRT Model
 
-        This function is slow, please use onepl_separate
+        This function is slow, please use onepl_mml
 
         Args:
             dataset: [items x participants] matrix of True/False Values
@@ -179,7 +179,7 @@ def twopl_full(dataset, max_iter=25):
     return discrimination, difficulty
 
 
-def pcm_full(dataset, max_iter=25):
+def pcm_mml(dataset, max_iter=25):
     """Estimate parameters for partial credit model.
 
     Estimate the discrimination and difficulty parameters for

@@ -24,9 +24,9 @@
     },
     "Synthesis": 
     {
-        "TwoPL_Separate":
+        "TwoPL_MML":
         {
-            "Model": "twopl_separate",
+            "Model": "twopl_mml",
             "Discrimination_pdf": null,
             "Discrimination_pdf_args": null,
             "Difficulty_pdf": null,

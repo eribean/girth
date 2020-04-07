@@ -33,13 +33,13 @@ def validate_estimation_options(options_dict=None):
 
     """
     validate = {'max_iteration':
-                    lambda x: (type(x) == int) and x > 0,
+                    lambda x: isinstance(x, int) and x > 0,
                 'distribution':
-                    lambda x: callable(x),
+                    callable,
                 'quadrature_bounds':
-                    lambda x: (type(x) in [tuple, list]) and (x[1] > x[0]),
+                    lambda x: isinstance(x, (tuple, list)) and (x[1] > x[0]),
                 'quadrature_n':
-                    lambda x: (type(x) == int) and x > 7}
+                    lambda x: isinstance(x, int) and x > 7}
     
     # A complete options dictionary
     full_options = default_options()

@@ -3,50 +3,64 @@ from scipy import integrate, stats
 from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import (irt_evaluation, convert_responses_to_kernel_sign,
-                   mml_approx)
+                   validate_estimation_options, mml_approx)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
 from girth.polytomous_utils import condition_polytomous_response, _credit_partial_integral
 
 
-def rasch_full(dataset, discrimination=1, max_iter=25):
-    """
-        Estimates parameters in an IRT model with full
-        gaussian quadrature
+def rasch_full(dataset, discrimination=1, options=None):
+    """ Estimates difficulty parameters in Rash IRT model.
 
         Args:
             dataset: [items x participants] matrix of True/False Values
             discrimination: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
+            options: dictionary of overriding parameters
 
         Returns:
-            array of discrimination estimates
+            difficulty: (1d array) difficulty estimates
+
+        Options:
+            max_iteration:
+            distribution:
+            quadrature_bounds:
+            quadrature_n:
     """
-    return onepl_full(dataset, alpha=discrimination, max_iter=max_iter)[1]
+    return onepl_full(dataset, alpha=discrimination, options=options)[1]
 
 
-def onepl_full(dataset, alpha=None, max_iter=25):
-    """
-        Estimates parameters in an 1PL IRT Model
+def onepl_full(dataset, alpha=None, options=None):
+    """ Estimates parameters in an 1PL IRT Model.
 
         This function is slow, please use onepl_mml
 
         Args:
             dataset: [items x participants] matrix of True/False Values
             alpha: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
+            options: dictionary of overriding parameters
 
         Returns:
-            array of discrimination estimates
-        
+            discrimination: (float) estimate of test discrimination
+            difficulty: (1d array) estimates of item diffiulties
+
+        Options:
+            max_iteration:
+            distribution:
+            quadrature_bounds:
+            quadrature_n:
+
         Notes:
             If alpha is supplied then this solves a Rasch model
     """
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
+
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
-    theta = _get_quadrature_points(61, -5, 5)
-    distribution = stats.norm(0, 1).pdf(theta)
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
@@ -54,7 +68,7 @@ def onepl_full(dataset, alpha=None, max_iter=25):
     def alpha_min_func(alpha_estimate):
         discrimination[:] = alpha_estimate
 
-        for iteration in range(max_iter):
+        for iteration in range(options['max_iteration']):
             previous_difficulty = difficulty.copy()
 
             # Quadrature evaluation for values that do not change
@@ -82,7 +96,7 @@ def onepl_full(dataset, alpha=None, max_iter=25):
                     estimate_int *= partial_int
 
                     otpt = integrate.fixed_quad(
-                        lambda x: estimate_int, -5, 5, n=61)[0]
+                        lambda x: estimate_int, quad_start, quad_stop, n=quad_n)[0]
 
                     return -np.log(otpt).dot(counts)
 
@@ -98,7 +112,8 @@ def onepl_full(dataset, alpha=None, max_iter=25):
             if(np.abs(previous_difficulty - difficulty).max() < 1e-3):
                 break
 
-        cost = integrate.fixed_quad(lambda x: partial_int, -5, 5, n=61)[0]
+        cost = integrate.fixed_quad(
+            lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
         return -np.log(cost).dot(counts)
 
     if alpha is None:  # OnePl Solver
@@ -109,27 +124,40 @@ def onepl_full(dataset, alpha=None, max_iter=25):
     return alpha, difficulty
 
 
-def twopl_full(dataset, max_iter=25):
-    """
-        Estimates parameters in a 2PL IRT model with marginal likelihood
+def twopl_full(dataset, options=None):
+    """ Estimates parameters in a 2PL IRT model.
+
+        Please use twopl_mml instead.
 
         Args:
             dataset: [items x participants] matrix of True/False Values
+            options: dictionary of overriding parameters
 
         Returns:
-            array of discrimination, difficulty estimates
+            discrimination: (1d array) estimates of item discrimination
+            difficulty: (1d array) estimates of item difficulties
+
+       Options:
+            max_iteration:
+            distribution:
+            quadrature_bounds:
+            quadrature_n:
     """
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
+
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
-    theta = _get_quadrature_points(61, -5, 5)
-    distribution = stats.norm(0, 1).pdf(theta)
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
 
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
 
         # Quadrature evaluation for values that do not change
@@ -156,7 +184,7 @@ def twopl_full(dataset, max_iter=25):
 
                 estimate_int *= partial_int
                 otpt = integrate.fixed_quad(
-                    lambda x: estimate_int, -5, 5, n=61)[0]
+                    lambda x: estimate_int, quad_start, quad_stop, n=quad_n)[0]
 
                 return -np.log(otpt).dot(counts)
 
@@ -179,7 +207,7 @@ def twopl_full(dataset, max_iter=25):
     return discrimination, difficulty
 
 
-def pcm_mml(dataset, max_iter=25):
+def pcm_mml(dataset, options=None):
     """Estimate parameters for partial credit model.
 
     Estimate the discrimination and difficulty parameters for
@@ -187,19 +215,29 @@ def pcm_mml(dataset, max_iter=25):
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
-        max_iter: (optional) maximum number of iterations to perform
+        options: dictionary of overriding parameters
 
     Returns:
-        array of discrimination parameters
-        2d array of difficulty parameters, (NAN represents non response)
+        discrimination: (1d array) estimates of item discrimination
+        difficulty: (2d array) estimates of item difficulties x item thresholds
+
+    Options:
+        max_iteration:
+        distribution:
+        quadrature_bounds:
+        quadrature_n:
     """
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
+
     responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
                                                            _reference=0.0)
     n_items = responses.shape[0]
 
     # Interpolation Locations
-    theta = _get_quadrature_points(61, -5, 5)
-    distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
 
     # Initialize difficulty parameters for estimation
     betas = np.full((n_items, item_counts.max()), np.nan)
@@ -218,7 +256,7 @@ def pcm_mml(dataset, max_iter=25):
     # 3. Integrate of theta
     # 4. minimize and repeat
     #############
-    for iteration in range(max_iter):
+    for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
         previous_betas = betas.copy()
 
@@ -252,7 +290,7 @@ def pcm_mml(dataset, max_iter=25):
 
                 new_values *= partial_int
                 otpt = integrate.fixed_quad(
-                    lambda x: new_values, -5, 5, n=61)[0]
+                    lambda x: new_values, quad_start, quad_stop, n=quad_n)[0]
 
                 return -np.log(otpt).sum()
 

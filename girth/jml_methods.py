@@ -3,7 +3,8 @@ from scipy.optimize import fmin_slsqp, fminbound
 
 from girth import (condition_polytomous_response,
                    convert_responses_to_kernel_sign, irt_evaluation,
-                   mml_approx, trim_response_set_and_counts)
+                   mml_approx, trim_response_set_and_counts,
+                   validate_estimation_options)
 
 
 def _jml_abstract(dataset, _item_min_func,
@@ -64,18 +65,22 @@ def _jml_abstract(dataset, _item_min_func,
     return alphas, betas
 
 
-def rasch_jml(dataset, discrimination=1, max_iter=25):
-    """
-        Estimates difficulty parameters in an IRT model
+def rasch_jml(dataset, discrimination=1, options=None):
+    """ Estimates difficulty parameters in an IRT model
 
         Args:
             dataset: [items x participants] matrix of True/False Values
             discrimination: scalar of discrimination used in model (default to 1)
-            max_iter: maximum number of iterations to run
+            options: dictionary of overriding parameters
 
         Returns:
-            array of difficulty estimates
+            difficulty: (1d array) estimates of item difficulties
+
+        Options:
+            max_iterations:
     """
+    options = validate_estimation_options(options)
+
     # Defines item parameter update function
     def _item_min_func(n_items, alphas, thetas,
                        betas, the_sign, counts):
@@ -95,22 +100,27 @@ def rasch_jml(dataset, discrimination=1, max_iter=25):
         return alphas, betas
 
     result = _jml_abstract(dataset, _item_min_func,
-                           discrimination, max_iter)
+                           discrimination, options['max_iteration'])
 
     return result[1]
 
 
-def onepl_jml(dataset, max_iter=25):
-    """
-        Estimates difficulty and discrimination paramters in 1PL IRT model
+def onepl_jml(dataset, options=None):
+    """ Estimates parameters in an 1PL IRT Model.
 
         Args:
             dataset: [items x participants] matrix of True/False Values
-            max_iter: maximum number of iterations to run
+            options: dictionary of overriding parameters
 
         Returns:
-            discrimination, array of difficulty estimates
+            discrimination: (float) estimate of test discrimination
+            difficulty: (1d array) estimates of item diffiulties
+
+        Options:
+            max_iteration:
     """
+    options = validate_estimation_options(options)
+
     # Defines item parameter update function
     def _item_min_func(n_items, alphas, thetas,
                        betas, the_sign, counts):
@@ -141,22 +151,27 @@ def onepl_jml(dataset, max_iter=25):
         return alphas, betas
 
     result = _jml_abstract(dataset, _item_min_func, discrimination=1,
-                           max_iter=max_iter)
+                           max_iter=options['max_iteration'])
 
     return result[0][0], result[1]
 
 
-def twopl_jml(dataset, max_iter=25):
-    """
-        Estimates difficulty and discrimination paramters in 2PL IRT model
+def twopl_jml(dataset, options=None):
+    """ Estimates parameters in a 2PL IRT model.
 
         Args:
             dataset: [items x participants] matrix of True/False Values
-            max_iter: maximum number of iterations to run
+            options: dictionary of overriding parameters
 
         Returns:
-            array of discriminations, array of difficulty estimates
+            discrimination: (1d array) estimates of item discrimination
+            difficulty: (1d array) estimates of item difficulties
+
+       Options:
+            max_iteration:
     """
+    options = validate_estimation_options(options)
+
     # Defines item parameter update function
     def _item_min_func(n_items, alphas, thetas,
                        betas, the_sign, counts):
@@ -175,7 +190,7 @@ def twopl_jml(dataset, max_iter=25):
         return alphas, betas
 
     return _jml_abstract(dataset, _item_min_func, discrimination=1,
-                         max_iter=max_iter)
+                         max_iter=options['max_iteration'])
 
 
 def _jml_inequality(test):

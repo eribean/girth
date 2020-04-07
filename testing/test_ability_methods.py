@@ -95,8 +95,9 @@ class TestAbilityEstimates(unittest.TestCase):
         self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.419, places=3)
 
         # Skewed distribution
+        options = {'distribution': self.skew_expected_theta_func}
         theta3 = ability_map(self.set_three, self.difficulty, self.discrimination,
-                             self.skew_expected_theta_func)
+                             options)
         self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.506, places=3)
 
         # Missing Values
@@ -121,8 +122,9 @@ class TestAbilityEstimates(unittest.TestCase):
         self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.418, places=3)
 
         # Skewed distribution
+        options = {'distribution': self.skew_expected_theta_func}
         theta3 = ability_eap(self.set_three, self.difficulty, self.discrimination,
-                             self.skew_expected_theta_func)
+                             options)
         self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.501, places=3)
 
         # Missing Values

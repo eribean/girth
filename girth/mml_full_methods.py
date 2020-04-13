@@ -322,10 +322,10 @@ def pcm_mml(dataset, options=None):
 
 
 def gum_mml(dataset, options=None):
-    """Estimate parameters for partial credit model.
+    """Estimate parameters for graded unfolding model.
 
     Estimate the discrimination and difficulty parameters for
-    the partial credit model using marginal maximum likelihood.
+    the graded unfolding model using marginal maximum likelihood.
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
@@ -333,7 +333,8 @@ def gum_mml(dataset, options=None):
 
     Returns:
         discrimination: (1d array) estimates of item discrimination
-        difficulty: (2d array) estimates of item difficulties x item thresholds
+        delta: (1d array) estimates of item folding values
+        difficulty: (2d array) estimates of item thresholds x item thresholds
 
     Options:
         * max_iteration: int
@@ -395,7 +396,6 @@ def gum_mml(dataset, options=None):
         for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
             item_length = item_counts[item_ndx] - 1
-            new_betas = np.zeros((item_length))
 
             # Remove the previous output
             old_values = _unfold_partial_integral(theta, previous_delta[item_ndx],

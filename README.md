@@ -23,6 +23,8 @@ Girth is a python package for estimating item response theory IRT) parameters.  
 2. Partial Credit Model
    * Joint Maximum Likelihood
    * Marginal Maximum Likelihood
+3. Graded Unfolding Model
+   * Marginal Maximum Likelihood
 
 **Ablity Estimation**
 1. Marginal Likelihood Estimation

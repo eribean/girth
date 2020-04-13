@@ -296,7 +296,7 @@ def pcm_mml(dataset, options=None):
 
                 return -np.log(otpt).sum()
 
-            # Univariate minimization for discrimination parameter
+            # Initial Guess of Item Parameters
             initial_guess = np.concatenate(([discrimination[item_ndx]],
                                             betas[item_ndx, 1:item_length]))
 
@@ -324,7 +324,7 @@ def pcm_mml(dataset, options=None):
 def gum_mml(dataset, options=None):
     """Estimate parameters for graded unfolding model.
 
-    Estimate the discrimination and difficulty parameters for
+    Estimate the discrimination, delta and threshold parameters for
     the graded unfolding model using marginal maximum likelihood.
 
     Args:
@@ -418,7 +418,7 @@ def gum_mml(dataset, options=None):
 
                 return -np.log(otpt).sum()
 
-            # Univariate minimization for discrimination parameter
+            # Initial Guess of Item Parameters
             initial_guess = np.concatenate(([discrimination[item_ndx]],
                                             [delta[item_ndx]],
                                             betas[item_ndx]))
@@ -442,6 +442,4 @@ def gum_mml(dataset, options=None):
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
 
-    # TODO:  look where missing values are and place NAN there instead
-    # of appending them to the end
     return discrimination, delta, betas

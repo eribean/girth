@@ -7,7 +7,7 @@ from girth import rasch_mml, onepl_mml, twopl_mml
 from girth import rasch_full, onepl_full, twopl_full
 
 from girth import create_synthetic_irt_polytomous
-from girth import grm_mml, pcm_mml
+from girth import grm_mml, pcm_mml, gum_mml
 
 
 class TestMMLRaschMethods(unittest.TestCase):
@@ -357,6 +357,40 @@ class TestMMLPartialCreditModel(unittest.TestCase):
             expected_diff, output[1], decimal=5)
         np.testing.assert_array_almost_equal(
             expected_discr, output[0], decimal=5)
+
+
+class TestMMLGradedUnfoldingModel(unittest.TestCase):
+    """Tests the marginal maximum likelihood for GUM."""
+
+    # Smoke / Regression Tests
+    def test_unfolding_run(self):
+        """Testing the unfolding model runs."""
+        np.random.seed(555)
+        difficulty = -(np.random.rand(10, 2) * 1.5)
+        delta = 0.5 * np.random.rand(10, 1)
+        discrimination = np.random.rand(10) + 0.5
+        thetas = np.random.randn(200)
+
+        betas = np.c_[difficulty, np.zeros((10, 1)), -difficulty[:, ::-1]]
+        betas += delta
+        syn_data = create_synthetic_irt_polytomous(betas, discrimination,
+                                                   thetas, model='GUM',
+                                                   seed=546)
+
+        result = gum_mml(syn_data, {'max_iteration': 100})
+
+        rmse_discrimination = np.sqrt(np.square(discrimination.squeeze() - 
+                                                result[0]).mean())
+        rmse_delta = np.sqrt(np.square(delta.squeeze() - 
+                                       result[1]).mean())
+        rmse_tau = np.sqrt(np.square(difficulty - 
+                                     result[2]).mean())
+
+        self.assertAlmostEqual(rmse_discrimination, 0.3709931291, places=5)
+        self.assertAlmostEqual(rmse_delta, 1.18368786, places=5)
+        self.assertAlmostEqual(rmse_tau, 0.6406162162, places=5)
+
+
 
 
 

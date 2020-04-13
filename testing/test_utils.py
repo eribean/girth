@@ -7,13 +7,15 @@ from scipy import integrate, stats
 
 from girth import (create_synthetic_irt_dichotomous,
                    irt_evaluation, trim_response_set_and_counts,
-                   convert_responses_to_kernel_sign, 
-                   validate_estimation_options,condition_polytomous_response, 
+                   convert_responses_to_kernel_sign,
+                   validate_estimation_options, condition_polytomous_response,
                    get_true_false_counts, mml_approx)
-from girth.utils import (_get_quadrature_points, _compute_partial_integral, 
+from girth.utils import (_get_quadrature_points, _compute_partial_integral,
                          default_options)
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
-                                    _solve_integral_equations, _credit_partial_integral)
+                                    _solve_integral_equations, _credit_partial_integral,
+                                    _unfold_partial_integral)
+from girth.synthetic import _unfold_func
 
 
 class TestUtilitiesMethods(unittest.TestCase):
@@ -320,6 +322,31 @@ class TestPolytomousUtilities(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(result, expected)
 
+    def test_unfold_partial_integration(self):
+        """Testing the unfolding integral."""
+        theta = _get_quadrature_points(61, -5, 5)
+        response_set = np.array([0, 1, 2, 2, 1, 0, 3, 1, 3, 2, 2, 2])
+        betas = np.array([-1.3, -.4, 0.2])
+        delta = -0.76
+        # (2N -1) / 2 - n
+        folding = 3.5 - np.arange(4)
+        discrimination = 1.42
+
+        # Convert to PCM thresholds
+        full = np.concatenate((betas, [0], -betas[::-1]))
+        full += delta
+        scratch = np.zeros((full.size + 1, theta.size))
+        _unfold_func(full, discrimination, theta, scratch)
+
+        expected = np.zeros((response_set.size, theta.size))
+        for ndx, response in enumerate(response_set):
+            expected[ndx] = scratch[response]
+
+        result = _unfold_partial_integral(theta, delta, betas,
+                                          discrimination, folding,
+                                          response_set)
+        np.testing.assert_array_almost_equal(result, expected)
+
 
 class TestOptions(unittest.TestCase):
     """Tests default options."""
@@ -334,7 +361,7 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(output['quadrature_n'], 61)
         self.assertTupleEqual(output['quadrature_bounds'], (-5, 5))
         result = output['distribution'](x)
-        np.testing.assert_array_almost_equal(expected, 
+        np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
         self.assertEqual(len(output.keys()), 4)
 
@@ -349,7 +376,7 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(result['quadrature_n'], 61)
         self.assertTupleEqual(result['quadrature_bounds'], (-5, 5))
         result = result['distribution'](x)
-        np.testing.assert_array_almost_equal(expected, 
+        np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
 
     def test_warnings(self):
@@ -357,7 +384,7 @@ class TestOptions(unittest.TestCase):
         test = {'Bad Key': "Come at me Bro"}
         with self.assertRaises(KeyError):
             validate_estimation_options(test)
-        
+
         test = [21.0]
         with self.assertRaises(AssertionError):
             validate_estimation_options(test)
@@ -399,8 +426,8 @@ class TestOptions(unittest.TestCase):
         output = validate_estimation_options(new_parameters)
         self.assertEqual(len(output.keys()), 4)
         result = output['distribution'](x)
-        np.testing.assert_array_almost_equal(expected, 
-                                            result, decimal=6) 
+        np.testing.assert_array_almost_equal(expected,
+                                             result, decimal=6)
 
         new_parameters = {'quadrature_bounds': (-7, -5),
                           'quadrature_n': 13}

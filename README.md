@@ -5,7 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory Package
-Girth is a python package for estimating item response theory IRT) parameters.  In addition, support for synthetic irt data generation is supported as well.  Currently, the supported estimation methods include:
+Girth is a python package for estimating item response theory (IRT) parameters.  In addition, synthetic IRT data generation is supported. Below is a list of available functions, for more information visit the GIRTH [homepage](https://eribean.github.io/girth/).
+
 
 **Dichotomous Models**
 1. Rasch Model
@@ -27,9 +28,10 @@ Girth is a python package for estimating item response theory IRT) parameters.  
    * Marginal Maximum Likelihood
 
 **Ablity Estimation**
-1. Marginal Likelihood Estimation
-2. Maximum a Posteriori Estimation
-3. Expected a Posteriori Estimation
+1. Dichotomous
+   * Marginal Likelihood Estimation
+   * Maximum a Posteriori Estimation
+   * Expected a Posteriori Estimation
 
 **Supported Synthetic Data Generation**
 1. Rasch / 1PL Models Dichotomous Models
@@ -40,7 +42,6 @@ Girth is a python package for estimating item response theory IRT) parameters.  
 6. Graded Unfolding Model Polytomous
 7. Multidimensional Dichotomous Models
 
-More information can be found on the [homepage](https://eribean.github.io/girth/).
 
 ## Installation
 Via pip

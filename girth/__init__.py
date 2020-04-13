@@ -10,7 +10,7 @@ from .synthetic import (create_correlated_abilities,
 from .mml_methods import (rasch_mml, onepl_mml,
                           twopl_mml, grm_mml)
 from .mml_full_methods import (rasch_full, onepl_full, twopl_full,
-                               pcm_mml)
+                               pcm_mml, gum_mml)
 from .conditional_methods import rasch_conditional
 from .jml_methods import (rasch_jml, onepl_jml, twopl_jml,
                           grm_jml, pcm_jml)

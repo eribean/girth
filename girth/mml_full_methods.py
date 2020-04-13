@@ -5,7 +5,9 @@ from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 from girth import (irt_evaluation, convert_responses_to_kernel_sign,
                    validate_estimation_options, mml_approx)
 from girth.utils import _get_quadrature_points, _compute_partial_integral
-from girth.polytomous_utils import condition_polytomous_response, _credit_partial_integral
+from girth.polytomous_utils import (condition_polytomous_response,
+                                    _credit_partial_integral,
+                                    _unfold_partial_integral)
 
 
 def rasch_full(dataset, discrimination=1, options=None):
@@ -294,7 +296,7 @@ def pcm_mml(dataset, options=None):
 
                 return -np.log(otpt).sum()
 
-            # Univariate minimization for discrimination parameter
+            # Initial Guess of Item Parameters
             initial_guess = np.concatenate(([discrimination[item_ndx]],
                                             betas[item_ndx, 1:item_length]))
 
@@ -317,3 +319,127 @@ def pcm_mml(dataset, options=None):
     # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
     return discrimination, betas[:, 1:]
+
+
+def gum_mml(dataset, options=None):
+    """Estimate parameters for graded unfolding model.
+
+    Estimate the discrimination, delta and threshold parameters for
+    the graded unfolding model using marginal maximum likelihood.
+
+    Args:
+        dataset: [n_items, n_participants] 2d array of measured responses
+        options: dictionary with updates to default options
+
+    Returns:
+        discrimination: (1d array) estimates of item discrimination
+        delta: (1d array) estimates of item folding values
+        difficulty: (2d array) estimates of item thresholds x item thresholds
+
+    Options:
+        * max_iteration: int
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
+    """
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
+
+    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
+                                                           _reference=0.0)
+    n_items = responses.shape[0]
+
+    # Interpolation Locations
+    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
+
+    # Initialize item parameters for iterations
+    discrimination = np.ones((n_items,))
+    betas = np.full((n_items, item_counts.max() - 1), np.nan)
+    delta = np.zeros((n_items,))
+    partial_int = np.ones((responses.shape[1], theta.size))
+
+    # Set initial estimates to evenly spaced
+    for ndx in range(n_items):
+        item_length = item_counts[ndx] - 1
+        betas[ndx, :item_length] = np.linspace(-1, 1, item_length)
+
+    # This is the index associated with "folding" about the center
+    fold_span = ((item_counts[:, None] - 0.5) -
+                 np.arange(betas.shape[1] + 1)[None, :])
+
+    #############
+    # 1. Start the iteration loop
+    # 2. Estimate Dicriminatin/Difficulty Jointly
+    # 3. Integrate of theta
+    # 4. minimize and repeat
+    #############
+    for iteration in range(options['max_iteration']):
+        previous_discrimination = discrimination.copy()
+        previous_betas = betas.copy()
+        previous_delta = delta.copy()
+
+        # Quadrature evaluation for values that do not change
+        # This is done during the outer loop to address rounding errors
+        # and for speed
+        partial_int *= 0.0
+        partial_int += distribution[None, :]
+        for item_ndx in range(n_items):
+            partial_int *= _unfold_partial_integral(theta, delta[item_ndx],
+                                                    betas[item_ndx],
+                                                    discrimination[item_ndx],
+                                                    fold_span[item_ndx],
+                                                    responses[item_ndx])
+
+        # Loop over each item and solve for the alpha / beta parameters
+        for item_ndx in range(n_items):
+            # pylint: disable=cell-var-from-loop
+            item_length = item_counts[item_ndx] - 1
+
+            # Remove the previous output
+            old_values = _unfold_partial_integral(theta, previous_delta[item_ndx],
+                                                  previous_betas[item_ndx],
+                                                  previous_discrimination[item_ndx],
+                                                  fold_span[item_ndx],
+                                                  responses[item_ndx])
+            partial_int /= old_values
+
+            def _local_min_func(estimate):
+                new_betas = estimate[2:]
+                new_values = _unfold_partial_integral(theta, estimate[1],
+                                                      new_betas,
+                                                      estimate[0], fold_span[item_ndx],
+                                                      responses[item_ndx])
+
+                new_values *= partial_int
+                otpt = integrate.fixed_quad(
+                    lambda x: new_values, quad_start, quad_stop, n=quad_n)[0]
+
+                return -np.log(otpt).sum()
+
+            # Initial Guess of Item Parameters
+            initial_guess = np.concatenate(([discrimination[item_ndx]],
+                                            [delta[item_ndx]],
+                                            betas[item_ndx]))
+
+            otpt = fmin_slsqp(_local_min_func, initial_guess,
+                              disp=False,
+                              bounds=[(.25, 4)] + [(-2, 2)] + [(-6, 6)] * item_length)
+
+            discrimination[item_ndx] = otpt[0]
+            delta[item_ndx] = otpt[1]
+            betas[item_ndx, :] = otpt[2:]
+
+            new_values = _unfold_partial_integral(theta, delta[item_ndx],
+                                                  betas[item_ndx],
+                                                  discrimination[item_ndx],
+                                                  fold_span[item_ndx],
+                                                  responses[item_ndx])
+
+            partial_int *= new_values
+
+        if np.abs(previous_discrimination - discrimination).max() < 1e-3:
+            break
+
+    return discrimination, delta, betas

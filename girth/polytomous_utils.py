@@ -109,4 +109,19 @@ def _credit_partial_integral(theta, betas, discrimination,
     kernel /= np.nansum(kernel, axis=0)[None, :]
 
     return kernel[response_set, :]
-    
+
+
+def _unfold_partial_integral(theta, delta, betas, 
+                             discrimination, fold_span,
+                             response_set):
+    """Computes the partial integral for the _GGUM model."""
+    # Unfolding_Model
+    thresholds = np.exp(-discrimination * np.cumsum(betas))
+
+    kernel = np.outer(fold_span, discrimination * (theta - delta))
+
+    np.cosh(kernel, out=kernel)
+    kernel[1:, :] *= thresholds[:, None]
+    kernel /= np.nansum(kernel, axis=0)
+
+    return kernel[response_set, :]

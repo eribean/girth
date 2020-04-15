@@ -6,11 +6,9 @@ from girth import irt_evaluation
 
 
 def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
-    """
-    Transforms item responses for easier use during parameter
-    estimation
+    """ Recodes polytomous responses into linear indices.
 
-    This takes an input array of ordinal values and converts it into
+    Takes an input array of ordinal values and converts it into
     an array of linear indices to access difficulty parameters through 
     fancy indexing. 
 
@@ -19,8 +17,8 @@ def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
         trim_ends:  (boolean) trims responses that are either all no or all yes
 
     Returns:
-        updated dataset array adjusted for linear indexing, 
-        vector of lengths associated with each item
+        dataset: (2d array) ordinal values converted to linear indices
+        beta_length: (1d array) number of unique values per item
     """
     # Remove all no / yes endorsements
     min_value, max_value = dataset.min(), dataset.max()

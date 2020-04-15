@@ -5,17 +5,18 @@ from scipy.special import roots_legendre
 
 def default_options():
     """ Dictionary of options used in Girth.
-        Args:
-            max_iteration: [int] maximum number of iterations
-                allowed during processing. (Default = 25)
-            distribution: [callable] function that returns a pdf
-                evaluated at quadrature points, p = f(theta).
-                (Default = scipy.stats.norm(0, 1).pdf)
-            quadrature_bounds: (lower, upper) bounds to limit
-                numerical integration. Default = (-5, 5)
-            quadrature_n: [int] number of quadrature points to use
-                          Default = 61
-    """
+
+    Args:
+        max_iteration: [int] maximum number of iterations
+            allowed during processing. (Default = 25)
+        distribution: [callable] function that returns a pdf
+            evaluated at quadrature points, p = f(theta).
+            (Default = scipy.stats.norm(0, 1).pdf)
+        quadrature_bounds: (lower, upper) bounds to limit
+            numerical integration. Default = (-5, 5)
+        quadrature_n: [int] number of quadrature points to use
+                        Default = 61
+"""
     return {"max_iteration": 25,
             "distribution": gaussian(0, 1).pdf,
             "quadrature_bounds": (-5, 5),
@@ -23,7 +24,7 @@ def default_options():
 
 
 def validate_estimation_options(options_dict=None):
-    """Validates an options dictionary.
+    """ Validates an options dictionary.
 
     Args:
         options_dict: Dictionary with updates to default_values
@@ -61,7 +62,7 @@ def validate_estimation_options(options_dict=None):
 
 
 def get_true_false_counts(responses):
-    """Returns the number of true and false for each item.
+    """ Returns the number of true and false for each item.
 
     Takes in a responses array and returns counts associated with
     true / false.  True is a value in the dataset which equals '1'
@@ -72,8 +73,8 @@ def get_true_false_counts(responses):
         responses: [n_items x n_participants] array of response values
 
     Returns:
-        1d array of 'false' counts per item,
-        1d array of 'true' counts per item
+        n_false: (1d array) "false" counts per item
+        n_true: (1d array) "true" counts per item
     """
     n_false = np.count_nonzero(responses == 0, axis=1)
     n_true = np.count_nonzero(responses == 1, axis=1)
@@ -82,17 +83,18 @@ def get_true_false_counts(responses):
 
 
 def mml_approx(dataset, discrimination=1, scalar=None):
-    """
-        Estimates the difficulty parameters of an IRT
-        model assuming a normal distribution
+    """ Difficulty parameter estimates of IRT model.
+    
+    Analytic estimates of the difficulty parameters 
+    in an IRT model assuming a normal distribution .
 
-        Args:
-            dataset: [items x participants] matrix of True/False Values
-            discrimination: scalar of discrimination used in model (default to 1)
-            scalar: log(n_no / n_yes)
+    Args:
+        dataset: [items x participants] matrix of True/False Values
+        discrimination: scalar of discrimination used in model (default to 1)
+        scalar: (1d array) logarithm of "false counts" to "true counts" (log(n_no / n_yes))
 
-        Returns:
-            array of discrimination estimates
+    Returns:
+        difficulty: (1d array) difficulty estimates
     """
     if scalar is None:
         n_no, n_yes = get_true_false_counts(dataset)
@@ -116,7 +118,7 @@ def convert_responses_to_kernel_sign(responses):
         responses: [n_items x n_participants] array of response values
 
     Returns:
-        2d array of sign values to use in the parameter estimation
+        the_sign: (2d array) sign values associated with input responses
     """
     # The default value is now 0
     the_sign = np.zeros_like(responses, dtype='float')
@@ -133,16 +135,16 @@ def convert_responses_to_kernel_sign(responses):
 
 
 def trim_response_set_and_counts(response_sets, counts):
-    """
-        Trims all true or all false responses from the response set/counts.
+    """ Trims all true or all false responses from the response set/counts.
 
-        Args:
-            response_set:  (2D array) response set by persons obtained by running
-                            numpy.unique
-            counts:  counts associated with response set
+    Args:
+        response_set:  (2D array) response set by persons obtained by running
+                        numpy.unique
+        counts:  counts associated with response set
 
-        Returns:
-            response_set, counts updated to reflect removal of response patterns
+    Returns:
+        response_set: updated response set with removal of undesired response patterns
+        counts: updated counts to account for removal
     """
     # Remove response sets where output is all true/false
     mask = ~(np.nanvar(response_sets, axis=0) == 0)
@@ -153,21 +155,21 @@ def trim_response_set_and_counts(response_sets, counts):
 
 
 def irt_evaluation(difficulty, discrimination, thetas):
-    """
-        Evaluates an IRT model and returns the exact values.  This function
-        supports only unidimemsional models
+    """ Evaluation of unidimensional IRT model.
 
-        Assumes the model
-            P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
+    Evaluates an IRT model and returns the exact values.  This function
+    supports only unidimemsional models
 
-        Args:
-            difficulty: [array] of difficulty parameters
-            discrimination:  [array | number] of discrimination parameters
-            thetas: [array] of person abilities
+    Assumes the model
+        P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
 
-        Returns:
-            dichotomous matrix of [difficulty.size x thetas.size] representing
-            synthetic data
+    Args:
+        difficulty: (1d array) item difficulty parameters
+        discrimination:  (1d array | number) item discrimination parameters
+        thetas: (1d array) person abilities
+
+    Returns:
+        probabilities: (2d array) evaluation of sigmoid for given inputs
     """
     # If discrimination is a scalar, make it an array
     if np.atleast_1d(discrimination).size == 1:
@@ -180,21 +182,23 @@ def irt_evaluation(difficulty, discrimination, thetas):
 
 
 def _get_quadrature_points(n, a, b):
-    """
-        Utility function to get the legendre points,
-        shifted from [-1, 1] to [a, b]
+    """ Quadrature points needed for gauss-legendre integration.
 
-        Args:
-            n: number of quadrature_points
-            a: lower bound of integration
-            b: upper bound of integration
+    Utility function to get the legendre points,
+    shifted from [-1, 1] to [a, b]
 
-        Returns:
-            Array of quadrature_points for numerical integration
+    Args:
+        n: number of quadrature_points
+        a: lower bound of integration
+        b: upper bound of integration
 
-        Notes:
-            A local function of the based fixed_quad found in scipy, this is
-            done for processing optimization
+    Returns:
+        quadrature_points: (1d array) quadrature_points for 
+                           numerical integration
+
+    Notes:
+        A local function of the based fixed_quad found in scipy, this is
+        done for processing optimization
     """
     x, _ = roots_legendre(n)
     x = np.real(x)
@@ -205,23 +209,23 @@ def _get_quadrature_points(n, a, b):
 
 def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
     """
-        Computes the partial integral for a set of item parameters
+    Computes the partial integral for a set of item parameters
 
-        Args:
-            theta: (array) evaluation points
-            difficulty: (array) set of difficulty parameters
-            discrimination: (array | number) set of discrimination parameters
-            the_sign:  (array) positive or negative sign
-                               associated with response vector
+    Args:
+        theta: (array) evaluation points
+        difficulty: (array) set of difficulty parameters
+        discrimination: (array | number) set of discrimination parameters
+        the_sign:  (array) positive or negative sign
+                            associated with response vector
 
-        Returns:
-            2d array of integration of items defined by "sign" parameters
-                axis 0: individual persons
-                axis 1: evaluation points (at theta)
+    Returns:
+        partial_integral: (2d array) 
+            integration of items defined by "sign" parameters
+            axis 0: individual persons
+            axis 1: evaluation points (at theta)
 
-        Notes:
-            Implicitly multiplies the data by the gaussian distribution
-
+    Notes:
+        Implicitly multiplies the data by the gaussian distribution
     """
     # Size single discrimination into full array
     if np.atleast_1d(discrimination).size == 1:

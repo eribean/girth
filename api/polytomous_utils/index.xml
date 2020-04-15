@@ -13,9 +13,8 @@
 &lt;span >def &lt;span class="ident" >condition_polytomous_response&lt;/span>&lt;/span>(&lt;span >dataset, trim_ends=True)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Transforms item responses for easier use during parameter
-estimation&lt;/p>
-&lt;p >This takes an input array of ordinal values and converts it into
+&lt;section class="desc" >&lt;p >Recodes polytomous responses into linear indices.&lt;/p>
+&lt;p >Takes an input array of ordinal values and converts it into
 an array of linear indices to access difficulty parameters through
 fancy indexing. &lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
@@ -27,28 +26,26 @@ fancy indexing. &lt;/p>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >updated&lt;/code> &lt;code >dataset&lt;/code> &lt;code >array&lt;/code> &lt;code >adjusted&lt;/code> &lt;code >for&lt;/code> &lt;code >linear&lt;/code> &lt;code >indexing&lt;/code>,&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >vector&lt;/code> of &lt;code >lengths&lt;/code> &lt;code >associated&lt;/code> &lt;code >with&lt;/code> &lt;code >each&lt;/code> &lt;code >item&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) ordinal values converted to linear indices&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >beta_length&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) number of unique values per item&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
-&amp;#34;&amp;#34;&amp;#34;
-Transforms item responses for easier use during parameter
-estimation
-This takes an input array of ordinal values and converts it into
+&amp;#34;&amp;#34;&amp;#34; Recodes polytomous responses into linear indices.
+Takes an input array of ordinal values and converts it into
 an array of linear indices to access difficulty parameters through
 fancy indexing.
 Args:
 dataset: [n_items x n_takers] 2d array of ordinal responses
 trim_ends: (boolean) trims responses that are either all no or all yes
 Returns:
-updated dataset array adjusted for linear indexing,
-vector of lengths associated with each item
+dataset: (2d array) ordinal values converted to linear indices
+beta_length: (1d array) number of unique values per item
 &amp;#34;&amp;#34;&amp;#34;
 # Remove all no / yes endorsements
 min_value, max_value = dataset.min(), dataset.max()

@@ -91,7 +91,7 @@ return {&amp;#34;max_iteration&amp;#34;: 25,
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def validate_estimation_options(options_dict=None):
-&amp;#34;&amp;#34;&amp;#34;Validates an options dictionary.
+&amp;#34;&amp;#34;&amp;#34; Validates an options dictionary.
 Args:
 options_dict: Dictionary with updates to default_values
 Returns:
@@ -156,17 +156,17 @@ ignored&lt;/p>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >'false'&lt;/code> &lt;code >counts&lt;/code> &lt;code >per&lt;/code> &lt;code >item&lt;/code>,&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >1d&lt;/code> &lt;code >array&lt;/code> of &lt;code >'true'&lt;/code> &lt;code >counts&lt;/code> &lt;code >per&lt;/code> &lt;code >item&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >n_false&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) "false" counts per item&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >n_true&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) "true" counts per item&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def get_true_false_counts(responses):
-&amp;#34;&amp;#34;&amp;#34;Returns the number of true and false for each item.
+&amp;#34;&amp;#34;&amp;#34; Returns the number of true and false for each item.
 Takes in a responses array and returns counts associated with
 true / false. True is a value in the dataset which equals &amp;#39;1&amp;#39;
 and false is a value which equals &amp;#39;0&amp;#39;. All other values are
@@ -174,8 +174,8 @@ ignored
 Args:
 responses: [n_items x n_participants] array of response values
 Returns:
-1d array of &amp;#39;false&amp;#39; counts per item,
-1d array of &amp;#39;true&amp;#39; counts per item
+n_false: (1d array) &amp;#34;false&amp;#34; counts per item
+n_true: (1d array) &amp;#34;true&amp;#34; counts per item
 &amp;#34;&amp;#34;&amp;#34;
 n_false = np.count_nonzero(responses == 0, axis=1)
 n_true = np.count_nonzero(responses == 1, axis=1)
@@ -204,8 +204,9 @@ return n_false, n_true&lt;/code>&lt;/pre>
 &lt;span >def &lt;span class="ident" >mml_approx&lt;/span>&lt;/span>(&lt;span >dataset, discrimination=1, scalar=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Estimates the difficulty parameters of an IRT
-model assuming a normal distribution&lt;/p>
+&lt;section class="desc" >&lt;p >Difficulty parameter estimates of IRT model.&lt;/p>
+&lt;p >Analytic estimates of the difficulty parameters
+in an IRT model assuming a normal distribution .&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >dataset&lt;/code>&lt;/strong>&lt;/dt>
@@ -213,27 +214,27 @@ model assuming a normal distribution&lt;/p>
 &lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >scalar of discrimination used in model (default to 1)&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >scalar&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >log(n_no / n_yes)&lt;/dd>
+&lt;dd >(1d array) logarithm of "false counts" to "true counts" (log(n_no / n_yes))&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >array&lt;/code> of &lt;code >discrimination&lt;/code> &lt;code >estimates&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(1d array) difficulty estimates&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def mml_approx(dataset, discrimination=1, scalar=None):
-&amp;#34;&amp;#34;&amp;#34;
-Estimates the difficulty parameters of an IRT
-model assuming a normal distribution
+&amp;#34;&amp;#34;&amp;#34; Difficulty parameter estimates of IRT model.
+Analytic estimates of the difficulty parameters
+in an IRT model assuming a normal distribution .
 Args:
 dataset: [items x participants] matrix of True/False Values
 discrimination: scalar of discrimination used in model (default to 1)
-scalar: log(n_no / n_yes)
+scalar: (1d array) logarithm of &amp;#34;false counts&amp;#34; to &amp;#34;true counts&amp;#34; (log(n_no / n_yes))
 Returns:
-array of discrimination estimates
+difficulty: (1d array) difficulty estimates
 &amp;#34;&amp;#34;&amp;#34;
 if scalar is None:
 n_no, n_yes = get_true_false_counts(dataset)
@@ -278,8 +279,8 @@ account for missing values.&lt;/p>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >2d&lt;/code> &lt;code >array&lt;/code> of &lt;code >sign&lt;/code> &lt;code >values&lt;/code> &lt;code >to&lt;/code> &lt;code >use&lt;/code> &lt;code >in&lt;/code> &lt;code >the&lt;/code> &lt;code >parameter&lt;/code> &lt;code >estimation&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >the_sign&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) sign values associated with input responses&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
@@ -295,7 +296,7 @@ account for missing values.
 Args:
 responses: [n_items x n_participants] array of response values
 Returns:
-2d array of sign values to use in the parameter estimation
+the_sign: (2d array) sign values associated with input responses
 &amp;#34;&amp;#34;&amp;#34;
 # The default value is now 0
 the_sign = np.zeros_like(responses, dtype=&amp;#39;float&amp;#39;)
@@ -341,22 +342,24 @@ numpy.unique&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >response_set&lt;/code>, &lt;code >counts&lt;/code> &lt;code >updated&lt;/code> &lt;code >to&lt;/code> &lt;code >reflect&lt;/code> &lt;code >removal&lt;/code> of &lt;code >response&lt;/code> &lt;code >patterns&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >response_set&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >updated response set with removal of undesired response patterns&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >counts&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >updated counts to account for removal&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def trim_response_set_and_counts(response_sets, counts):
-&amp;#34;&amp;#34;&amp;#34;
-Trims all true or all false responses from the response set/counts.
+&amp;#34;&amp;#34;&amp;#34; Trims all true or all false responses from the response set/counts.
 Args:
 response_set: (2D array) response set by persons obtained by running
 numpy.unique
 counts: counts associated with response set
 Returns:
-response_set, counts updated to reflect removal of response patterns
+response_set: updated response set with removal of undesired response patterns
+counts: updated counts to account for removal
 &amp;#34;&amp;#34;&amp;#34;
 # Remove response sets where output is all true/false
 mask = ~(np.nanvar(response_sets, axis=0) == 0)
@@ -387,7 +390,8 @@ return response_sets, counts&lt;/code>&lt;/pre>
 &lt;span >def &lt;span class="ident" >irt_evaluation&lt;/span>&lt;/span>(&lt;span >difficulty, discrimination, thetas)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Evaluates an IRT model and returns the exact values.
+&lt;section class="desc" >&lt;p >Evaluation of unidimensional IRT model.&lt;/p>
+&lt;p >Evaluates an IRT model and returns the exact values.
 This function
 supports only unidimemsional models&lt;/p>
 &lt;p >Assumes the model
@@ -395,36 +399,33 @@ P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >[array] of difficulty parameters&lt;/dd>
+&lt;dd >(1d array) item difficulty parameters&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >discrimination&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >[array | number] of discrimination parameters&lt;/dd>
+&lt;dd >(1d array | number) item discrimination parameters&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >thetas&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >[array] of person abilities&lt;/dd>
+&lt;dd >(1d array) person abilities&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >dichotomous&lt;/code> &lt;code >matrix&lt;/code> of [&lt;code >difficulty.size&lt;/code> &lt;code >x&lt;/code> &lt;code >thetas.size&lt;/code>] &lt;code >representing&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >synthetic&lt;/code> &lt;code >data&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >probabilities&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) evaluation of sigmoid for given inputs&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def irt_evaluation(difficulty, discrimination, thetas):
-&amp;#34;&amp;#34;&amp;#34;
+&amp;#34;&amp;#34;&amp;#34; Evaluation of unidimensional IRT model.
 Evaluates an IRT model and returns the exact values. This function
 supports only unidimemsional models
 Assumes the model
 P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
 Args:
-difficulty: [array] of difficulty parameters
-discrimination: [array | number] of discrimination parameters
-thetas: [array] of person abilities
+difficulty: (1d array) item difficulty parameters
+discrimination: (1d array | number) item discrimination parameters
+thetas: (1d array) person abilities
 Returns:
-dichotomous matrix of [difficulty.size x thetas.size] representing
-synthetic data
+probabilities: (2d array) evaluation of sigmoid for given inputs
 &amp;#34;&amp;#34;&amp;#34;
 # If discrimination is a scalar, make it an array
 if np.atleast_1d(discrimination).size == 1:

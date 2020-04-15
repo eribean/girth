@@ -14,17 +14,21 @@
 &lt;/code>&lt;/dt>
 &lt;dd >
 &lt;section class="desc" >&lt;p >Creates correlated ability parameters based on an input correlation matrix.&lt;/p>
-&lt;p >This is a helper function for use in synthesizing multi-dimensional data&lt;/p>
+&lt;p >This is a helper function for use in synthesizing multi-dimensional data
+assuming multivariate normal distribution&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >correlation_matrix&lt;/code>&lt;/strong>&lt;/dt>
-&lt;dd >[2D Array, NxN] Symmetric matrix defining
+&lt;dd >(2d array) Symmetric matrix defining
 the correlation between the abilities&lt;/dd>
 &lt;dt >&lt;strong >&lt;code >n_participants&lt;/code>&lt;/strong>&lt;/dt>
 &lt;dd >number of participants to synthesize&lt;/dd>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
-&lt;p >[N, n_participants] array of ability parameters&lt;/p>&lt;/section>
+&lt;dl >
+&lt;dt >&lt;strong >&lt;code >abilities&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) correlated abilities&lt;/dd>
+&lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
 &lt;span >Expand source code&lt;/span>
@@ -32,12 +36,13 @@ the correlation between the abilities&lt;/dd>
 &lt;pre >&lt;code class="python" >def create_correlated_abilities(correlation_matrix, n_participants):
 &amp;#34;&amp;#34;&amp;#34; Creates correlated ability parameters based on an input correlation matrix.
 This is a helper function for use in synthesizing multi-dimensional data
+assuming multivariate normal distribution
 Args:
-correlation_matrix: [2D Array, NxN] Symmetric matrix defining
+correlation_matrix: (2d array) Symmetric matrix defining
 the correlation between the abilities
 n_participants: number of participants to synthesize
 Returns:
-[N, n_participants] array of ability parameters
+abilities: (2d array) correlated abilities
 &amp;#34;&amp;#34;&amp;#34;
 lower = np.linalg.cholesky(correlation_matrix)
 return lower @ np.random.randn(correlation_matrix.shape[0], n_participants)&lt;/code>&lt;/pre>
@@ -65,8 +70,8 @@ return lower @ np.random.randn(correlation_matrix.shape[0], n_participants)&lt;/
 &lt;span >def &lt;span class="ident" >create_synthetic_irt_dichotomous&lt;/span>&lt;/span>(&lt;span >difficulty, discrimination, thetas, guessing=0, seed=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Creates synthetic IRT data to test parameters estimation
-functions.
+&lt;section class="desc" >&lt;p >Creates dichotomous unidimensional synthetic IRT data.&lt;/p>
+&lt;p >Creates synthetic IRT data to test parameters estimation functions.&lt;br />
 Only for use with dichotomous outputs&lt;/p>
 &lt;p >Assumes the model
 P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))&lt;/p>
@@ -85,10 +90,8 @@ P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))&lt;/p>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >dichotomous&lt;/code> &lt;code >matrix&lt;/code> of [&lt;code >difficulty.size&lt;/code> &lt;code >x&lt;/code> &lt;code >thetas.size&lt;/code>] &lt;code >representing&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >synthetic&lt;/code> &lt;code >data&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >synthetic_data&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) realization of possible response given parameters&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
@@ -96,9 +99,9 @@ P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))&lt;/p>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
 guessing=0, seed=None):
-&amp;#34;&amp;#34;&amp;#34;
-Creates synthetic IRT data to test parameters estimation
-functions. Only for use with dichotomous outputs
+&amp;#34;&amp;#34;&amp;#34; Creates dichotomous unidimensional synthetic IRT data.
+Creates synthetic IRT data to test parameters estimation functions.
+Only for use with dichotomous outputs
 Assumes the model
 P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
 Args:
@@ -108,8 +111,7 @@ thetas: [array] of person abilities
 guessing: [array | number] of guessing parameters associated with items
 seed: Optional setting to reproduce results
 Returns:
-dichotomous matrix of [difficulty.size x thetas.size] representing
-synthetic data
+synthetic_data: (2d array) realization of possible response given parameters
 &amp;#34;&amp;#34;&amp;#34;
 if seed:
 np.random.seed(seed)
@@ -146,10 +148,7 @@ return random_compare &amp;lt;= continuous_output&lt;/code>&lt;/pre>
 &lt;span >def &lt;span class="ident" >create_synthetic_mirt_dichotomous&lt;/span>&lt;/span>(&lt;span >difficulty, discrimination, thetas, seed=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Creates synthetic multidimensional IRT data to test
-parameters estimation functions.
-Only for use with
-dichotomous outputs&lt;/p>
+&lt;section class="desc" >&lt;p >Creates dichotomous multidimensional synthetic IRT data.&lt;/p>
 &lt;p >Assumes the model
 P(theta) = 1.0 / (1 + exp(-1 * (dot(discrimination,theta) + difficulty)))&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
@@ -165,10 +164,8 @@ P(theta) = 1.0 / (1 + exp(-1 * (dot(discrimination,theta) + difficulty)))&lt;/p>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >dichotomous&lt;/code> &lt;code >matrix&lt;/code> of [&lt;code >difficulty.size&lt;/code> &lt;code >x&lt;/code> &lt;code >thetas.size&lt;/code>] &lt;code >representing&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >synthetic&lt;/code> &lt;code >data&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >synthetic_data&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) realization of possible response given parameters&lt;/dd>
 &lt;/dl>
 &lt;h2 id="example" >Example&lt;/h2>
 &lt;p >n_factors = 3
@@ -184,10 +181,7 @@ thetas = np.random.randn(n_factors, n_people)&lt;/p>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
 seed=None):
-&amp;#34;&amp;#34;&amp;#34;
-Creates synthetic multidimensional IRT data to test
-parameters estimation functions. Only for use with
-dichotomous outputs
+&amp;#34;&amp;#34;&amp;#34; Creates dichotomous multidimensional synthetic IRT data.
 Assumes the model
 P(theta) = 1.0 / (1 + exp(-1 * (dot(discrimination,theta) + difficulty)))
 Args:
@@ -196,8 +190,7 @@ discrimination: [2-D array, MxN] of discrimination parameters
 thetas: [2-D array, NxP] of person abilities
 seed: Optional setting to reproduce results
 Returns:
-dichotomous matrix of [difficulty.size x thetas.size] representing
-synthetic data
+synthetic_data: (2d array) realization of possible response given parameters
 Example:
 n_factors = 3
 n_items = 15
@@ -243,10 +236,8 @@ return random_compare &amp;lt;= continuous_output&lt;/code>&lt;/pre>
 &lt;span >def &lt;span class="ident" >create_synthetic_irt_polytomous&lt;/span>&lt;/span>(&lt;span >difficulty, discrimination, thetas, model='grm', seed=None)&lt;/span>
 &lt;/code>&lt;/dt>
 &lt;dd >
-&lt;section class="desc" >&lt;p >Creates synthetic IRT data to test parameters estimation
-functions.
-Creates polytomous output with specified number
-of levels from [1, levels]&lt;/p>
+&lt;section class="desc" >&lt;p >Creates polytomous unidimensional synthetic IRT data.&lt;/p>
+&lt;p >Creates polytomous output with specified number of levels from [1, levels]&lt;/p>
 &lt;h2 id="args" >Args&lt;/h2>
 &lt;dl >
 &lt;dt >&lt;strong >&lt;code >difficulty&lt;/code>&lt;/strong>&lt;/dt>
@@ -265,10 +256,8 @@ of levels from [1, levels]&lt;/p>
 &lt;/dl>
 &lt;h2 id="returns" >Returns&lt;/h2>
 &lt;dl >
-&lt;dt >&lt;code >dichotomous&lt;/code> &lt;code >matrix&lt;/code> of [&lt;code >difficulty.size&lt;/code> &lt;code >x&lt;/code> &lt;code >thetas.size&lt;/code>] &lt;code >representing&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
-&lt;dt >&lt;code >synthetic&lt;/code> &lt;code >data&lt;/code>&lt;/dt>
-&lt;dd >&amp;nbsp;&lt;/dd>
+&lt;dt >&lt;strong >&lt;code >synthetic_data&lt;/code>&lt;/strong>&lt;/dt>
+&lt;dd >(2d array) realization of possible response given parameters&lt;/dd>
 &lt;/dl>&lt;/section>
 &lt;details class="source" >
 &lt;summary >
@@ -276,10 +265,8 @@ of levels from [1, levels]&lt;/p>
 &lt;/summary>
 &lt;pre >&lt;code class="python" >def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
 model=&amp;#39;grm&amp;#39;, seed=None):
-&amp;#34;&amp;#34;&amp;#34;
-Creates synthetic IRT data to test parameters estimation
-functions. Creates polytomous output with specified number
-of levels from [1, levels]
+&amp;#34;&amp;#34;&amp;#34; Creates polytomous unidimensional synthetic IRT data.
+Creates polytomous output with specified number of levels from [1, levels]
 Args:
 difficulty: [2D array (items x n_levels-1)] of difficulty parameters
 discrimination: [array | number] of discrimination parameters
@@ -290,8 +277,7 @@ model: [&amp;#34;grm&amp;#34;, &amp;#34;pcm&amp;#34;, &amp;#34;gum&amp;#34;] str
 &amp;#39;gum&amp;#39;: Generalized Graded Unfolding Model
 seed: Optional setting to reproduce results
 Returns:
-dichotomous matrix of [difficulty.size x thetas.size] representing
-synthetic data
+synthetic_data: (2d array) realization of possible response given parameters
 &amp;#34;&amp;#34;&amp;#34;
 difficulty = np.atleast_2d(difficulty)
 n_items, n_levels = difficulty.shape
@@ -322,11 +308,12 @@ thetas, level_scratch[1:, :])
 np.cumsum(level_scratch[1:, :], axis=0, out=level_scratch[1:, :])
 level_scratch[0] = np.random.rand(thetas.size)
 # Discritize the outputs based on the thresholds
-output[item_ndx] = np.apply_along_axis(_my_digitize, axis=0, arr=level_scratch)
+output[item_ndx] = np.apply_along_axis(
+_my_digitize, axis=0, arr=level_scratch)
 # Add 1 to return [1, n_levels]
 output += 1
-np.clip(output, 0, clip_high, out=output)
-return output &lt;/code>&lt;/pre>
+np.clip(output, 1, clip_high, out=output)
+return output&lt;/code>&lt;/pre>
 &lt;/details>
 &lt;/dd>
 &lt;/dl>

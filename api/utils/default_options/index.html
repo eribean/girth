@@ -29,17 +29,18 @@ evaluated at quadrature points, p = f(theta).
 numerical integration. Default = (-5, 5)</dd><dt><strong><code>quadrature_n</code></strong></dt><dd>[int] number of quadrature points to use
 Default = 61</dd></dl></section><details class=source><summary><span>Expand source code</span></summary><pre><code class=python>def default_options():
     &#34;&#34;&#34; Dictionary of options used in Girth.
-        Args:
-            max_iteration: [int] maximum number of iterations
-                allowed during processing. (Default = 25)
-            distribution: [callable] function that returns a pdf
-                evaluated at quadrature points, p = f(theta).
-                (Default = scipy.stats.norm(0, 1).pdf)
-            quadrature_bounds: (lower, upper) bounds to limit
-                numerical integration. Default = (-5, 5)
-            quadrature_n: [int] number of quadrature points to use
-                          Default = 61
-    &#34;&#34;&#34;
+
+    Args:
+        max_iteration: [int] maximum number of iterations
+            allowed during processing. (Default = 25)
+        distribution: [callable] function that returns a pdf
+            evaluated at quadrature points, p = f(theta).
+            (Default = scipy.stats.norm(0, 1).pdf)
+        quadrature_bounds: (lower, upper) bounds to limit
+            numerical integration. Default = (-5, 5)
+        quadrature_n: [int] number of quadrature points to use
+                        Default = 61
+&#34;&#34;&#34;
     return {&#34;max_iteration&#34;: 25,
             &#34;distribution&#34;: gaussian(0, 1).pdf,
             &#34;quadrature_bounds&#34;: (-5, 5),

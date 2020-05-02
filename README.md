@@ -5,6 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory Package
+
+[![GIRTH](https://eribean.github.io/girth/featured-background_hubf3811d606e709c4b8d3b39f7338865e_285315_960x540_fill_q75_catmullrom_top.jpg)](https://eribean.github.io/girth/)
+
 Girth is a python package for estimating item response theory (IRT) parameters.  In addition, synthetic IRT data generation is supported. Below is a list of available functions, for more information visit the GIRTH [homepage](https://eribean.github.io/girth/).
 
 

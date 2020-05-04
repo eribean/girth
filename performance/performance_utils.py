@@ -30,6 +30,7 @@ def _validate_options(option_dict):
     """Validates options of performance."""
 
     _set_default(option_dict, "Processor_count", 1)
+    _set_default(option_dict, "Chunksize", 20)
 
     if option_dict["Processor_count"] in [-1, -2]:
         cpu_count = (multiprocessing.cpu_count() // 

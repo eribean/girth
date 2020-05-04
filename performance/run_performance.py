@@ -3,6 +3,7 @@ import json
 import argparse
 import multiprocessing
 from functools import partial
+from itertools import product, starmap, repeat
 from time import time
 from os import path
 
@@ -68,7 +69,8 @@ def create_item_parameters(analysis_dict):
     return discrimination, difficulty
 
 
-def create_synthetic_data(difficulty, discrimination, analysis_dict, ndx):
+def create_synthetic_data(difficulty, discrimination, analysis_dict, 
+                          ability_ndx, trial_ndx):
     """ Creates the synthetic data to run metrics on.
 
         Args:
@@ -77,11 +79,11 @@ def create_synthetic_data(difficulty, discrimination, analysis_dict, ndx):
         Returns:
             Iterator that yields a synthetic dataset 
     """
-    seed = analysis_dict['Seed'] + 1 + ndx
+    seed = analysis_dict['Seed'] + 1 + ability_ndx
 
     ability = scipy_stats_string_to_functions(analysis_dict['Ability_pdf'],
                                               analysis_dict['Ability_pdf_args'])
-    ability_counts = analysis_dict['Ability_count'][ndx]
+    ability_counts = analysis_dict['Ability_count'][ability_ndx]
 
     if analysis_dict['Type'].lower() == "dichotomous":
         func = partial(girth.create_synthetic_irt_dichotomous,
@@ -92,28 +94,37 @@ def create_synthetic_data(difficulty, discrimination, analysis_dict, ndx):
         
         func = partial(girth.create_synthetic_irt_polytomous,
                        difficulty=difficulty, discrimination=discrimination,
-                       model=poly_type) 
+                       model=poly_type)
+    
+    # Fast forward the random seed to make sure
+    # results are replicable
+    seed += trial_ndx[0]
 
-    for _ in range(analysis_dict['Trials']):
+    for _ in range(trial_ndx[0], trial_ndx[1]):
         seed += 1
-        thetas = ability.rvs(size=ability_counts)
+        thetas = ability.rvs(size=ability_counts, random_state=2*seed)
         yield func(thetas=thetas, seed=seed)
 
 
-def gather_metrics(analysis, synthesis, ndx):
+def gather_metrics(synthesis_key, ability_ndx, trial_ndx, config_dict):
     """ Runs the synthetic data creation
  
         Args:
-            analysis: Dictionary of analysis parameters
-            synthesis: Dictionary of synthesis parameters
-            ndx: integer into ability count
+            synthesis_key: Dictionary key into synthesis parameters
+            ability_ndx: Index into ability count
+            trial_ndx: integer into ability count
+            config_dict: dictionary of run parameters
         
         Returns:
-            dictionary of metrics for run 
+            dictionary of metrics for run for the trial nds
     """
+    analysis = config_dict['Analysis']
+    synthesis = config_dict['Synthesis'][synthesis_key]
+
     alpha, beta = create_item_parameters(analysis)
 
-    datasets = create_synthetic_data(beta, alpha, analysis, ndx)
+    datasets = create_synthetic_data(beta, alpha, analysis,
+                                     ability_ndx, trial_ndx)
 
     estimate_func = girth.__dict__[synthesis['Model']]
 
@@ -137,9 +148,18 @@ def gather_metrics(analysis, synthesis, ndx):
             rmse_alpha.append(np.abs(alpha))
             value = np.sqrt(np.nanmean(np.square(otpt[0] - beta)))
             rmse_beta.append(value)           
-    
+
     # Package outputs
-    count = analysis['Ability_count'][ndx]
+    count = analysis['Ability_count'][ability_ndx]
+    return {"key": synthesis_key,
+            "count": count,
+            "data": {'alpha': rmse_alpha,
+                     'beta': rmse_beta,
+                     'time': time_counts}}
+
+
+def compute_statistics(synthesis_key, ability_count, results_dict):
+    """Filters the results and recombines, then takes statistics."""
     def _statistics(input_array):
         return {'max': np.max(input_array),
                 'min': np.min(input_array),
@@ -148,10 +168,16 @@ def gather_metrics(analysis, synthesis, ndx):
                 'quartile_1': np.percentile(input_array, 25),
                 'quartile_2': np.percentile(input_array, 75)}
 
-    output = {count: {'alpha': _statistics(rmse_alpha),
-                      'beta': _statistics(rmse_beta),
-                      'time': _statistics(time_counts)}}    
-    return output
+    dataset = list(filter(lambda x: (x['key'] == synthesis_key) & (x['count'] == ability_count), 
+                          results_dict))
+    
+    rmse_alpha = np.concatenate([x['data']['alpha'] for x in dataset])
+    rmse_beta = np.concatenate([x['data']['beta'] for x in dataset])
+    time_counts = np.concatenate([x['data']['time'] for x in dataset])
+
+    return {ability_count: {'alpha': _statistics(rmse_alpha),
+                            'beta': _statistics(rmse_beta),
+                            'time': _statistics(time_counts)}} 
 
 
 if __name__ == '__main__':
@@ -167,38 +193,45 @@ if __name__ == '__main__':
 
     with open(args.config, 'r') as fptr:
         config_dict = json.load(fptr)
-    
+    t1 = time()
     # Make sure values are working
     config_dict = validate_performance_dict(config_dict)
 
     # get the appropriate map function
     processor_count = config_dict['Options']['Processor_count']
-    map_func = map
+    map_func = starmap
     if processor_count > 1:
-        map_func = multiprocessing.Pool(processes=processor_count).map
+        map_func = multiprocessing.Pool(processes=processor_count).starmap
 
-    # sort items from largest to smallest
-    ability_counts = config_dict["Analysis"]["Ability_count"]
-    ability_counts.sort(reverse=True)
-    ability_length = len(ability_counts)
+    # Create the interation indices for the chunks
+    number_of_trials = (1 + config_dict['Analysis']['Trials'] // 
+                        config_dict['Options']['Chunksize'])
+
+    trial_chunks = np.linspace(0, config_dict['Analysis']['Trials'], 
+                               number_of_trials, dtype=int)
+    trial_chunks = list(zip(trial_chunks[:-1], trial_chunks[1:]))
+    synthesis_keys = config_dict['Synthesis'].keys()
+
+    chunks = product(synthesis_keys, range(len(config_dict['Analysis']['Ability_count'])), 
+                     trial_chunks)
 
     print(f"Using {config_dict['Options']['Processor_count']} processors\n")
+    print(f"Processing {len(synthesis_keys)*len(config_dict['Analysis']['Ability_count']) * len(trial_chunks)} chunks")
 
+    # Process the outputs
+    function_call = partial(gather_metrics, config_dict=config_dict)
+    results = map_func(function_call, chunks)    
+    results = list(results)
+
+    # Combine statistics for all the data
     results_dict = dict()
-    # Loop over synthesis arguments
-    for key, synthesis in config_dict['Synthesis'].items():
-        print(f"Start processing on {key}")
-        results_dict[key] = {}
-        
-        # This function will be evaluted at each ability count
-        run_func = partial(gather_metrics, config_dict['Analysis'],
-                           synthesis)
-    
-        results = map_func(run_func, range(ability_length))
-    
-        for ndx, result in enumerate(results):
-            results_dict[key].update(result)
-    
+    for synthesis_key in synthesis_keys:
+        results_dict[synthesis_key] = dict()
+        for ability_count in config_dict['Analysis']['Ability_count']:
+            results_stats = compute_statistics(synthesis_key, ability_count, results)
+            results_dict[synthesis_key].update(results_stats)
+
+    # Add the truth datasets
     alpha, beta = create_item_parameters(config_dict['Analysis'])
     results_dict['Truth'] = {'alpha': alpha.tolist(),
                              'beta': beta.tolist()}   
@@ -208,3 +241,5 @@ if __name__ == '__main__':
     
     with open(output_file, 'w') as fptr:
         json.dump(results_dict, fptr, indent=4)
+    
+    print(f"Total processing time = {time() - t1}")

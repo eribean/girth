@@ -151,7 +151,7 @@ def twopl_mml(dataset, options=None):
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
 
-    for iteration in range(options['quadrature_n']):
+    for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
 
         # Quadrature evaluation for values that do not change

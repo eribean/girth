@@ -43,7 +43,7 @@ class TestJointMaximum(unittest.TestCase):
         expected_output = np.array([-1.70585219, -1.03551581,
                                     -0.09329877,  0.92320069,  1.77063402])
 
-        np.testing.assert_allclose(expected_output, output[1])
+        np.testing.assert_allclose(expected_output, output[1], 1e-3)
         self.assertAlmostEqual(1.5316042, output[0])
 
 
@@ -65,8 +65,8 @@ class TestJointMaximum(unittest.TestCase):
         betas = np.array([-6., -0.39644246, -0.00862153,
                           0.3869096, 6.])
 
-        np.testing.assert_allclose(alphas, output[0])
-        np.testing.assert_allclose(betas, output[1], rtol=1e-5)
+        np.testing.assert_allclose(alphas, output[0], rtol=1e-3)
+        np.testing.assert_allclose(betas, output[1], rtol=1e-3)
 
 
 class TestPolytomousJMLMethods(unittest.TestCase):
@@ -103,8 +103,8 @@ class TestPolytomousJMLMethods(unittest.TestCase):
                           [-0.47923614,  0.31797999,  0.89676892],
                           [-0.67769087,  0.49737400,      np.nan]])
 
-        np.testing.assert_allclose(alphas, output[0], rtol=1e-5)
-        np.testing.assert_allclose(betas, output[1], rtol=1e-5)
+        np.testing.assert_allclose(alphas, output[0], rtol=1e-3)
+        np.testing.assert_allclose(betas, output[1], rtol=1e-3)
 
     def test_partial_credit_jml_regression(self):
         """Testing joint maximum partial credit model."""
@@ -119,15 +119,15 @@ class TestPolytomousJMLMethods(unittest.TestCase):
         output = pcm_jml(syn_data)
 
         # Expected Outputs (Basically a smoke test)
-        alphas = np.array([0.41826845, 4., 0.356021, 0.42943596, 4.])
-        betas = [[ 6.        , -1.83001522,  0.57618678],
-                 [-1.34063596, -0.36478777,  0.3783891 ],
-                 [ 3.32583095, -1.63422385,  0.93340261],
-                 [ 2.58060883, -3.65355207,  1.80558368],
-                 [ 0.55722762,  1.01035413,  0.74398657]]
+        alphas = np.array([0.41826845, 4., 0.356021, 0.429537, 4.])
+        betas = [[ 6.,         -1.83001497,  0.57618739],
+                 [-1.34063642, -0.36478753,  0.3783893 ],
+                 [ 3.32581876, -1.63421762,  0.93340153],
+                 [ 2.57971531, -3.65201053,  1.80513887],
+                 [ 0.55722782,  1.01035442,  0.74398655]]
 
-        np.testing.assert_allclose(alphas, output[0], atol=1e-4)
-        np.testing.assert_allclose(betas, output[1], atol=1e-4)
+        np.testing.assert_allclose(alphas, output[0], rtol=1e-3)
+        np.testing.assert_allclose(betas, output[1], rtol=1e-3)
         
 
 if __name__ == '__main__':

@@ -79,10 +79,6 @@ def ability_3pl_map(dataset, difficulty, discrimination,
     options = validate_estimation_options(options)
     distribution = options['distribution']
 
-    if np.atleast_1d(discrimination).size == 1:
-        discrimination = np.full(dataset.shape[0], discrimination,
-                                 dtype="float")
-
     n_takers = dataset.shape[1]
     the_sign = convert_responses_to_kernel_sign(dataset)
     thetas = np.zeros((n_takers,))
@@ -134,14 +130,6 @@ def ability_3pl_eap(dataset, difficulty, discrimination,
     options = validate_estimation_options(options)
     quad_start, quad_stop = options['quadrature_bounds']
     quad_n = options['quadrature_n']
-
-    # Fill guessing parameters if not set
-    if np.any(guessing == None):
-        guessing = np.zeros_like(difficulty)
-
-    if np.atleast_1d(discrimination).size == 1:
-        discrimination = np.full(dataset.shape[0], discrimination,
-                                 dtype='float')
 
     the_sign = convert_responses_to_kernel_sign(dataset)
 

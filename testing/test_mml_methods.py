@@ -387,11 +387,8 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
                                      result[2]).mean())
 
         self.assertAlmostEqual(rmse_discrimination, 0.3709931291, places=5)
-        self.assertAlmostEqual(rmse_delta, 1.18368786, places=5)
+        self.assertAlmostEqual(rmse_delta, 1.18368282, places=5)
         self.assertAlmostEqual(rmse_tau, 0.6406162162, places=5)
-
-
-
 
 
 if __name__ == '__main__':

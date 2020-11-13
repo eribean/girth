@@ -84,7 +84,7 @@ def threepl_full(dataset, options=None):
                                             guessing[item_ndx, None]))
 
             fmin_slsqp(min_func_local, initial_guess, disp=False,
-                       bounds=[(0.25, 4), (-4, 4), (0., 0.33)])
+                       bounds=[(0.25, 4), (-6, 6), (0., 0.33)])
 
             # Update the partial integral based on the new found values
             estimate_int = _compute_partial_integral_3pl(theta, difficulty[item_ndx, None],

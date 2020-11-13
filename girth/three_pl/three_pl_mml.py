@@ -89,7 +89,7 @@ def threepl_mml(dataset, options=None):
             # Solve for the discrimination parameters
             initial_guess = [discrimination[ndx], guessing[ndx]]
             fmin_slsqp(min_func_local, initial_guess, 
-                       bounds=([0.25, 6], [0, .33]), iprint=False)
+                       bounds=([0.25, 4], [0, .33]), iprint=False)
 
             # Update the partial integral based on the new found values
             estimate_int = _compute_partial_integral_3pl(theta, difficulty[ndx, None],

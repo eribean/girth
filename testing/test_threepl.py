@@ -40,8 +40,8 @@ class TestMMLThreePLMethods(unittest.TestCase):
 
         np.testing.assert_allclose(
             expected_discrimination, output[0], rtol=1e-4)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-4)
-        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-4)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-3)
+        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-3)
 
     def test_twopl_regression_full(self):
         """Testing twopl full methods."""
@@ -55,8 +55,8 @@ class TestMMLThreePLMethods(unittest.TestCase):
 
         np.testing.assert_allclose(
             expected_discrimination, output[0], rtol=1e-4)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-4)
-        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-4)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-3)
+        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-3)
 
 
 class TestAbilityEstimates3PL(unittest.TestCase):
@@ -90,10 +90,10 @@ class TestAbilityEstimates3PL(unittest.TestCase):
         minimum = np.nanmin(recovered_theta)
         maximum = np.nanmax(recovered_theta)
 
-        self.assertAlmostEqual(mean, -0.088980088, places=4)
-        self.assertAlmostEqual(std, 1.572094414, places=4)
-        self.assertAlmostEqual(minimum, -5.999995, places=4)
-        self.assertAlmostEqual(maximum, 3.2975309, places=4)
+        self.assertAlmostEqual(mean, -0.088980088, places=3)
+        self.assertAlmostEqual(std, 1.572094414, places=3)
+        self.assertAlmostEqual(minimum, -5.999995, places=3)
+        self.assertAlmostEqual(maximum, 3.2975309, places=3)
 
     def test_ability_map(self):
         """Testing Maximum A Posteriori."""
@@ -108,10 +108,10 @@ class TestAbilityEstimates3PL(unittest.TestCase):
         minimum = np.nanmin(recovered_theta)
         maximum = np.nanmax(recovered_theta)
 
-        self.assertAlmostEqual(mean, 0.0348392, places=4)
-        self.assertAlmostEqual(std,0.71308818659, places=4)
-        self.assertAlmostEqual(minimum, -1.7259849459, places=4)
-        self.assertAlmostEqual(maximum, 1.64162059967, places=4)
+        self.assertAlmostEqual(mean, 0.0348392, places=3)
+        self.assertAlmostEqual(std,0.71308818659, places=3)
+        self.assertAlmostEqual(minimum, -1.7259849459, places=3)
+        self.assertAlmostEqual(maximum, 1.64162059967, places=3)
 
     def test_ability_eap(self):
         """Testing Expected A Posteriori."""
@@ -126,10 +126,10 @@ class TestAbilityEstimates3PL(unittest.TestCase):
         minimum = np.nanmin(recovered_theta)
         maximum = np.nanmax(recovered_theta)
 
-        self.assertAlmostEqual(mean, 0.004648932, places=4)
-        self.assertAlmostEqual(std, 0.732529437, places=4)
-        self.assertAlmostEqual(minimum, -1.7767052989, places=4)
-        self.assertAlmostEqual(maximum, 1.67935964, places=4)
+        self.assertAlmostEqual(mean, 0.004648932, places=3)
+        self.assertAlmostEqual(std, 0.732529437, places=3)
+        self.assertAlmostEqual(minimum, -1.7767052989, places=3)
+        self.assertAlmostEqual(maximum, 1.67935964, places=3)
 
 
 if __name__ == '__main__':

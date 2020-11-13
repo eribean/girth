@@ -54,7 +54,7 @@ class TestMMLThreePLMethods(unittest.TestCase):
                                    1.817438e-01])
 
         np.testing.assert_allclose(
-            expected_discrimination, output[0], rtol=1e-4)
+            expected_discrimination, output[0], rtol=1e-3)
         np.testing.assert_allclose(expected_output, output[1], rtol=1e-3)
         np.testing.assert_allclose(expected_guess, output[2], rtol=1e-3)
 

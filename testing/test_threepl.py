@@ -39,9 +39,9 @@ class TestMMLThreePLMethods(unittest.TestCase):
                                    1.818037e-01])
 
         np.testing.assert_allclose(
-            expected_discrimination, output[0], rtol=1e-2)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-2)
-        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-2)
+            expected_discrimination, output[0], rtol=1e-2, atol=1e-2)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-2, atol=1e-2)
+        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-2, atol=1e-2)
 
     def test_twopl_regression_full(self):
         """Testing twopl full methods."""
@@ -54,9 +54,9 @@ class TestMMLThreePLMethods(unittest.TestCase):
                                    1.817438e-01])
 
         np.testing.assert_allclose(
-            expected_discrimination, output[0], rtol=1e-2)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-2)
-        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-2)
+            expected_discrimination, output[0], rtol=1e-2, atol=1e-2)
+        np.testing.assert_allclose(expected_output, output[1], rtol=1e-2, atol=1e-2)
+        np.testing.assert_allclose(expected_guess, output[2], rtol=1e-2, atol=1e-2)
 
 
 class TestAbilityEstimates3PL(unittest.TestCase):

@@ -16,7 +16,7 @@ def default_options():
             numerical integration. Default = (-5, 5)
         quadrature_n: [int] number of quadrature points to use
                         Default = 61
-"""
+    """
     return {"max_iteration": 25,
             "distribution": gaussian(0, 1).pdf,
             "quadrature_bounds": (-5, 5),

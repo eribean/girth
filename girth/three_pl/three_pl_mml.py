@@ -6,40 +6,7 @@ from girth import (validate_estimation_options, get_true_false_counts,
                    convert_responses_to_kernel_sign)
 from girth.mml_methods import _mml_abstract
 from girth.utils import _get_quadrature_points
-
-
-def _compute_partial_integral_local(theta, difficulty, discrimination, the_sign, guessing):
-    """
-    Computes the partial integral for a set of item parameters
-
-    Args:
-        theta: (array) evaluation points
-        difficulty: (array) set of difficulty parameters
-        discrimination: (array | number) set of discrimination parameters
-        the_sign:  (array) positive or negative sign
-                            associated with response vector
-
-    Returns:
-        partial_integral: (2d array) 
-            integration of items defined by "sign" parameters
-            axis 0: individual persons
-            axis 1: evaluation points (at theta)
-
-    Notes:
-        Implicitly multiplies the data by the gaussian distribution
-    """
-    # This represents a 3-dimensional array
-    # [Response Set, Person, Theta]
-    # The integration happens over response set and the result is an
-    # array of [Person, Theta]
-    kernel = the_sign[:, :, None] * np.ones((1, 1, theta.size))
-    kernel *= discrimination[:, None, None]
-    kernel *= (theta[None, None, :] - difficulty[:, None, None])
-    
-    otpt = (1.0 / (1.0 + np.exp(kernel))) * (1 - guessing[:, None, None])
-    otpt += 0.5 * (1 - the_sign[:, :, None]) * guessing[:, None, None]
-
-    return otpt.prod(axis=0).squeeze()
+from girth.three_pl.three_pl_utils import _compute_partial_integral_3pl
 
 
 def threepl_mml(dataset, options=None):
@@ -86,17 +53,18 @@ def threepl_mml(dataset, options=None):
 
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
-        partial_int = _compute_partial_integral_local(theta, difficulty,
-                                                discrimination, the_sign, guessing)
+        partial_int = _compute_partial_integral_3pl(theta, difficulty,
+                                                discrimination, guessing, the_sign)
         partial_int *= distribution
 
         for ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
 
             # remove contribution from current item
-            local_int = _compute_partial_integral_local(theta, difficulty[ndx, None],
-                                                  discrimination[ndx, None], the_sign[ndx, None],
-                                                  guessing[ndx, None])
+            local_int = _compute_partial_integral_3pl(theta, difficulty[ndx, None],
+                                                  discrimination[ndx, None], 
+                                                  guessing[ndx, None],
+                                                  the_sign[ndx, None])
 
             partial_int /= local_int
 
@@ -107,10 +75,10 @@ def threepl_mml(dataset, options=None):
                 local_scalar[0, 0] = (scalar[ndx] - guessing[ndx]) / (1. - guessing[ndx])
                 _mml_abstract(difficulty[ndx, None], local_scalar,
                               discrimination[ndx, None], theta, distribution, options)
-                estimate_int = _compute_partial_integral_local(theta, difficulty[ndx, None],
+                estimate_int = _compute_partial_integral_3pl(theta, difficulty[ndx, None],
                                                          discrimination[ndx, None],
-                                                         the_sign[ndx, None],
-                                                         guessing[ndx, None])
+                                                         guessing[ndx, None],
+                                                         the_sign[ndx, None])
 
                 estimate_int *= partial_int
                 otpt = integrate.fixed_quad(
@@ -124,13 +92,12 @@ def threepl_mml(dataset, options=None):
                        bounds=([0.25, 6], [0, .33]), iprint=False)
 
             # Update the partial integral based on the new found values
-            estimate_int = _compute_partial_integral_local(theta, difficulty[ndx, None],
+            estimate_int = _compute_partial_integral_3pl(theta, difficulty[ndx, None],
                                                      discrimination[ndx, None],
-                                                     the_sign[ndx, None], guessing[ndx, None])
+                                                     guessing[ndx, None], 
+                                                     the_sign[ndx, None])
             # update partial integral
             partial_int *= estimate_int
-
-    
 
         if np.abs(discrimination - previous_discrimination).max() < 1e-3:
             break

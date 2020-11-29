@@ -195,49 +195,51 @@ def _get_quadrature_points(n, a, b):
     Returns:
         quadrature_points: (1d array) quadrature_points for 
                            numerical integration
+        weights: (1d array) quadrature weights
 
     Notes:
         A local function of the based fixed_quad found in scipy, this is
         done for processing optimization
     """
-    x, _ = roots_legendre(n)
+    x, w = roots_legendre(n)
     x = np.real(x)
 
     # Legendre domain is [-1, 1], convert to [a, b]
-    return (b - a) * (x + 1) * 0.5 + a
+    scalar = (b - a) * 0.5
+    return scalar * (x + 1) + a, scalar * w
 
 
-def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
-    """
-    Computes the partial integral for a set of item parameters
+# def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
+#     """
+#     Computes the partial integral for a set of item parameters
 
-    Args:
-        theta: (array) evaluation points
-        difficulty: (array) set of difficulty parameters
-        discrimination: (array | number) set of discrimination parameters
-        the_sign:  (array) positive or negative sign
-                            associated with response vector
+#     Args:
+#         theta: (array) evaluation points
+#         difficulty: (array) set of difficulty parameters
+#         discrimination: (array | number) set of discrimination parameters
+#         the_sign:  (array) positive or negative sign
+#                             associated with response vector
 
-    Returns:
-        partial_integral: (2d array) 
-            integration of items defined by "sign" parameters
-            axis 0: individual persons
-            axis 1: evaluation points (at theta)
+#     Returns:
+#         partial_integral: (2d array) 
+#             integration of items defined by "sign" parameters
+#             axis 0: individual persons
+#             axis 1: evaluation points (at theta)
 
-    Notes:
-        Implicitly multiplies the data by the gaussian distribution
-    """
-    # Size single discrimination into full array
-    if np.atleast_1d(discrimination).size == 1:
-        discrimination = np.full(the_sign.shape[0], discrimination,
-                                 dtype='float')
+#     Notes:
+#         Implicitly multiplies the data by the gaussian distribution
+#     """
+#     # Size single discrimination into full array
+#     if np.atleast_1d(discrimination).size == 1:
+#         discrimination = np.full(the_sign.shape[0], discrimination,
+#                                  dtype='float')
 
-    # This represents a 3-dimensional array
-    # [Response Set, Person, Theta]
-    # The integration happens over response set and the result is an
-    # array of [Person, Theta]
-    kernel = the_sign[:, :, None] * np.ones((1, 1, theta.size))
-    kernel *= discrimination[:, None, None]
-    kernel *= (theta[None, None, :] - difficulty[:, None, None])
+#     # This represents a 3-dimensional array
+#     # [Response Set, Person, Theta]
+#     # The integration happens over response set and the result is an
+#     # array of [Person, Theta]
+#     kernel = the_sign[:, :, None] * np.ones((1, 1, theta.size))
+#     kernel *= discrimination[:, None, None]
+#     kernel *= (theta[None, None, :] - difficulty[:, None, None])
 
-    return (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
+#     return (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()

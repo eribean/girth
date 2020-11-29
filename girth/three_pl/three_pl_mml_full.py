@@ -36,7 +36,7 @@ def threepl_full(dataset, options=None):
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
-    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    theta, _ = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
 
     discrimination = np.ones((n_items,))

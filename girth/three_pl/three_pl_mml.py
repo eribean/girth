@@ -38,8 +38,9 @@ def threepl_mml(dataset, options=None):
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
     the_sign = convert_responses_to_kernel_sign(unique_sets)
 
-    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
+    distribution_x_weights = distribution * weights
 
     # Perform the minimization
     discrimination = np.ones((n_items,))
@@ -74,7 +75,7 @@ def threepl_mml(dataset, options=None):
                 
                 local_scalar[0, 0] = (scalar[ndx] - guessing[ndx]) / (1. - guessing[ndx])
                 _mml_abstract(difficulty[ndx, None], local_scalar,
-                              discrimination[ndx, None], theta, distribution, options)
+                              discrimination[ndx, None], theta, distribution_x_weights)
                 estimate_int = _compute_partial_integral_3pl(theta, difficulty[ndx, None],
                                                          discrimination[ndx, None],
                                                          guessing[ndx, None],

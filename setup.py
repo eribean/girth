@@ -12,7 +12,8 @@ if __name__ == '__main__':
     setup(
         name="girth", 
         packages=['girth', 'girth.performance', 'girth.three_pl'],
-        package_dir={'girth': 'girth', 
+        package_dir={'girth': 'girth',
+                     'girth.three_pl': convert_path('./three_pl'),
                      'girth.performance':convert_path('./performance')},
         version="0.2",
         license="MIT",
@@ -24,7 +25,7 @@ if __name__ == '__main__':
         url = 'https://eribean.github.io/girth/',
         download_url = 'https://github.com/eribean/girth/archive/0.2.tar.gz',
         keywords = ['IRT', 'Psychometrics', 'Item Response Theory'],
-        install_requires = ['numpy', 'scipy'],
+        install_requires = ['numpy', 'scipy', 'numba'],
         classifiers = [
             'Development Status :: 3 - Alpha',
             'Intended Audience :: Science/Research',

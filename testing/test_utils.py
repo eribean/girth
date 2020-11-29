@@ -10,8 +10,8 @@ from girth import (create_synthetic_irt_dichotomous,
                    convert_responses_to_kernel_sign,
                    validate_estimation_options, condition_polytomous_response,
                    get_true_false_counts, mml_approx)
-from girth.utils import (_get_quadrature_points, _compute_partial_integral,
-                         default_options)
+from girth.utils import _get_quadrature_points, default_options
+from girth.numba_functions import _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral,
                                     _unfold_partial_integral)
@@ -53,11 +53,12 @@ class TestUtilitiesMethods(unittest.TestCase):
         n_points = 11
 
         # A smoke test to make sure it's running properly
-        quad_points = _get_quadrature_points(n_points, -1, 1)
+        quad_points, weights = _get_quadrature_points(n_points, -1, 1)
 
-        x, _ = roots_legendre(n_points)
+        x, w = roots_legendre(n_points)
 
         np.testing.assert_allclose(x, quad_points)
+        np.testing.assert_allclose(w, weights)
 
     def test_partial_integration_single(self):
         """Tests the integration quadrature function."""
@@ -66,46 +67,18 @@ class TestUtilitiesMethods(unittest.TestCase):
         np.random.seed(154)
 
         discrimination = 1.32
-        difficuly = np.linspace(-1.3, 1.3, 5)
-        the_sign = (-1)**np.random.randint(low=0, high=2, size=(5, 1))
+        difficulty = .67
+        the_sign = (-1)**np.random.randint(low=0, high=2, size=(1, 10))
 
-        quad_points = _get_quadrature_points(61, -6, 6)
-        dataset = _compute_partial_integral(quad_points, difficuly, discrimination,
-                                            the_sign)
+        quad_points, _ = _get_quadrature_points(61, -6, 6)
+        the_output = np.zeros((the_sign.shape[1], quad_points.size))        
+        value = _compute_partial_integral(quad_points, difficulty, 
+                                          discrimination, the_sign[0],
+                                          the_output)
 
-        value = integrate.fixed_quad(lambda x: dataset, -6, 6, n=61)[0]
-
-        discrrm = discrimination * the_sign * -1
-        xx = np.linspace(-6, 6, 5001)
-        yy = irt_evaluation(difficuly, discrrm.squeeze(), xx)
-        yy = yy.prod(axis=0)
-        expected = yy.sum() * 12 / 5001
-
-        self.assertAlmostEqual(value, expected.sum(), places=3)
-
-    def test_partial_integration_array(self):
-        """Tests the integration quadrature function on array."""
-
-        # Set seed for repeatability
-        np.random.seed(121)
-
-        discrimination = np.random.rand(5) + 0.5
-        difficuly = np.linspace(-1.3, 1.3, 5)
-        the_sign = (-1)**np.random.randint(low=0, high=2, size=(5, 1))
-
-        quad_points = _get_quadrature_points(61, -6, 6)
-        dataset = _compute_partial_integral(quad_points, difficuly, discrimination,
-                                            the_sign)
-
-        value = integrate.fixed_quad(lambda x: dataset, -6, 6, n=61)[0]
-
-        discrrm = discrimination * the_sign.squeeze() * -1
-        xx = np.linspace(-6, 6, 5001)
-        yy = irt_evaluation(difficuly, discrrm, xx)
-        yy = yy.prod(axis=0)
-        expected = yy.sum() * 12 / 5001
-
-        self.assertAlmostEqual(value, expected.sum(), places=3)
+        discrrm = discrimination * the_sign
+        expected = 1.0 / (1 + np.exp(np.outer(discrrm, (quad_points - difficulty))))
+        np.testing.assert_allclose(value, expected)
 
     def test_trim_response_set(self):
         """Testing trim of all yes/no values."""
@@ -266,7 +239,7 @@ class TestPolytomousUtilities(unittest.TestCase):
         n1 = np.count_nonzero(syn_data, axis=1)
         ratio = n1 / (n1 + n0)
 
-        theta = _get_quadrature_points(61, -5, 5)
+        theta, _ = _get_quadrature_points(61, -5, 5)
         distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
         results = _solve_integral_equations(
             discrimination, ratio, distribution, theta)
@@ -274,7 +247,7 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_graded_partial_integral(self):
         """Testing the partial integral in the graded model."""
-        theta = _get_quadrature_points(61, -5, 5)
+        theta, _ = _get_quadrature_points(61, -5, 5)
         responses = np.random.randint(0, 3, (10, 100))
         betas = np.array([-10000, -.3, 0.1, 1.2])
         betas_roll = np.roll(betas, -1)
@@ -298,7 +271,7 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_credit_partial_integration(self):
         """Testing the partial integral in the graded model."""
-        theta = _get_quadrature_points(61, -5, 5)
+        theta, _ = _get_quadrature_points(61, -5, 5)
         response_set = np.array([0, 1, 2, 2, 1, 0, 3, 1, 3, 2, 2, 2])
         betas = np.array([0, -0.4, 0.94, -.37])
         discrimination = 1.42
@@ -324,7 +297,7 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_unfold_partial_integration(self):
         """Testing the unfolding integral."""
-        theta = _get_quadrature_points(61, -5, 5)
+        theta, _ = _get_quadrature_points(61, -5, 5)
         response_set = np.array([0, 1, 2, 2, 1, 0, 3, 1, 3, 2, 2, 2])
         betas = np.array([-1.3, -.4, 0.2])
         delta = -0.76

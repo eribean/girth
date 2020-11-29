@@ -1,3 +1,4 @@
+from .numba_functions import numba_expit, _compute_partial_integral
 from .utils import (validate_estimation_options, irt_evaluation,
                     trim_response_set_and_counts,
                     convert_responses_to_kernel_sign,

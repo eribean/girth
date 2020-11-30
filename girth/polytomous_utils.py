@@ -2,7 +2,7 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound
 
-from girth import irt_evaluation
+from girth.numba_functions import numba_expit
 
 
 def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
@@ -64,27 +64,33 @@ def _solve_for_constants(item_responses):
 def _graded_partial_integral(theta, betas, betas_roll,
                              discrimination, responses):
     """Computes the partial integral for the graded response."""
-    graded_prob = (irt_evaluation(betas, discrimination, theta) - 
-                   irt_evaluation(betas_roll, discrimination, theta))
+    temp1 = (betas[:, None] - theta) * discrimination[:, None]
+    temp2 = (betas_roll[:, None] - theta) * discrimination[:, None]
+    graded_prob = numba_expit(temp1) 
+    graded_prob -= numba_expit(temp2)
 
-    #TODO: Potential chunking for memory limited systems    
-    return graded_prob[responses, :].prod(axis=0)
+    return graded_prob[responses, :]
 
 
-def _solve_integral_equations(discrimination, ratio, distribution, theta):
+def _solve_integral_equations_LUT(discrimination, ratio, _, __, interpolate_function):
+    """Solve single sigmoid integral for difficulty
+    parameter using Look Up Table.
+    """
+    return interpolate_function(discrimination, ratio)
+
+
+def _solve_integral_equations(discrimination, ratio, distribution, theta, _):
     """Solve single sigmoid integral for difficulty parameter."""
     difficulty = np.zeros_like(ratio)
+    temp1 = np.exp(-1 * discrimination * theta)
     
     for ratio_ndx, value in enumerate(ratio):
-
         def _min_func_local(estimate):
-            kernel = (distribution / 
-                     (1 + np.exp(discrimination * (estimate - theta))))
-            integral = integrate.fixed_quad(lambda x: kernel, -5, 5, n=61)[0]
+            kernel = 1. / (1 + np.exp(estimate*discrimination) * temp1)
+            integral = np.sum(kernel * distribution)
             return np.square(value - integral)
                         
-        difficulty[ratio_ndx] = fminbound(_min_func_local, -6, 6)
-    
+        difficulty[ratio_ndx] = fminbound(_min_func_local, -6, 6, xtol=1e-4)
     return difficulty
 
 

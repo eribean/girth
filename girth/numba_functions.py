@@ -53,3 +53,15 @@ def _compute_partial_integral(theta, difficulty, discrimination,
             the_output[ndx1, ndx2] = 1.0 / (1.0 + np.exp(kernel))
     
     return the_output
+
+
+@nb.njit()
+def _array_LUT(alpha, beta, theta, weight, output):
+    """Computes the look up table values used to speed
+       up parameter estimation
+    """
+    for ndx1 in range(alpha.shape[0]):
+        temp1 = alpha[ndx1] * theta 
+        for ndx2 in range(beta.shape[0]):
+            temp2 = 1.0 + np.exp(alpha[ndx1] * beta[ndx2] - temp1)
+            output[ndx1, ndx2] = np.sum(weight / temp2)

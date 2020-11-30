@@ -11,11 +11,10 @@ print(convert_path('/performance'))
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth', 'girth.performance', 'girth.three_pl'],
+        packages=['girth', 'girth.performance'],
         package_dir={'girth': 'girth',
-                     'girth.three_pl': convert_path('./three_pl'),
                      'girth.performance':convert_path('./performance')},
-        version="0.2",
+        version="0.3",
         license="MIT",
         description="A python package for Item Response Theory.",
         long_description=long_description.replace('<ins>','').replace('</ins>',''),

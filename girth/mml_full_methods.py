@@ -355,8 +355,9 @@ def gum_mml(dataset, options=None):
     n_items = responses.shape[0]
 
     # Interpolation Locations
-    theta, _ = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
+    distribution_x_weight = distribution * weights
 
     # Initialize item parameters for iterations
     discrimination = np.ones((n_items,))
@@ -388,7 +389,7 @@ def gum_mml(dataset, options=None):
         # This is done during the outer loop to address rounding errors
         # and for speed
         partial_int *= 0.0
-        partial_int += distribution[None, :]
+        partial_int += distribution_x_weight[None, :]
         for item_ndx in range(n_items):
             partial_int *= _unfold_partial_integral(theta, delta[item_ndx],
                                                     betas[item_ndx],
@@ -417,9 +418,7 @@ def gum_mml(dataset, options=None):
                                                       responses[item_ndx])
 
                 new_values *= partial_int
-                otpt = integrate.fixed_quad(
-                    lambda x: new_values, quad_start, quad_stop, n=quad_n)[0]
-
+                otpt = np.sum(new_values, axis=1)
                 return -np.log(otpt).sum()
 
             # Initial Guess of Item Parameters

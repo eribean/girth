@@ -20,7 +20,7 @@ Girth is a python package for estimating item response theory (IRT) parameters. 
    * Joint Maximum Likelihood
    * Marginal Maximum Likelihood
 3. Three Parameter Logistic Models
-   * Marginal Maximum Likelihood
+   * Marginal Maximum Likelihood (No Optimization and Minimal Support)
 
 **Polytomous Models**
 1. Graded Response Model
@@ -67,11 +67,11 @@ from girth import create_synthetic_irt_dichotomous
 from girth import twopl_mml
 
 # Create Synthetic Data
-difficuly = np.linspace(-2.5, 2.5, 10)
+difficulty = np.linspace(-2.5, 2.5, 10)
 discrimination = np.random.rand(10) + 0.5
 theta = np.random.randn(500)
 
-syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination, theta)
+syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination, theta)
 
 # Solve for parameters
 estimates = twopl_mml(syn_data)

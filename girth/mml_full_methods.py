@@ -244,8 +244,9 @@ def pcm_mml(dataset, options=None):
     n_items = responses.shape[0]
 
     # Interpolation Locations
-    theta, _ = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    theta, weight = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
+    distribution_x_weight = distribution * weight
 
     # Initialize difficulty parameters for estimation
     betas = np.full((n_items, item_counts.max()), np.nan)
@@ -272,7 +273,7 @@ def pcm_mml(dataset, options=None):
         # This is done during the outer loop to address rounding errors
         # and for speed
         partial_int *= 0.0
-        partial_int += distribution[None, :]
+        partial_int += distribution_x_weight[None, :]
         for item_ndx in range(n_items):
             partial_int *= _credit_partial_integral(theta, betas[item_ndx],
                                                     discrimination[item_ndx],
@@ -295,11 +296,8 @@ def pcm_mml(dataset, options=None):
                 new_values = _credit_partial_integral(theta, new_betas,
                                                       estimate[0],
                                                       responses[item_ndx])
-
                 new_values *= partial_int
-                otpt = integrate.fixed_quad(
-                    lambda x: new_values, quad_start, quad_stop, n=quad_n)[0]
-
+                otpt = np.sum(new_values, axis=1)
                 return -np.log(otpt).sum()
 
             # Initial Guess of Item Parameters

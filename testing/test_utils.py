@@ -10,7 +10,7 @@ from girth import (create_synthetic_irt_dichotomous,
                    convert_responses_to_kernel_sign,
                    validate_estimation_options, condition_polytomous_response,
                    get_true_false_counts, mml_approx)
-from girth.utils import _get_quadrature_points, default_options
+from girth.utils import _get_quadrature_points, default_options, create_beta_LUT
 from girth.numba_functions import _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral,
@@ -239,10 +239,10 @@ class TestPolytomousUtilities(unittest.TestCase):
         n1 = np.count_nonzero(syn_data, axis=1)
         ratio = n1 / (n1 + n0)
 
-        theta, _ = _get_quadrature_points(61, -5, 5)
+        theta, weights = _get_quadrature_points(61, -5, 5)
         distribution = np.exp(-np.square(theta) / 2) / np.sqrt(2 * np.pi)
         results = _solve_integral_equations(
-            discrimination, ratio, distribution, theta)
+            discrimination, ratio, distribution * weights, theta, None)
         np.testing.assert_array_almost_equal(results, difficulty, decimal=2)
 
     def test_graded_partial_integral(self):
@@ -253,8 +253,10 @@ class TestPolytomousUtilities(unittest.TestCase):
         betas_roll = np.roll(betas, -1)
         betas_roll[-1] = 10000
 
-        output = _graded_partial_integral(theta, betas, betas_roll,
-                                          1.0, responses)
+        output = np.ones((responses.shape[1], theta.size))
+        for ndx in range(responses.shape[0]):
+            output *= _graded_partial_integral(theta, betas, betas_roll,
+                                               np.array([1,]), responses[ndx])
 
         # Compare to hand calculations
         hand_calc = list()
@@ -320,6 +322,32 @@ class TestPolytomousUtilities(unittest.TestCase):
                                           response_set)
         np.testing.assert_array_almost_equal(result, expected)
 
+    def test_lut_creation(self):
+        """Test the lookup table creation function."""
+        lut_func = create_beta_LUT((0.5, 2, 500), (-3, 3, 500))
+
+        # do two values
+        options = validate_estimation_options(None)
+        quad_start, quad_stop = options['quadrature_bounds']
+        quad_n = options['quadrature_n']
+        
+        theta, weight = _get_quadrature_points(quad_n, quad_start, quad_stop)
+        distribution = options['distribution'](theta)
+
+        alpha1 = 0.89
+        beta1 = 1.76
+
+        p_value1 = ((weight * distribution) / (1.0 + np.exp(-alpha1*(theta - beta1)))).sum()
+        estimated_beta = lut_func(alpha1, p_value1)
+        self.assertAlmostEqual(beta1, estimated_beta, places=4)
+
+        alpha1 = 1.89
+        beta1 = -2.34
+
+        p_value1 = ((weight * distribution) / (1.0 + np.exp(-alpha1*(theta - beta1)))).sum()
+        estimated_beta = lut_func(alpha1, p_value1)
+        self.assertAlmostEqual(beta1, estimated_beta, places=4)
+
 
 class TestOptions(unittest.TestCase):
     """Tests default options."""
@@ -332,11 +360,12 @@ class TestOptions(unittest.TestCase):
 
         self.assertEqual(output['max_iteration'], 25)
         self.assertEqual(output['quadrature_n'], 61)
+        self.assertEqual(output['use_LUT'], True)
         self.assertTupleEqual(output['quadrature_bounds'], (-5, 5))
         result = output['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
-        self.assertEqual(len(output.keys()), 4)
+        self.assertEqual(len(output.keys()), 5)
 
     def test_no_input(self):
         """Testing validation for No input."""
@@ -344,9 +373,10 @@ class TestOptions(unittest.TestCase):
         x = np.linspace(-3, 3, 101)
         expected = stats.norm(0, 1).pdf(x)
 
-        self.assertEqual(len(result.keys()), 4)
+        self.assertEqual(len(result.keys()), 5)
         self.assertEqual(result['max_iteration'], 25)
         self.assertEqual(result['quadrature_n'], 61)
+        self.assertEqual(result['use_LUT'], True)
         self.assertTupleEqual(result['quadrature_bounds'], (-5, 5))
         result = result['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
@@ -390,6 +420,10 @@ class TestOptions(unittest.TestCase):
         with self.assertRaises(AssertionError):
             validate_estimation_options(test)
 
+        test = {'use_LUT': 1}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)
+
     def test_population_update(self):
         """Testing update to options."""
         x = np.linspace(-3, 3, 101)
@@ -397,7 +431,7 @@ class TestOptions(unittest.TestCase):
 
         new_parameters = {'distribution': stats.norm(2, 1).pdf}
         output = validate_estimation_options(new_parameters)
-        self.assertEqual(len(output.keys()), 4)
+        self.assertEqual(len(output.keys()), 5)
         result = output['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
@@ -408,12 +442,17 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(output['max_iteration'], 25)
         self.assertEqual(output['quadrature_n'], 13)
         self.assertTupleEqual(output['quadrature_bounds'], (-7, -5))
-        self.assertEqual(len(output.keys()), 4)
+        self.assertEqual(len(output.keys()), 5)
 
         new_parameters = {'max_iteration': 43}
         output = validate_estimation_options(new_parameters)
         self.assertEqual(output['max_iteration'], 43)
-        self.assertEqual(len(output.keys()), 4)
+        self.assertEqual(len(output.keys()), 5)
+
+        new_parameters = {'use_LUT': False}
+        output = validate_estimation_options(new_parameters)
+        self.assertEqual(output['use_LUT'], False)
+        self.assertEqual(len(output.keys()), 5)        
 
 
 if __name__ == '__main__':

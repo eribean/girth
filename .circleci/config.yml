@@ -11,7 +11,7 @@ jobs:
       - python/load-cache
       - run:
           environment:
-            LLVM_CONFIG: /home/circleci/.local/opt/llvm/bin/llvm-config
+            LLVM_CONFIG: /home/circleci/.local/llvm/bin/llvm-config
           command: |
             for line in $(cat requirements.txt)
             do

@@ -97,7 +97,8 @@ nosetests --with-coverage --cover-package=girth testing/
 
 * Python 3.7  
 * Numpy  
-* Scipy  
+* Scipy
+* Numba
 
 We use the anaconda environment which can be installed
 Download [here](https://www.anaconda.com/distribution/)

@@ -9,7 +9,13 @@ jobs:
     steps:
       - checkout
       - python/load-cache
-      - python/install-deps
+      - run:
+          command: |
+            for line in $(cat requirements.txt)
+            do
+              pip install --user $line
+            done
+          name: Install Deps
       - python/save-cache
       - run:
           command: |

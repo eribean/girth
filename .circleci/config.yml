@@ -10,10 +10,12 @@ jobs:
       - checkout
       - python/load-cache
       - run:
+          environment:
+            LLVM_CONFIG: ~/.local/bin/llvm-config
           command: |
             for line in $(cat requirements.txt)
             do
-              pip install $line
+              pip install --user $line
             done
           name: Install Deps
       - python/save-cache

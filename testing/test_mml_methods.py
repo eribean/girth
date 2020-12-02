@@ -308,9 +308,9 @@ class TestMMLPartialCreditModel(unittest.TestCase):
                             [-0.22679954, -1.18577072,  1.94080517, -0.45182054]])
 
         np.testing.assert_allclose(
-            expected_discr, output_large[0], atol=1e-4, rtol=1e-5)
+            expected_discr, output_large[0], atol=2e-4, rtol=7e-4)
         np.testing.assert_allclose(
-            expected_diff, output_large[1], atol=1e-4, rtol=1e-5)
+            expected_diff, output_large[1], atol=2e-4, rtol=7e-4)
 
     def test_pcm_mixed_difficulty_length(self):
         """Testing response set with different difficulty lengths."""

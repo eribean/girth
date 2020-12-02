@@ -6,12 +6,12 @@ orbs:
 jobs:
   build-and-test:
     docker:
-    - image: circleci/python:3.7.1
+    - image: circleci/python:3.7
     steps:
       - checkout
       - restore_cache:
           keys:
-          - girth-{{ checksum "requirements.txt"  }}      
+          - pip-{{ checksum "requirements.txt"  }}      
       - run:
           environment:
             LLVM_CONFIG: /home/circleci/.local/bin/llvm-config
@@ -22,7 +22,7 @@ jobs:
             done
           name: Install Deps
       - save_cache:
-          key: girth-{{ checksum "requirements.txt"  }}
+          key: pip-{{ checksum "requirements.txt"  }}
           paths:
           - /home/circleci/.local/lib/
       - run:

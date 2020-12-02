@@ -9,7 +9,9 @@ jobs:
     - image: circleci/python:3.7.1
     steps:
       - checkout
-      - python/load-cache
+      - restore_cache:
+          keys:
+          - girth-{{ checksum "requirements.txt"  }}      
       - run:
           environment:
             LLVM_CONFIG: /home/circleci/.local/bin/llvm-config
@@ -19,7 +21,10 @@ jobs:
               pip install --user $line
             done
           name: Install Deps
-      - python/save-cache
+      - save_cache:
+          key: girth-{{ checksum "requirements.txt"  }}
+          paths:
+          - /home/circleci/.local/lib/
       - run:
           command: |
             pip install --user coverage

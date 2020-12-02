@@ -5,7 +5,8 @@ from scipy.stats import uniform
 from scipy.stats import norm as gaussian
 from scipy.optimize import fminbound
 from girth import convert_responses_to_kernel_sign, validate_estimation_options
-from girth.utils import _compute_partial_integral, _get_quadrature_points
+from girth.numba_functions import _compute_partial_integral
+from girth.utils import _get_quadrature_points
 
 
 def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
@@ -126,22 +127,23 @@ def ability_eap(dataset, difficulty, discrimination, options=None):
                                  dtype='float')
 
     the_sign = convert_responses_to_kernel_sign(dataset)
+    the_output = np.zeros((the_sign.shape[1], quad_n), dtype='float64')
 
-    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
-    partial_int = _compute_partial_integral(
-        theta, difficulty, discrimination, the_sign)
+    theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    partial_int = np.ones_like(the_output)
+    for ndx in range(the_sign.shape[0]):
+        partial_int *= _compute_partial_integral(theta, difficulty[ndx], 
+                                                 discrimination[ndx], the_sign[ndx],
+                                                 the_output)
 
     # Weight by the input ability distribution
-    partial_int *= options['distribution'](theta)
+    partial_int *= (options['distribution'](theta) * weights)
 
     # Compute the denominator
-    denominator = integrate.fixed_quad(
-        lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
+    denominator = np.sum(partial_int, axis=1)
 
     # compute the numerator
     partial_int *= theta
-
-    numerator = integrate.fixed_quad(
-        lambda x: partial_int, quad_start, quad_stop, n=quad_n)[0]
+    numerator = np.sum(partial_int, axis=1)
 
     return numerator / denominator

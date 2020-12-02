@@ -5,12 +5,26 @@ orbs:
 
 jobs:
   build-and-test:
-    executor: python/default
+    docker:
+    - image: circleci/python:3.7
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
+      - restore_cache:
+          keys:
+          - pip-{{ checksum "requirements.txt"  }}      
+      - run:
+          environment:
+            LLVM_CONFIG: /home/circleci/.local/bin/llvm-config
+          command: |
+            for line in $(cat requirements.txt)
+            do
+              pip install --user $line
+            done
+          name: Install Deps
+      - save_cache:
+          key: pip-{{ checksum "requirements.txt"  }}
+          paths:
+          - /home/circleci/.local/lib/
       - run:
           command: |
             pip install --user coverage

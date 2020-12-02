@@ -31,10 +31,9 @@ class TestMMLRaschMethods(unittest.TestCase):
         """Testing rasch separate methods."""
         syn_data = self.data.copy()
         output = rasch_mml(syn_data, self.discrimination)
-        expected_output = np.array([-1.32474732, -0.81461152, -0.08222081,  
-                                    0.6586734, 1.47055251])
+        expected_output = np.array([-1.324751, -0.814625, -0.082224,  0.658678,  1.470566])
 
-        np.testing.assert_allclose(expected_output, output, rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output, atol=1e-4, rtol=1e-5)
 
     def test_rasch_regression_full(self):
         """Testing rasch full methods."""
@@ -43,7 +42,7 @@ class TestMMLRaschMethods(unittest.TestCase):
         expected_output = np.array([-1.32206195, -0.81438101, -0.0847999, 
                                      0.65460933,  1.4664586])
 
-        np.testing.assert_allclose(expected_output, output)
+        np.testing.assert_allclose(expected_output, output, atol=1e-4, rtol=1e-5)
 
     def test_rasch_close(self):
         """Testing rasch converging methods."""
@@ -79,11 +78,10 @@ class TestMMLOnePLMethods(unittest.TestCase):
         """Testing onepl separate methods."""
         syn_data = self.data.copy()
         output = onepl_mml(syn_data)
-        expected_output = np.array([-1.37650899, -0.64900501, -0.03933423,  
-                                     0.77918774,  1.38618528])
+        expected_output = np.array([-1.376502, -0.648995, -0.039338,  0.77919 ,  1.386173])
 
         self.assertAlmostEqual(output[0], 1.9017036760, places=5)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output[1], atol= 1e-4, rtol=1e-5)
 
     def test_onepl_regression_full(self):
         """Testing onepl full methods."""
@@ -93,7 +91,7 @@ class TestMMLOnePLMethods(unittest.TestCase):
                                      0.78121678,  1.38471631])
 
         self.assertAlmostEqual(output[0], 1.90187164)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+        np.testing.assert_allclose(expected_output, output[1], atol= 1e-4, rtol=1e-5)
 
     def test_onepl_close(self):
         """Testing onepl converging methods."""
@@ -133,12 +131,11 @@ class TestMMLTwoPLMethods(unittest.TestCase):
 
         expected_discrimination = np.array([0.99981316, 1.86369226, 1.35526711, 
                                             0.52935723, 0.90899136])
-        expected_output = np.array([-1.31508773, -0.6482668 , -0.07980827,  
-                                     0.77405645,  1.66790766])
+        expected_output = np.array([-1.315087, -0.648258, -0.079815,  0.774052,  1.66791])
 
         np.testing.assert_allclose(
-            expected_discrimination, output[0], rtol=1e-6)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-6)
+            expected_discrimination, output[0], atol = 1e-4, rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output[1], atol = 1e-4, rtol=1e-5)
 
     def test_twopl_regression_full(self):
         """Testing twopl full methods."""
@@ -151,8 +148,8 @@ class TestMMLTwoPLMethods(unittest.TestCase):
                                      0.77397527,  1.66750714])
 
         np.testing.assert_allclose(
-            expected_discrimination, output[0], rtol=1e-5)
-        np.testing.assert_allclose(expected_output, output[1], rtol=1e-5)
+            expected_discrimination, output[0], atol = 1e-4, rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output[1], atol = 1e-4, rtol=1e-5)
 
     def test_twopl_close(self):
         """Testing twopl converging methods."""
@@ -180,11 +177,10 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
                                                    thetas)
 
-        estimated_parameters = grm_mml(syn_data)
+        estimated_parameters = grm_mml(syn_data, {"use_LUT": False})
 
         # Regression test
-        expected_discrimination = np.array([0.58291387, 1.38349382, 0.87993092,
-                                            1.17329774, 1.47195824])
+        expected_discrimination = np.array([0.582914, 1.38349 , 0.879928, 1.173225, 1.471951])
 
         expectected_difficulty = np.array([[-1.23881672, -0.5340817,  0.06170343,  1.23881201],
                                            [-1.09279868, -0.76747967,
@@ -195,10 +191,12 @@ class TestMMLGradedResponseModel(unittest.TestCase):
                                                0.23281603,  1.27521818],
                                            [-1.47758497, -0.9050062,  0.0698804,  0.71286592]])
 
-        np.testing.assert_array_almost_equal(
-            estimated_parameters[0], expected_discrimination)
-        np.testing.assert_array_almost_equal(
-            estimated_parameters[1], expectected_difficulty)
+        np.testing.assert_allclose(
+            estimated_parameters[0], expected_discrimination, 
+            atol = 1e-4, rtol=1e-5)
+        np.testing.assert_allclose(
+            estimated_parameters[1], expectected_difficulty,
+            atol = 1e-4, rtol=1e-5)
 
     def test_graded_small_participant(self):
         """Regression Testing graded response model with small N."""
@@ -212,22 +210,21 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         estimated_parameters = grm_mml(syn_data)
 
         # Regression test
-        expected_discrimination = np.array([1.72485717, 0.39305266, 0.82841429,
-                                            0.93731447, 1.56774651])
+        expected_discrimination = np.array([1.724843, 0.393598, 0.828646, 0.937709, 1.567619])
 
-        expectected_difficulty = np.array([[-0.1571751,  0.22757599,  0.33438484,  0.59311136],
-                                           [1.22266539,  1.3332354,
-                                               2.26915694,  3.51488207],
-                                           [-1.25515215, -1.06235363, -
-                                               0.70073232,  0.87821931],
-                                           [-1.26630059, -0.37880122,
-                                               2.25720247,      np.nan],
-                                           [-1.36961213, -0.66186681, -0.50308306,      np.nan]])
+        expectected_difficulty = np.array([
+                                    [-0.1571773,   0.22757906,  0.33440129,  0.59312807],
+                                    [ 1.22120566,  1.33164642,  2.26644668,  3.51066062],
+                                    [-1.25491225, -1.06215245, -0.70060057,  0.87804437],
+                                    [-1.26594612, -0.37869587,  2.2565641,       np.nan],
+                                    [-1.36972366, -0.66190223, -0.50312446,      np.nan]])
 
-        np.testing.assert_array_almost_equal(
-            estimated_parameters[0], expected_discrimination)
-        np.testing.assert_array_almost_equal(
-            estimated_parameters[1], expectected_difficulty)
+        np.testing.assert_allclose(
+            estimated_parameters[0], expected_discrimination, 
+            atol = 1e-4, rtol=1e-5)
+        np.testing.assert_allclose(
+            estimated_parameters[1], expectected_difficulty, 
+            atol = 1e-4, rtol=1e-5)
 
     def test_graded_response_model_close(self):
         """Regression Testing graded response model with large N."""
@@ -238,7 +235,7 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
                                                    thetas)
 
-        estimated_parameters = grm_mml(syn_data)
+        estimated_parameters = grm_mml(syn_data, {"use_LUT": False})
 
         rmse = np.sqrt(
             np.square(estimated_parameters[0] - discrimination).mean())
@@ -295,34 +292,25 @@ class TestMMLPartialCreditModel(unittest.TestCase):
         self.assertAlmostEqual(rmse_large, 0.07285609, places=5)
 
         # Regression Tests
-        expected_discr = np.array([0.81233975, 0.98594227, 1.15784476,
-                                   0.54351843, 1.0774421, 0.53615107,
-                                   1.0475184, 0.82479055, 1.13312411,
-                                   0.52347491])
+        expected_discr = np.array([0.81237, 0.98594, 1.15784, 
+                                   0.54352, 1.07744, 0.53615, 1.04752,
+                                   0.82479, 1.13313, 0.52348])
+        expected_diff = np.array(
+                            [[-0.36228655,  1.12552716, -0.8683124,  -0.05670265],
+                            [-0.74530574,  0.50813067, -1.3035864,   1.54851965],
+                            [-0.37363133,  0.22108749,  1.49891726,  0.82861256],
+                            [ 0.61968191, -1.62910971, -0.1741578,  -0.64065034],
+                            [-0.7778711,  -1.53569334,  0.20636619,  0.74253886],
+                            [ 0.34621761, -1.9338782,  1.02446975, -0.60102526],
+                            [-1.05718863, -0.99201518,  0.78186304,  1.02658717],
+                            [ 0.34289683,  0.60301358,  1.80654666, -1.16526188],
+                            [ 0.83154823, -2.08790263,  0.72526695, -1.12897981],
+                            [-0.22679954, -1.18577072,  1.94080517, -0.45182054]])
 
-        expected_diff = np.array([[-0.36227744,  1.12566146, -0.86842382, -0.05673954],
-                                  [-0.74530762,  0.50813106, -
-                                      1.30358698,  1.5485216],
-                                  [-0.37363539,  0.22108959,
-                                      1.49892019,  0.82861686],
-                                  [0.61968408, -1.62910758, -
-                                      0.17415797, -0.64065788],
-                                  [-0.7778677, -1.53569663,
-                                      0.2063686,  0.74254058],
-                                  [0.34622206, -1.93388653,
-                                      1.02447532, -0.60102884],
-                                  [-1.05718775, -0.99201864,
-                                      0.78186396,  1.02659318],
-                                  [0.34289862,  0.6030145,
-                                      1.80655127, -1.16526299],
-                                  [0.83155461, -2.08791222,
-                                      0.72527178, -1.12898438],
-                                  [-0.22679832, -1.18577464,  1.94080754, -0.45182257]])
-
-        np.testing.assert_array_almost_equal(
-            expected_discr, output_large[0], decimal=5)
-        np.testing.assert_array_almost_equal(
-            expected_diff, output_large[1], decimal=5)
+        np.testing.assert_allclose(
+            expected_discr, output_large[0], atol=2e-4, rtol=7e-4)
+        np.testing.assert_allclose(
+            expected_diff, output_large[1], atol=2e-4, rtol=7e-4)
 
     def test_pcm_mixed_difficulty_length(self):
         """Testing response set with different difficulty lengths."""
@@ -353,10 +341,10 @@ class TestMMLPartialCreditModel(unittest.TestCase):
                                    1.1954911, 0.51227604])
 
         output = pcm_mml(syn_data)
-        np.testing.assert_array_almost_equal(
-            expected_diff, output[1], decimal=5)
-        np.testing.assert_array_almost_equal(
-            expected_discr, output[0], decimal=5)
+        np.testing.assert_allclose(
+            expected_diff, output[1], atol=1e-4, rtol=1e-5)
+        np.testing.assert_allclose(
+            expected_discr, output[0], atol=1e-4, rtol=1e-5)
 
 
 class TestMMLGradedUnfoldingModel(unittest.TestCase):

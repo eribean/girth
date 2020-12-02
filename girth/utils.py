@@ -1,6 +1,9 @@
 import numpy as np
+from scipy import interpolate
 from scipy.stats import norm as gaussian
 from scipy.special import roots_legendre
+
+from girth import _array_LUT
 
 
 def default_options():
@@ -16,11 +19,13 @@ def default_options():
             numerical integration. Default = (-5, 5)
         quadrature_n: [int] number of quadrature points to use
                         Default = 61
+        use_LUT: [Boolean] use a look up table in mml functions
     """
     return {"max_iteration": 25,
             "distribution": gaussian(0, 1).pdf,
             "quadrature_bounds": (-5, 5),
-            "quadrature_n": 61}
+            "quadrature_n": 61,
+            "use_LUT": True}
 
 
 def validate_estimation_options(options_dict=None):
@@ -40,7 +45,10 @@ def validate_estimation_options(options_dict=None):
                 'quadrature_bounds':
                     lambda x: isinstance(x, (tuple, list)) and (x[1] > x[0]),
                 'quadrature_n':
-                    lambda x: isinstance(x, int) and x > 7}
+                    lambda x: isinstance(x, int) and x > 7,
+                'use_LUT':
+                    lambda x: isinstance(x, bool)
+                }
     
     # A complete options dictionary
     full_options = default_options()
@@ -195,49 +203,69 @@ def _get_quadrature_points(n, a, b):
     Returns:
         quadrature_points: (1d array) quadrature_points for 
                            numerical integration
+        weights: (1d array) quadrature weights
 
     Notes:
         A local function of the based fixed_quad found in scipy, this is
         done for processing optimization
     """
-    x, _ = roots_legendre(n)
+    x, w = roots_legendre(n)
     x = np.real(x)
 
     # Legendre domain is [-1, 1], convert to [a, b]
-    return (b - a) * (x + 1) * 0.5 + a
+    scalar = (b - a) * 0.5
+    return scalar * (x + 1) + a, scalar * w
 
 
-def _compute_partial_integral(theta, difficulty, discrimination, the_sign):
-    """
-    Computes the partial integral for a set of item parameters
-
+def create_beta_LUT(alpha, beta, options=None):
+    """Creates a Look Up Table to speed up conversion.
+    
     Args:
-        theta: (array) evaluation points
-        difficulty: (array) set of difficulty parameters
-        discrimination: (array | number) set of discrimination parameters
-        the_sign:  (array) positive or negative sign
-                            associated with response vector
-
+        alpha: (array-like) [alpha_start, alpha_stop, alpha_n]
+        beta: (array-like) [beta_start, beta_stop, beta_n]
+        options: dictionary with updates to default options
+        
     Returns:
-        partial_integral: (2d array) 
-            integration of items defined by "sign" parameters
-            axis 0: individual persons
-            axis 1: evaluation points (at theta)
-
-    Notes:
-        Implicitly multiplies the data by the gaussian distribution
+        func: function that linear interpolates for 
+              beta given (alpha, p-value)
+        
+    Options:
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
     """
-    # Size single discrimination into full array
-    if np.atleast_1d(discrimination).size == 1:
-        discrimination = np.full(the_sign.shape[0], discrimination,
-                                 dtype='float')
-
-    # This represents a 3-dimensional array
-    # [Response Set, Person, Theta]
-    # The integration happens over response set and the result is an
-    # array of [Person, Theta]
-    kernel = the_sign[:, :, None] * np.ones((1, 1, theta.size))
-    kernel *= discrimination[:, None, None]
-    kernel *= (theta[None, None, :] - difficulty[:, None, None])
-
-    return (1.0 / (1.0 + np.exp(kernel))).prod(axis=0).squeeze()
+    options = validate_estimation_options(options)
+    quad_start, quad_stop = options['quadrature_bounds']
+    quad_n = options['quadrature_n']
+    
+    theta, weight = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    distribution = options['distribution'](theta)
+    distribution_x_weight = distribution * weight
+    
+    alpha = np.linspace(*alpha)
+    beta = np.linspace(*beta)
+    
+    # Get the index into the array
+    interp_a = interpolate.interp1d(alpha, 
+                                    np.arange(alpha.size, dtype='float'),
+                                    kind='linear')
+    
+    the_output = np.zeros((alpha.size, beta.size))
+    _array_LUT(alpha, beta, theta, distribution_x_weight, the_output)
+    
+    func_list = list()
+    for values in the_output:
+        func_list.append(interpolate.interp1d(values, beta, kind='linear', 
+                                                 fill_value=(beta[0], beta[-1]), 
+                                                 bounds_error=False))
+    
+    # return function that returns beta value
+    def interpolate_function(alpha_value, p_value):
+        tmp = interp_a(alpha_value)
+        tmpL = int(tmp)
+        tmpH = int(tmp + 1)
+        dx = tmp - tmpL
+        return ((1 - dx) * func_list[tmpL](p_value) + 
+                dx * func_list[tmpH](p_value))        
+    
+    return interpolate_function

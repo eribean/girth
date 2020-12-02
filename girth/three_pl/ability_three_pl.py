@@ -133,7 +133,7 @@ def ability_3pl_eap(dataset, difficulty, discrimination,
 
     the_sign = convert_responses_to_kernel_sign(dataset)
 
-    theta = _get_quadrature_points(quad_n, quad_start, quad_stop)
+    theta, _ = _get_quadrature_points(quad_n, quad_start, quad_stop)
     partial_int = _compute_partial_integral_3pl(
         theta, difficulty, discrimination, guessing, the_sign)
 

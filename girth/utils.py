@@ -19,13 +19,21 @@ def default_options():
             numerical integration. Default = (-5, 5)
         quadrature_n: [int] number of quadrature points to use
                         Default = 61
-        use_LUT: [Boolean] use a look up table in mml functions
+        use_LUT: [boolean] use a look up table in mml functions
+        estimate_distribution: [boolean] estimate the latent distribution
+                               using cubic splines
+        number_of_samples: [int] number of samples to use when
+                           estimating distribuion, must be > 5
+                           or use -1 to determine automatically
     """
     return {"max_iteration": 25,
             "distribution": gaussian(0, 1).pdf,
             "quadrature_bounds": (-5, 5),
             "quadrature_n": 61,
-            "use_LUT": True}
+            "use_LUT": True,
+            "estimate_distribution": False,
+            "number_of_samples": -1
+            }
 
 
 def validate_estimation_options(options_dict=None):
@@ -47,7 +55,11 @@ def validate_estimation_options(options_dict=None):
                 'quadrature_n':
                     lambda x: isinstance(x, int) and x > 7,
                 'use_LUT':
-                    lambda x: isinstance(x, bool)
+                    lambda x: isinstance(x, bool),
+                'estimate_distribution':
+                    lambda x: isinstance(x, bool),
+                "number_of_samples": 
+                    lambda x: isinstance(x, int) and x > 5,
                 }
     
     # A complete options dictionary

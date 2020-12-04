@@ -1,8 +1,10 @@
 import numpy as np
 from scipy.optimize import fmin_slsqp
 
+from girth import validate_estimation_options
 
-def parameter_constraints(current_parameters, sample_space):
+
+def _parameter_constraints(current_parameters, sample_space):
     """Constraints placed on parameters for model indentification."""
     constraints = np.zeros((3,))
 
@@ -56,7 +58,7 @@ def resample(cubic_spline_pdf, new_number_of_samples):
 
     coffs = fmin_slsqp(_local_min, initial_guess,
                        bounds=[(0, np.inf),] * new_number_of_samples, 
-                       f_eqcons=parameter_constraints,
+                       f_eqcons=_parameter_constraints,
                        args=(new_spline_pdf.sample_space[2:-2], ),
                        iprint=False)
     
@@ -71,7 +73,7 @@ class CubicSplinePDF(object):
         options: dictionary with updates to default options
 
     Options:
-        * number_of_samples: int | None
+        * number_of_samples: int
         * quadrature_bounds: (float, float)
     """
     def __init__(self, options):
@@ -186,6 +188,109 @@ class CubicSplinePDF(object):
         return np.sum(filter_matrix * 
                       self.coefficients, axis=1) / self.delta_sample
 
-    def pdf(self, evaluation_locations):
-        """Duplicate function to support estimation functions."""
-        return self(evaluation_locations)
+
+class LatentPDF(object):
+    """Controls the latent ability distribution definition.
+    
+    Parameters:
+        options: dictionary with updates to default options
+        
+    Options:
+        * number_of_samples: int > 5 | None 
+        * distribution: callable
+        * quadrature_bounds: (float, float)
+        * quadrature_n: int
+        * estimate_distribution: Boolean
+        
+    Notes:
+        The distribution in options is used as the
+        null-hypothesis or if latent estimation
+        is not desired
+    """
+    def __init__(self, options=None):
+        """Constructor for latent estimation class"""
+        options = validate_estimation_options(options)   
+        
+        # Quadrature Parameters
+        quad_start, quad_stop = options['quadrature_bounds']
+        quad_n = options['quadrature_n']
+        theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
+        self.quad_bounds = (quad_start, quad_stop)
+        
+        # The locations and weight to use by default
+        self.quadrature_locations = theta
+        self.weights = weights
+        self.null_distribution = options['distribution'](theta)
+        
+        # Triggers to run the estimation or use default
+        self.estimate_distribution = options['estimate_distribution']
+        
+        # Triggers fixed cubic-spline grid
+        self.fixed_points = options['number_of_samples'] != -1
+        
+        # Distribution Free class (starts at 5)
+        self.n_points = (options['number_of_samples'] 
+                         if self.fixed_points else 5)
+        
+        # Initialize the first cubic-spline class
+        # and set the distibution be an inverted U-shape
+        cubic_spline = self._init_cubic_spline()
+        cubic_spline.coefficients[self.n_points // 2] = 1
+        self.cubic_splines = list(cubic_spline)
+    
+    def _init_cubic_spline(self):
+        """Initializes a cubic spline class."""
+        options = {'number_of_samples': self.n_points,
+                   'quadrature_bounds': self.quad_bounds}
+        return CubicSplinePDF(options)
+    
+    def optimize_distribution(self, unweighted_integration):
+        """Optimizes the distribution for the current parameters."""
+        local_spline = self.cubic_splines[-1]
+        
+        filter_matrix = local_spline.filter_matrix(self.quadrature_locations)
+        coefficients = np.zeros_like(local_spline.sample_space)
+        
+        def _local_minimizer(estimates, _=None):
+            coefficients[2:-2] = estimates
+            
+            # Compute the distribution at the interpolation points
+            distribution = np.sum(filter_matrix * coefficients, axis=1)
+            distribution *= self.weights
+            
+            # Perform the numerical integration 
+            otpt = np.sum(unweighted_integration * distribution, axis=1)
+            
+            return -np.log(otpt).sum()
+
+        # run the minimization
+        fmin_slsqp(_local_minimizer, 
+                   local_spline.coefficients[2:-2], 
+                   bounds=[(0, np.inf),] * local_spline.number_of_samples, 
+                   f_eqcons=_parameter_constraints,
+                   args=(local_spline.sample_space[2:-2],),
+                   iprint=False)
+        
+        # Update the estimates for the cubic spline
+        local_spline.update_coefficients(coefficients[2:-2])
+        
+        # return the distribution
+        return local_spline(self.quadrature_locations)
+        
+    def __call__(self, iteration, unweighted_integration):
+        """Runs a latent ability estimation iteration.
+        
+        Returns:
+            distribution_x_weights: weighting function for integration
+        """
+        # Return null distribution if estimation not requested
+        # or the first iteration in an estimation
+        if not self.estimate_distribution or iteration == 1:
+            distribution = self.null_distribution
+        
+        else:
+            distribution = self.optimize_distribution(unweighted_integration)
+            
+            # Logic here for updates
+            
+        return distribution * self.weights

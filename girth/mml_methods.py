@@ -114,7 +114,8 @@ def onepl_mml(dataset, alpha=None, options=None):
     else:  # Rasch Method
         min_func(alpha)
 
-    return alpha, difficulty
+    return {"Discrimination": alpha, 
+            "Difficulty": difficulty}
 
 
 def twopl_mml(dataset, options=None):
@@ -201,7 +202,8 @@ def twopl_mml(dataset, options=None):
         if np.abs(discrimination - previous_discrimination).max() < 1e-3:
             break
 
-    return discrimination, difficulty
+    return {"Discrimination": discrimination, 
+            "Difficulty": difficulty}
 
 
 def grm_mml(dataset, options=None):
@@ -224,7 +226,7 @@ def grm_mml(dataset, options=None):
 
     Options:
         * estimate_distribution: Boolean    
-        * number_of_samples: int > 5 | -1     
+        * number_of_samples: int >= 5    
         * use_LUT: boolean
         * max_iteration: int
         * distribution: callable
@@ -358,8 +360,8 @@ def grm_mml(dataset, options=None):
     full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
                                              latent_pdf.n_points-3)
 
-    return {'Discriminations': discrimination[start_indices],
-            'Difficulties': output_betas,
+    return {'Discrimination': discrimination[start_indices],
+            'Difficulty': output_betas,
             'LatentPDf': latent_pdf,
             'AIC': {'final': full_metrics[0],
                     'null': null_metrics[0],

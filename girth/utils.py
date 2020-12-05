@@ -24,7 +24,6 @@ def default_options():
                                using cubic splines
         number_of_samples: [int] number of samples to use when
                            estimating distribuion, must be > 5
-                           or use -1 to determine automatically
     """
     return {"max_iteration": 25,
             "distribution": gaussian(0, 1).pdf,
@@ -32,7 +31,7 @@ def default_options():
             "quadrature_n": 61,
             "use_LUT": True,
             "estimate_distribution": False,
-            "number_of_samples": -1
+            "number_of_samples": 9
             }
 
 
@@ -59,7 +58,7 @@ def validate_estimation_options(options_dict=None):
                 'estimate_distribution':
                     lambda x: isinstance(x, bool),
                 "number_of_samples": 
-                    lambda x: isinstance(x, int) and (x >= 5 or x== -1),
+                    lambda x: isinstance(x, int) and x >= 5,
                 }
     
     # A complete options dictionary

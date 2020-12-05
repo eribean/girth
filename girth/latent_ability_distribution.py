@@ -188,7 +188,7 @@ class LatentPDF(object):
         
     Options:
         * estimate_distribution: Boolean    
-        * number_of_samples: int > 5 | -1 
+        * number_of_samples: int > 5 
         * distribution: callable
         * quadrature_bounds: (float, float)
         * quadrature_n: int
@@ -198,7 +198,7 @@ class LatentPDF(object):
         null-hypothesis or if latent estimation
         is not desired
     """
-    def __init__(self, options=None, max_sample_length=11):
+    def __init__(self, options=None):
         """Constructor for latent estimation class"""
         options = validate_estimation_options(options)   
         
@@ -214,17 +214,8 @@ class LatentPDF(object):
         self.null_distribution = options['distribution'](theta)
         
         # Triggers to run the estimation or use default
-        self.estimate_distribution = options['estimate_distribution']
-        
-        # Triggers fixed cubic-spline grid
-        self.fixed_points = options['number_of_samples'] != -1
-        self.max_sample_length = max_sample_length
-        
-        self.n_points = 3
-        # Distribution free  (starts at 5)
-        if self.estimate_distribution:
-            self.n_points = (options['number_of_samples'] 
-                            if self.fixed_points else 5)
+        self.estimate_distribution = options['estimate_distribution']    
+        self.n_points = options['number_of_samples']
         
         # Initialize the first cubic-spline class
         # and set the distibution be an inverted U-shape
@@ -298,50 +289,6 @@ class LatentPDF(object):
         else:
             dist_x_weights = self.optimize_distribution(unweighted_integration)
             dist_x_weights *= self.weights
-            
-            # Increase points only up to a maximumum amount
-            # if trying to find the optimal number of
-            if not self.fixed_points:
-                
-                # Get the current metrics associated with the data
-                _, bic = self.compute_metrics(unweighted_integration,
-                                              dist_x_weights, self.n_points-3)
-                
-                # Compare to a simpler model 
-                # 5 is the minimum cubic spline sample locations
-                if self.n_points == 5: 
-                    distribution = self.null_distribution * self.weights
-                    n_points = 0
-                else:
-                    old_cubic_spline = resample(self.cubic_splines[-1],
-                                                self.n_points-2)
-                    distribution = (old_cubic_spline(self.quadrature_locations) * 
-                                    self.weights)
-                    n_points = self.n_points - 5
-                    
-
-                _, bic_old = self.compute_metrics(unweighted_integration,
-                                                  distribution, n_points)
-
-                # See how the point selection improved the fit
-                delta_bic = bic_old - bic
-                
-                if (delta_bic >= 8):
-                    # Try more points if we can
-                    if self.n_points < self.max_sample_length:
-                        self.n_points += 2
-                        new_cubic_spline = resample(self.cubic_splines[-1],
-                                                    self.n_points)
-                        # Set it up for the next iteration
-                        self.cubic_splines.append(new_cubic_spline)
-                else:
-                    # Use the simpler model and freeze the number of points
-                    self.fixed_points = True
-                    if self.n_points >= 7:
-                        self.n_points -= 2
-                        
-                        # Set it up for the next iteration
-                        self.cubic_splines.append(old_cubic_spline)
                     
         return dist_x_weights
 

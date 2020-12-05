@@ -125,7 +125,8 @@ def onepl_full(dataset, alpha=None, options=None):
     else:  # Rasch Solver
         alpha_min_func(alpha)
 
-    return alpha, difficulty
+    return {'Discrimination': alpha, 
+            'Difficulty': difficulty}
 
 
 def twopl_full(dataset, options=None):
@@ -212,7 +213,8 @@ def twopl_full(dataset, options=None):
         if(np.abs(discrimination - previous_discrimination).max() < 1e-3):
             break
 
-    return discrimination, difficulty
+    return {'Discrimination': discrimination, 
+            'Difficulty': difficulty}
 
 
 def pcm_mml(dataset, options=None):
@@ -322,7 +324,8 @@ def pcm_mml(dataset, options=None):
 
     # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
-    return discrimination, betas[:, 1:]
+    return {'Discrimination': discrimination, 
+            'Difficulty': betas[:, 1:]}
 
 
 def gum_mml(dataset, options=None):
@@ -338,7 +341,7 @@ def gum_mml(dataset, options=None):
     Returns:
         discrimination: (1d array) estimates of item discrimination
         delta: (1d array) estimates of item folding values
-        difficulty: (2d array) estimates of item thresholds x item thresholds
+        difficulty: (2d array) estimates of item thresholds
 
     Options:
         * max_iteration: int
@@ -445,4 +448,8 @@ def gum_mml(dataset, options=None):
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
 
-    return discrimination, delta, betas
+    return {'Discrimination': discrimination, 
+            'Difficulties': np.c_[betas, np.zeros((delta.size,)), 
+                                  -betas[:, ::-1]] + delta[:, None],
+            'Delta': delta,
+            'Tau': betas}

@@ -187,11 +187,11 @@ class LatentPDF(object):
         options: dictionary with updates to default options
         
     Options:
-        * number_of_samples: int > 5 | None 
+        * estimate_distribution: Boolean    
+        * number_of_samples: int > 5 | -1 
         * distribution: callable
         * quadrature_bounds: (float, float)
         * quadrature_n: int
-        * estimate_distribution: Boolean
         
     Notes:
         The distribution in options is used as the
@@ -220,9 +220,11 @@ class LatentPDF(object):
         self.fixed_points = options['number_of_samples'] != -1
         self.max_sample_length = max_sample_length
         
-        # Distribution Free class (starts at 5)
-        self.n_points = (options['number_of_samples'] 
-                         if self.fixed_points else 5)
+        self.n_points = 3
+        # Distribution free  (starts at 5)
+        if self.estimate_distribution:
+            self.n_points = (options['number_of_samples'] 
+                            if self.fixed_points else 5)
         
         # Initialize the first cubic-spline class
         # and set the distibution be an inverted U-shape
@@ -335,7 +337,7 @@ class LatentPDF(object):
                 else:
                     # Use the simpler model and freeze the number of points
                     self.fixed_points = True
-                    if self.n_points >=7:
+                    if self.n_points >= 7:
                         self.n_points -= 2
                         
                         # Set it up for the next iteration

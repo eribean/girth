@@ -59,7 +59,7 @@ def validate_estimation_options(options_dict=None):
                 'estimate_distribution':
                     lambda x: isinstance(x, bool),
                 "number_of_samples": 
-                    lambda x: isinstance(x, int) and x > 5,
+                    lambda x: isinstance(x, int) and (x >= 5 or x== -1),
                 }
     
     # A complete options dictionary

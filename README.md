@@ -77,8 +77,8 @@ syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination, theta)
 estimates = twopl_mml(syn_data)
 
 # Unpack estimates
-discrimination_estimates = estimates[0]
-difficulty_estimates = estimates[1]
+discrimination_estimates = estimates['Discrimination']
+difficulty_estimates = estimates['Difficulty']
 ```
 
 ## Unittests

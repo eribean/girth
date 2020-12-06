@@ -152,6 +152,15 @@ class CubicSplinePDF(object):
         return x_locations, y_values
     
     def filter_matrix(self, evaluation_locations):
+        """Matrix to evaluate spline at input locations.
+        
+        Args:
+            evaluation_locations: (tuple-like) computes the values
+                                 at the supplied location
+        Returns:
+            filter_matrix: (2d array) Matrix needed to multiply
+                           spline coefficients to get f(x)
+        """
         x_positions = (np.atleast_1d(evaluation_locations)[:, None] - 
                        self.sample_space[None, :])
         x_positions /= self.delta_sample
@@ -188,7 +197,7 @@ class LatentPDF(object):
         
     Options:
         * estimate_distribution: Boolean    
-        * number_of_samples: int > 5 
+        * number_of_samples: int >= 5 
         * distribution: callable
         * quadrature_bounds: (float, float)
         * quadrature_n: int

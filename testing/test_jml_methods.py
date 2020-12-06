@@ -23,7 +23,7 @@ class TestJointMaximum(unittest.TestCase):
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
                                                     thetas)
 
-        output = rasch_jml(syn_data)
+        output = rasch_jml(syn_data)['Difficulty']
         expected_output = np.array([-1.61394095, -0.88286827,
                                      0.04830973,  0.77146166,  1.95939084])
 
@@ -43,8 +43,8 @@ class TestJointMaximum(unittest.TestCase):
         expected_output = np.array([-1.70585219, -1.03551581,
                                     -0.09329877,  0.92320069,  1.77063402])
 
-        np.testing.assert_allclose(expected_output, output[1], 1e-3)
-        self.assertAlmostEqual(1.5316042, output[0])
+        np.testing.assert_allclose(expected_output, output['Difficulty'], 1e-3)
+        self.assertAlmostEqual(1.5316042, output['Discrimination'])
 
 
     def test_joint_regression_twopl(self):
@@ -65,8 +65,8 @@ class TestJointMaximum(unittest.TestCase):
         betas = np.array([-6., -0.39644246, -0.00862153,
                           0.3869096, 6.])
 
-        np.testing.assert_allclose(alphas, output[0], rtol=1e-3)
-        np.testing.assert_allclose(betas, output[1], rtol=1e-3)
+        np.testing.assert_allclose(alphas, output['Discrimination'], rtol=1e-3)
+        np.testing.assert_allclose(betas, output['Difficulty'], rtol=1e-3)
 
 
 class TestPolytomousJMLMethods(unittest.TestCase):
@@ -103,8 +103,8 @@ class TestPolytomousJMLMethods(unittest.TestCase):
                           [-0.47923614,  0.31797999,  0.89676892],
                           [-0.67769087,  0.49737400,      np.nan]])
 
-        np.testing.assert_allclose(alphas, output[0], rtol=1e-3)
-        np.testing.assert_allclose(betas, output[1], rtol=1e-3)
+        np.testing.assert_allclose(alphas, output['Discrimination'], rtol=1e-3)
+        np.testing.assert_allclose(betas, output['Difficulty'], rtol=1e-3)
 
     def test_partial_credit_jml_regression(self):
         """Testing joint maximum partial credit model."""
@@ -126,8 +126,8 @@ class TestPolytomousJMLMethods(unittest.TestCase):
                  [ 2.57971531, -3.65201053,  1.80513887],
                  [ 0.55722782,  1.01035442,  0.74398655]]
 
-        np.testing.assert_allclose(alphas, output[0], rtol=1e-3)
-        np.testing.assert_allclose(betas, output[1], rtol=1e-3)
+        np.testing.assert_allclose(alphas, output['Discrimination'], rtol=1e-3)
+        np.testing.assert_allclose(betas, output['Difficulty'], rtol=1e-3)
         
 
 if __name__ == '__main__':

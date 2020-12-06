@@ -29,7 +29,7 @@ def rasch_full(dataset, discrimination=1, options=None):
         * quadrature_bounds: (float, float)
         * quadrature_n: int
     """
-    return onepl_full(dataset, alpha=discrimination, options=options)[1]
+    return onepl_full(dataset, alpha=discrimination, options=options)
 
 
 def onepl_full(dataset, alpha=None, options=None):

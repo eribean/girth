@@ -19,7 +19,7 @@ class TestConditionalRasch(unittest.TestCase):
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
                                                     thetas)
 
-        output = rasch_conditional(syn_data)
+        output = rasch_conditional(syn_data)['Difficulty']
         expected_output = np.array([-1.39893814, -0.80083855,
                                     -0.00947712,  0.61415543,  1.59509838])
 
@@ -35,7 +35,7 @@ class TestConditionalRasch(unittest.TestCase):
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
                                                     thetas)
 
-        output = rasch_conditional(syn_data, discrimination)
+        output = rasch_conditional(syn_data, discrimination)['Difficulty']
         expected_output = np.array([-1.38086088, -0.74781933,
                                     -0.01267694,  0.77906715,  1.36228999])
 
@@ -50,7 +50,7 @@ class TestConditionalRasch(unittest.TestCase):
         thetas = np.random.randn(1600)
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
                                                     thetas)
-        output = rasch_conditional(syn_data, discrimination)
+        output = rasch_conditional(syn_data, discrimination)['Difficulty']
 
         np.testing.assert_array_almost_equal(difficuly, output, decimal=1)
 

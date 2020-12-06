@@ -11,7 +11,7 @@ print(convert_path('/performance'))
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth', 'girth.performance'],
+        packages=['girth', 'girth.performance', 'girth.three_pl'],
         package_dir={'girth': 'girth',
                      'girth.performance':convert_path('./performance')},
         version="0.3",

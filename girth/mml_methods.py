@@ -49,7 +49,7 @@ def rasch_mml(dataset, discrimination=1, options=None):
         * quadrature_bounds: (float, float)
         * quadrature_n: int
     """
-    return onepl_mml(dataset, alpha=discrimination, options=options)[1]
+    return onepl_mml(dataset, alpha=discrimination, options=options)
 
 
 def onepl_mml(dataset, alpha=None, options=None):

@@ -80,4 +80,5 @@ def rasch_conditional(dataset, discrimination=1, options=None):
         if np.abs(betas - previous_betas).max() < 1e-3:
             break
 
-    return betas / discrimination
+    return {'Discrimination': discrimination,
+            'Difficulty': betas / discrimination}

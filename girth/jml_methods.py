@@ -62,7 +62,8 @@ def _jml_abstract(dataset, _item_min_func,
         if(np.abs(previous_betas - betas).max() < 1e-3):
             break
 
-    return alphas, betas
+    return {'Discrimination': alphas, 
+            'Difficulty': betas}
 
 
 def rasch_jml(dataset, discrimination=1, options=None):
@@ -102,7 +103,7 @@ def rasch_jml(dataset, discrimination=1, options=None):
     result = _jml_abstract(dataset, _item_min_func,
                            discrimination, options['max_iteration'])
 
-    return result[1]
+    return result
 
 
 def onepl_jml(dataset, options=None):
@@ -152,8 +153,9 @@ def onepl_jml(dataset, options=None):
 
     result = _jml_abstract(dataset, _item_min_func, discrimination=1,
                            max_iter=options['max_iteration'])
-
-    return result[0][0], result[1]
+    result['Discrimination'] = result['Discrimination'][0]
+    
+    return result
 
 
 def twopl_jml(dataset, options=None):
@@ -308,7 +310,8 @@ def grm_jml(dataset, options=None):
     for ndx, (start_ndx, end_ndx) in enumerate(zip(start_indices, cumulative_item_counts)):
         output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
 
-    return discrimination[start_indices], output_betas
+    return {'Discrimination': discrimination[start_indices], 
+            'Difficulty': output_betas}
 
 
 def pcm_jml(dataset, options=None):
@@ -417,4 +420,5 @@ def pcm_jml(dataset, options=None):
         if(np.abs(previous_discrimination - discrimination).max() < 1e-3):
             break
 
-    return discrimination, betas
+    return {'Discrimination': discrimination, 
+            'Difficulty': betas}

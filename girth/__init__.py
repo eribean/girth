@@ -8,6 +8,7 @@ from .synthetic import (create_correlated_abilities,
                         create_synthetic_irt_dichotomous,
                         create_synthetic_mirt_dichotomous,
                         create_synthetic_irt_polytomous)
+from .latent_ability_distribution import LatentPDF, CubicSplinePDF
 from .mml_methods import (rasch_mml, onepl_mml,
                           twopl_mml, grm_mml)
 from .mml_full_methods import (rasch_full, onepl_full, twopl_full,

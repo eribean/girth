@@ -97,4 +97,6 @@ def threepl_full(dataset, options=None):
         if(np.abs(discrimination - previous_discrimination).max() < 1e-3):
             break
 
-    return discrimination, difficulty, guessing
+    return {'Discrimination': discrimination, 
+            'Difficulty': difficulty, 
+            'Guessing': guessing}

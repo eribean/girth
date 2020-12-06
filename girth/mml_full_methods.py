@@ -4,7 +4,8 @@ from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import (irt_evaluation, convert_responses_to_kernel_sign,
                    validate_estimation_options, mml_approx)
-from girth.utils import _get_quadrature_points 
+from girth.utils import _get_quadrature_points
+from girth.latent_ability_distribution import LatentPDF
 from girth.numba_functions import _compute_partial_integral
 from girth.polytomous_utils import (condition_polytomous_response,
                                     _credit_partial_integral,
@@ -28,7 +29,7 @@ def rasch_full(dataset, discrimination=1, options=None):
         * quadrature_bounds: (float, float)
         * quadrature_n: int
     """
-    return onepl_full(dataset, alpha=discrimination, options=options)[1]
+    return onepl_full(dataset, alpha=discrimination, options=options)
 
 
 def onepl_full(dataset, alpha=None, options=None):
@@ -125,7 +126,8 @@ def onepl_full(dataset, alpha=None, options=None):
     else:  # Rasch Solver
         alpha_min_func(alpha)
 
-    return alpha, difficulty
+    return {'Discrimination': alpha, 
+            'Difficulty': difficulty}
 
 
 def twopl_full(dataset, options=None):
@@ -212,7 +214,8 @@ def twopl_full(dataset, options=None):
         if(np.abs(discrimination - previous_discrimination).max() < 1e-3):
             break
 
-    return discrimination, difficulty
+    return {'Discrimination': discrimination, 
+            'Difficulty': difficulty}
 
 
 def pcm_mml(dataset, options=None):
@@ -230,23 +233,22 @@ def pcm_mml(dataset, options=None):
         difficulty: (2d array) estimates of item difficulties x item thresholds
 
     Options:
+        * estimate_distribution: Boolean    
+        * number_of_samples: int >= 5       
         * max_iteration: int
         * distribution: callable
         * quadrature_bounds: (float, float)
         * quadrature_n: int
     """
     options = validate_estimation_options(options)
-    quad_start, quad_stop = options['quadrature_bounds']
-    quad_n = options['quadrature_n']
 
     responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
                                                            _reference=0.0)
     n_items = responses.shape[0]
 
-    # Interpolation Locations
-    theta, weight = _get_quadrature_points(quad_n, quad_start, quad_stop)
-    distribution = options['distribution'](theta)
-    distribution_x_weight = distribution * weight
+    # Quadrature Locations
+    latent_pdf = LatentPDF(options)
+    theta = latent_pdf.quadrature_locations
 
     # Initialize difficulty parameters for estimation
     betas = np.full((n_items, item_counts.max()), np.nan)
@@ -272,12 +274,15 @@ def pcm_mml(dataset, options=None):
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         # and for speed
-        partial_int *= 0.0
-        partial_int += distribution_x_weight[None, :]
+
+        partial_int = np.ones((responses.shape[1], theta.size))
         for item_ndx in range(n_items):
             partial_int *= _credit_partial_integral(theta, betas[item_ndx],
                                                     discrimination[item_ndx],
                                                     responses[item_ndx])
+        # Estimate the distribution if requested
+        distribution_x_weight = latent_pdf(partial_int, iteration)
+        partial_int *= distribution_x_weight        
 
         # Loop over each item and solve for the alpha / beta parameters
         for item_ndx in range(n_items):
@@ -322,7 +327,22 @@ def pcm_mml(dataset, options=None):
 
     # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
-    return discrimination, betas[:, 1:]
+    # Compute statistics for final iteration
+    partial_int /= distribution_x_weight
+    null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
+                                             latent_pdf.weights, 0)
+    full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
+                                             latent_pdf.n_points-3)
+
+    return {'Discrimination': discrimination,
+            'Difficulty': betas[:, 1:],
+            'LatentPDf': latent_pdf,
+            'AIC': {'final': full_metrics[0],
+                    'null': null_metrics[0],
+                    'delta': null_metrics[0] - full_metrics[0]},
+            'BIC': {'final': full_metrics[1],
+                    'null': null_metrics[1],
+                    'delta': null_metrics[1] - full_metrics[1]}}
 
 
 def gum_mml(dataset, options=None):
@@ -338,26 +358,26 @@ def gum_mml(dataset, options=None):
     Returns:
         discrimination: (1d array) estimates of item discrimination
         delta: (1d array) estimates of item folding values
-        difficulty: (2d array) estimates of item thresholds x item thresholds
+        difficulty: (2d array) estimates of item thresholds
 
     Options:
+        * estimate_distribution: Boolean    
+        * number_of_samples: int >= 5       
         * max_iteration: int
         * distribution: callable
         * quadrature_bounds: (float, float)
         * quadrature_n: int
     """
     options = validate_estimation_options(options)
-    quad_start, quad_stop = options['quadrature_bounds']
-    quad_n = options['quadrature_n']
 
     responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
                                                            _reference=0.0)
     n_items = responses.shape[0]
 
     # Interpolation Locations
-    theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
-    distribution = options['distribution'](theta)
-    distribution_x_weight = distribution * weights
+    # Quadrature Locations
+    latent_pdf = LatentPDF(options)
+    theta = latent_pdf.quadrature_locations
 
     # Initialize item parameters for iterations
     discrimination = np.ones((n_items,))
@@ -388,14 +408,16 @@ def gum_mml(dataset, options=None):
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         # and for speed
-        partial_int *= 0.0
-        partial_int += distribution_x_weight[None, :]
+        partial_int = np.ones((responses.shape[1], theta.size))
         for item_ndx in range(n_items):
             partial_int *= _unfold_partial_integral(theta, delta[item_ndx],
                                                     betas[item_ndx],
                                                     discrimination[item_ndx],
                                                     fold_span[item_ndx],
                                                     responses[item_ndx])
+        # Estimate the distribution if requested
+        distribution_x_weight = latent_pdf(partial_int, iteration)
+        partial_int *= distribution_x_weight
 
         # Loop over each item and solve for the alpha / beta parameters
         for item_ndx in range(n_items):
@@ -444,5 +466,23 @@ def gum_mml(dataset, options=None):
 
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
-
-    return discrimination, delta, betas
+    
+    # Compute statistics for final iteration
+    partial_int /= distribution_x_weight
+    null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
+                                             latent_pdf.weights, 0)
+    full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
+                                             latent_pdf.n_points-3)
+    
+    return {'Discrimination': discrimination, 
+            'Difficulties': np.c_[betas, np.zeros((delta.size,)), 
+                                  -betas[:, ::-1]] + delta[:, None],
+            'Delta': delta,
+            'Tau': betas,
+            'LatentPDf': latent_pdf,
+            'AIC': {'final': full_metrics[0],
+                    'null': null_metrics[0],
+                    'delta': null_metrics[0] - full_metrics[0]},
+            'BIC': {'final': full_metrics[1],
+                    'null': null_metrics[1],
+                    'delta': null_metrics[1] - full_metrics[1]}}            

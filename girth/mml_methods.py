@@ -245,7 +245,7 @@ def grm_mml(dataset, options=None):
         _integral_func = _solve_integral_equations_LUT
         _interp_func = create_beta_LUT((.15, 5.05, 500), (-6, 6, 500), options)
     
-    # Interpolation Locations
+    # Quadrature Locations
     latent_pdf = LatentPDF(options)
     theta = latent_pdf.quadrature_locations
 
@@ -355,6 +355,7 @@ def grm_mml(dataset, options=None):
         output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
     
     # Compute statistics for final iteration
+    partial_int /= distribution_x_weight
     null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
                                              latent_pdf.weights, 0)
     full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,

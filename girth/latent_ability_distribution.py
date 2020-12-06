@@ -214,8 +214,8 @@ class LatentPDF(object):
         self.null_distribution = options['distribution'](theta)
         
         # Triggers to run the estimation or use default
-        self.estimate_distribution = options['estimate_distribution']    
-        self.n_points = options['number_of_samples']
+        self.estimate_distribution = options['estimate_distribution']  
+        self.n_points = options['number_of_samples'] if self.estimate_distribution else 3  
         
         # Initialize the first cubic-spline class
         # and set the distibution be an inverted U-shape

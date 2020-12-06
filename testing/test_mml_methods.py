@@ -269,6 +269,30 @@ class TestMMLGradedResponseModel(unittest.TestCase):
                                    estimated_parameters_NOLUT['Discrimination'], 
                                    atol=1e-3, rtol=1e-3)
 
+    def test_graded_response_latent_distribution_estimate(self):
+        """Testing LUT give answer close to NO_LUT."""
+        np.random.seed(11546)
+        difficulty = np.sort(np.random.randn(20, 4), axis=1)
+        discrimination = np.random.rand(20) + 0.75
+        thetas = np.random.randn(1000)
+        syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
+                                                   thetas)
+
+        estimated_parameters_ED = grm_mml(syn_data, {"use_LUT": True, 
+                                                     "estimate_distribution": True,
+                                                     "number_of_samples": 5})
+        estimated_parameters_NED = grm_mml(syn_data, {"use_LUT": True, 
+                                                      "estimate_distribution": False})
+
+        # Just make sure it runs!
+        np.testing.assert_allclose(estimated_parameters_ED['Difficulty'],
+                                   estimated_parameters_NED['Difficulty'], 
+                                   atol=.05, rtol=1e-3)
+
+        np.testing.assert_allclose(estimated_parameters_ED['Discrimination'],
+                                   estimated_parameters_NED['Discrimination'], 
+                                   atol=.05, rtol=1e-3)                                   
+
 class TestMMLPartialCreditModel(unittest.TestCase):
     """Tests the marginal maximum likelihood for GRM."""
 

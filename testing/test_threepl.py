@@ -128,7 +128,7 @@ class TestAbilityEstimates3PL(unittest.TestCase):
 
         self.assertAlmostEqual(mean, 0.004648932, places=3)
         self.assertAlmostEqual(std, 0.732529437, places=3)
-        self.assertAlmostEqual(minimum, -1.7767052989, places=3)
+        self.assertAlmostEqual(minimum, -1.7761348, places=3)
         self.assertAlmostEqual(maximum, 1.67935964, places=3)
 
 

@@ -136,7 +136,7 @@ class TestAbilityEstimates(unittest.TestCase):
                      1.05603316, -0.57198605, -0.69371833, -0.69371833,  0.24361885]
 
         theta5 = ability_eap(self.set_five, self.regression_difficulty, self.regression_discrimination)
-        np.testing.assert_array_almost_equal(theta5, expected,decimal=5)
+        np.testing.assert_allclose(theta5, expected, atol=1e-3, rtol=1e-3)
 
 
 if __name__ == '__main__':

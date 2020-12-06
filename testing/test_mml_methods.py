@@ -33,7 +33,7 @@ class TestMMLRaschMethods(unittest.TestCase):
         output = rasch_mml(syn_data, self.discrimination)['Difficulty']
         expected_output = np.array([-1.324751, -0.814625, -0.082224,  0.658678,  1.470566])
 
-        np.testing.assert_allclose(expected_output, output, atol=1e-4, rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output, atol=1e-3, rtol=1e-3)
 
     def test_rasch_regression_full(self):
         """Testing rasch full methods."""
@@ -42,7 +42,7 @@ class TestMMLRaschMethods(unittest.TestCase):
         expected_output = np.array([-1.32206195, -0.81438101, -0.0847999, 
                                      0.65460933,  1.4664586])
 
-        np.testing.assert_allclose(expected_output, output, atol=1e-4, rtol=1e-5)
+        np.testing.assert_allclose(expected_output, output, atol=1e-3, rtol=1e-3)
 
     def test_rasch_close(self):
         """Testing rasch converging methods."""
@@ -81,9 +81,9 @@ class TestMMLOnePLMethods(unittest.TestCase):
         
         expected_output = np.array([-1.376502, -0.648995, -0.039338,  0.77919 ,  1.386173])
 
-        self.assertAlmostEqual(output['Discrimination'], 1.9017036760, places=5)
+        self.assertAlmostEqual(output['Discrimination'], 1.901730570, places=4)
         np.testing.assert_allclose(expected_output, output['Difficulty'], 
-                                   atol= 1e-4, rtol=1e-5)
+                                   atol= 1e-3, rtol=1e-3)
 
     def test_onepl_regression_full(self):
         """Testing onepl full methods."""
@@ -92,9 +92,9 @@ class TestMMLOnePLMethods(unittest.TestCase):
         expected_output = np.array([-1.37825764, -0.64679736, -0.03537104, 
                                      0.78121678,  1.38471631])
 
-        self.assertAlmostEqual(output['Discrimination'], 1.90187164)
+        self.assertAlmostEqual(output['Discrimination'], 1.9019012, places=4)
         np.testing.assert_allclose(expected_output, output['Difficulty'], 
-                                   atol= 1e-4, rtol=1e-5)
+                                   atol= 1e-3, rtol=1e-3)
 
     def test_onepl_close(self):
         """Testing onepl converging methods."""
@@ -139,7 +139,7 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         np.testing.assert_allclose(
             expected_discrimination, output['Discrimination'], atol = 1e-4, rtol=1e-5)
         np.testing.assert_allclose(expected_output, output['Difficulty'], 
-                                   atol = 1e-4, rtol=1e-5)
+                                   atol = 1e-3, rtol=1e-3)
 
     def test_twopl_regression_full(self):
         """Testing twopl full methods."""
@@ -154,7 +154,7 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         np.testing.assert_allclose(
             expected_discrimination, output['Discrimination'], atol = 1e-4, rtol=1e-5)
         np.testing.assert_allclose(expected_output, output['Difficulty'], 
-                                   atol = 1e-4, rtol=1e-5)
+                                   atol = 1e-3, rtol=1e-3)
 
     def test_twopl_close(self):
         """Testing twopl converging methods."""
@@ -198,10 +198,10 @@ class TestMMLGradedResponseModel(unittest.TestCase):
 
         np.testing.assert_allclose(
             estimated_parameters['Discrimination'], expected_discrimination, 
-            atol = 1e-4, rtol=1e-5)
+            atol = 1e-3, rtol=1e-3)
         np.testing.assert_allclose(
             estimated_parameters['Difficulty'], expectected_difficulty,
-            atol = 1e-4, rtol=1e-5)
+            atol = 1e-3, rtol=1e-3)
 
     def test_graded_small_participant(self):
         """Regression Testing graded response model with small N."""
@@ -226,10 +226,10 @@ class TestMMLGradedResponseModel(unittest.TestCase):
 
         np.testing.assert_allclose(
             estimated_parameters['Discrimination'], expected_discrimination, 
-            atol = 1e-4, rtol=1e-5)
+            atol = 1e-3, rtol=1e-3)
         np.testing.assert_allclose(
             estimated_parameters['Difficulty'], expectected_difficulty, 
-            atol = 1e-4, rtol=1e-5)
+            atol = 1e-3, rtol=1e-3)
 
     def test_graded_response_model_close(self):
         """Regression Testing graded response model with large N."""
@@ -249,6 +249,25 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         rmse = np.sqrt(np.square(estimated_parameters['Difficulty'] - difficulty).mean())
         self.assertLess(rmse, .1591)
 
+    def test_graded_response_LUT_vs_NOLUT(self):
+        """Testing LUT give answer close to NO_LUT."""
+        np.random.seed(489413)
+        difficulty = np.sort(np.random.randn(5, 4), axis=1)
+        discrimination = np.random.rand(5) + 0.5
+        thetas = np.random.randn(600)
+        syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
+                                                   thetas)
+
+        estimated_parameters_NOLUT = grm_mml(syn_data, {"use_LUT": False})
+        estimated_parameters_LUT = grm_mml(syn_data, {"use_LUT": True})
+
+        np.testing.assert_allclose(estimated_parameters_LUT['Difficulty'],
+                                   estimated_parameters_NOLUT['Difficulty'], 
+                                   atol=1e-3, rtol=1e-3)
+
+        np.testing.assert_allclose(estimated_parameters_LUT['Discrimination'],
+                                   estimated_parameters_NOLUT['Discrimination'], 
+                                   atol=1e-3, rtol=1e-3)
 
 class TestMMLPartialCreditModel(unittest.TestCase):
     """Tests the marginal maximum likelihood for GRM."""
@@ -294,7 +313,7 @@ class TestMMLPartialCreditModel(unittest.TestCase):
         rmse_large = rmse(output_large['Discrimination'][:5], self.discrimination_smol)
 
         self.assertLess(rmse_large, rmse_smol)
-        self.assertAlmostEqual(rmse_large, 0.07285609, places=5)
+        self.assertAlmostEqual(rmse_large, 0.0728439345, places=4)
 
         # Regression Tests
         expected_discr = np.array([0.81237, 0.98594, 1.15784, 
@@ -313,9 +332,9 @@ class TestMMLPartialCreditModel(unittest.TestCase):
                             [-0.22679954, -1.18577072,  1.94080517, -0.45182054]])
 
         np.testing.assert_allclose(
-            expected_discr, output_large['Discrimination'], atol=2e-4, rtol=7e-4)
+            expected_discr, output_large['Discrimination'], atol=1e-3, rtol=1e-3)
         np.testing.assert_allclose(
-            expected_diff, output_large['Difficulty'], atol=2e-4, rtol=7e-4)
+            expected_diff, output_large['Difficulty'], atol=1e-3, rtol=1e-3)
 
     def test_pcm_mixed_difficulty_length(self):
         """Testing response set with different difficulty lengths."""
@@ -338,9 +357,9 @@ class TestMMLPartialCreditModel(unittest.TestCase):
 
         output = pcm_mml(syn_data)
         np.testing.assert_allclose(
-            expected_diff, output['Difficulty'], atol=1e-4, rtol=1e-5)
+            expected_diff, output['Difficulty'], atol=1e-3, rtol=1e-3)
         np.testing.assert_allclose(
-            expected_discr, output['Discrimination'], atol=1e-4, rtol=1e-5)
+            expected_discr, output['Discrimination'], atol=1e-3, rtol=1e-3)
 
 
 class TestMMLGradedUnfoldingModel(unittest.TestCase):
@@ -370,9 +389,9 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
         rmse_tau = np.sqrt(np.square(difficulty - 
                                      result['Tau']).mean())
 
-        self.assertAlmostEqual(rmse_discrimination, 0.3709931291, places=5)
-        self.assertAlmostEqual(rmse_delta, 0.893843069403, places=5)
-        self.assertAlmostEqual(rmse_tau, 0.6406162162, places=5)
+        self.assertAlmostEqual(rmse_discrimination, 0.371009140, places=4)
+        self.assertAlmostEqual(rmse_delta, 0.893843069403, places=4)
+        self.assertAlmostEqual(rmse_tau, 0.6406162162, places=4)
 
 
 if __name__ == '__main__':

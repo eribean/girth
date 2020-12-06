@@ -359,11 +359,11 @@ class TestOptions(unittest.TestCase):
         expected = stats.norm(0, 1).pdf(x)
 
         self.assertEqual(output['max_iteration'], 25)
-        self.assertEqual(output['quadrature_n'], 61)
+        self.assertEqual(output['quadrature_n'], 41)
         self.assertEqual(output['use_LUT'], True)
         self.assertEqual(output['estimate_distribution'], False)
         self.assertEqual(output['number_of_samples'], 9)
-        self.assertTupleEqual(output['quadrature_bounds'], (-5, 5))
+        self.assertTupleEqual(output['quadrature_bounds'], (-4.5, 4.5))
         result = output['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
@@ -377,11 +377,11 @@ class TestOptions(unittest.TestCase):
 
         self.assertEqual(len(result.keys()), 7)
         self.assertEqual(result['max_iteration'], 25)
-        self.assertEqual(result['quadrature_n'], 61)
+        self.assertEqual(result['quadrature_n'], 41)
         self.assertEqual(result['use_LUT'], True)
         self.assertEqual(result['estimate_distribution'], False)
         self.assertEqual(result['number_of_samples'], 9)
-        self.assertTupleEqual(result['quadrature_bounds'], (-5, 5))
+        self.assertTupleEqual(result['quadrature_bounds'], (-4.5, 4.5))
         result = result['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)

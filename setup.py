@@ -14,7 +14,7 @@ if __name__ == '__main__':
         packages=['girth', 'girth.performance', 'girth.three_pl'],
         package_dir={'girth': 'girth',
                      'girth.performance':convert_path('./performance')},
-        version="0.3",
+        version="0.3.5",
         license="MIT",
         description="A python package for Item Response Theory.",
         long_description=long_description.replace('<ins>','').replace('</ins>',''),
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         author='Ryan C. Sanchez',
         author_email='rsanchez44@gatech.edu',
         url = 'https://eribean.github.io/girth/',
-        download_url = 'https://github.com/eribean/girth/archive/v0.3.tar.gz',
+        download_url = 'https://github.com/eribean/girth/archive/v0.3.5.tar.gz',
         keywords = ['IRT', 'Psychometrics', 'Item Response Theory'],
         install_requires = ['numpy', 'scipy', 'numba'],
         classifiers = [

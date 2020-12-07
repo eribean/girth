@@ -37,6 +37,8 @@ Girth is a python package for estimating item response theory (IRT) parameters. 
    * Marginal Likelihood Estimation
    * Maximum a Posteriori Estimation
    * Expected a Posteriori Estimation
+2. Polytomous
+   * Expected a Posteriori Estimation
 
 **Supported Synthetic Data Generation**
 1. Rasch / 1PL Models Dichotomous Models
@@ -58,6 +60,15 @@ From Source
 ```
 python setup.py install --prefix=path/to/your/installation
 ```
+
+## Dependencies
+We recommend the anaconda environment which can be installed
+[here](https://www.anaconda.com/distribution/)
+
+* Python 3.7  
+* Numpy  
+* Scipy
+* Numba
 
 ## Usage
 ```python
@@ -92,16 +103,6 @@ nosetests testing/
 ```
 nosetests --with-coverage --cover-package=girth testing/
 ```
-
-## Dependencies
-
-* Python 3.7  
-* Numpy  
-* Scipy
-* Numba
-
-We use the anaconda environment which can be installed
-Download [here](https://www.anaconda.com/distribution/)
 
 ## Contact
 

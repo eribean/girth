@@ -3,6 +3,7 @@ import unittest # pylint: disable=cyclic-import
 import numpy as np
 from scipy.stats import skewnorm
 
+from girth.ability_methods import _ability_eap_abstract
 from girth import (ability_eap, ability_map, 
                    ability_mle)
 
@@ -137,6 +138,21 @@ class TestAbilityEstimates(unittest.TestCase):
 
         theta5 = ability_eap(self.set_five, self.regression_difficulty, self.regression_discrimination)
         np.testing.assert_allclose(theta5, expected, atol=1e-3, rtol=1e-3)
+
+    def test_ability_eap_abstract(self):
+        """Testing eap computation."""
+        np.random.seed(1002124)
+        partial_int = np.random.randn(1000, 41)
+        weight = np.random.randn(41)
+        theta = np.linspace(-3, 3, 41)
+
+        result = _ability_eap_abstract(partial_int, weight, theta)
+
+        denom = (partial_int * (weight)).sum(1)
+        numer = (partial_int * (weight * theta)).sum(1)
+        expected = numer / denom
+        
+        np.testing.assert_allclose(result, expected, atol=1e-5, rtol=1e-3)
 
 
 if __name__ == '__main__':

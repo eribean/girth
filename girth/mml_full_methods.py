@@ -10,6 +10,7 @@ from girth.numba_functions import _compute_partial_integral
 from girth.polytomous_utils import (condition_polytomous_response,
                                     _credit_partial_integral,
                                     _unfold_partial_integral)
+from girth.ability_methods import _ability_eap_abstract
 
 
 def rasch_full(dataset, discrimination=1, options=None):
@@ -274,7 +275,6 @@ def pcm_mml(dataset, options=None):
         # Quadrature evaluation for values that do not change
         # This is done during the outer loop to address rounding errors
         # and for speed
-
         partial_int = np.ones((responses.shape[1], theta.size))
         for item_ndx in range(n_items):
             partial_int *= _credit_partial_integral(theta, betas[item_ndx],
@@ -325,17 +325,27 @@ def pcm_mml(dataset, options=None):
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
 
+    # Recompute partial int for later calculations
+    partial_int = np.ones((responses.shape[1], theta.size))
+    for item_ndx in range(n_items):
+        partial_int *= _credit_partial_integral(theta, betas[item_ndx],
+                                                discrimination[item_ndx],
+                                                responses[item_ndx])
+
     # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
     # Compute statistics for final iteration
-    partial_int /= distribution_x_weight
     null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
-                                             latent_pdf.weights, 0)
+                                              latent_pdf.weights, 0)
     full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
-                                             latent_pdf.n_points-3)
+                                              latent_pdf.n_points-3)
+
+    # Ability estimates
+    eap_abilities = _ability_eap_abstract(partial_int, distribution_x_weight, theta)
 
     return {'Discrimination': discrimination,
             'Difficulty': betas[:, 1:],
+            'Ability': eap_abilities,
             'LatentPDf': latent_pdf,
             'AIC': {'final': full_metrics[0],
                     'null': null_metrics[0],
@@ -466,17 +476,28 @@ def gum_mml(dataset, options=None):
 
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
-    
+
+    # Recompute partial int for later calculations
+    partial_int = np.ones((responses.shape[1], theta.size))
+    for item_ndx in range(n_items):
+        partial_int *= _unfold_partial_integral(theta, delta[item_ndx],
+                                                betas[item_ndx],
+                                                discrimination[item_ndx],
+                                                fold_span[item_ndx],
+                                                responses[item_ndx])    
     # Compute statistics for final iteration
-    partial_int /= distribution_x_weight
     null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
-                                             latent_pdf.weights, 0)
+                                              latent_pdf.weights, 0)
     full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
-                                             latent_pdf.n_points-3)
-    
+                                              latent_pdf.n_points-3)
+
+    # Ability estimates
+    eap_abilities = _ability_eap_abstract(partial_int, distribution_x_weight, theta)
+
     return {'Discrimination': discrimination, 
             'Difficulties': np.c_[betas, np.zeros((delta.size,)), 
                                   -betas[:, ::-1]] + delta[:, None],
+            'Ability': eap_abilities,
             'Delta': delta,
             'Tau': betas,
             'LatentPDf': latent_pdf,

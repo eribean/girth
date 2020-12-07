@@ -10,6 +10,7 @@ from girth.latent_ability_distribution import LatentPDF
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, 
                                     _solve_integral_equations_LUT)
+from girth.ability_methods import _ability_eap_abstract
 
 
 def _mml_abstract(difficulty, scalar, discrimination,
@@ -347,6 +348,13 @@ def grm_mml(dataset, options=None):
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
             
+    # Recompute partial int for later calculations
+    partial_int = np.ones((responses.shape[1], theta.size))
+    for item_ndx in range(n_items):
+        partial_int *= _graded_partial_integral(theta, betas, betas_roll,
+                                                discrimination,
+                                                responses[item_ndx])
+
     # Trim difficulties to conform to standard output
     # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
@@ -355,15 +363,18 @@ def grm_mml(dataset, options=None):
         output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
     
     # Compute statistics for final iteration
-    partial_int /= distribution_x_weight
     null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
                                              latent_pdf.weights, 0)
     full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
                                              latent_pdf.n_points-3)
 
+    # Ability estimates
+    eap_abilities = _ability_eap_abstract(partial_int, distribution_x_weight, theta)
+
     return {'Discrimination': discrimination[start_indices],
             'Difficulty': output_betas,
-            'LatentPDf': latent_pdf,
+            'Ability': eap_abilities,
+            'LatentPDF': latent_pdf,
             'AIC': {'final': full_metrics[0],
                     'null': null_metrics[0],
                     'delta': null_metrics[0] - full_metrics[0]},

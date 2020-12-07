@@ -97,11 +97,37 @@ def ability_map(dataset, difficulty, discrimination, options=None):
     return thetas
 
 
+def _ability_eap_abstract(partial_int, weight, theta):
+    """Generic function to compute abilities
+
+    Estimates the ability parameters (theta) for models via
+    expected a posterior likelihood estimation.
+
+    Args:
+        partial_int: (2d array) partial integrations over items
+        weight: weighting to apply before summation
+        theta: quadrature evaluation locations
+    
+    Returns:
+        abilities: the estimated latent abilities
+    """
+    local_int = partial_int * weight
+
+    # Compute the denominator
+    denominator = np.sum(local_int, axis=1)
+
+    # compute the numerator
+    local_int *= theta
+    numerator = np.sum(local_int, axis=1)
+
+    return numerator / denominator
+
+
 def ability_eap(dataset, difficulty, discrimination, options=None):
     """Estimates the abilities for dichotomous models.
 
     Estimates the ability parameters (theta) for dichotomous models via
-    expaected a posterior likelihood estimation.
+    expected a posterior likelihood estimation.
 
     Args:
         dataset: [n_items, n_participants] (2d Array) of measured responses
@@ -135,15 +161,7 @@ def ability_eap(dataset, difficulty, discrimination, options=None):
         partial_int *= _compute_partial_integral(theta, difficulty[ndx], 
                                                  discrimination[ndx], the_sign[ndx],
                                                  the_output)
+    distribution_x_weights = options['distribution'](theta) * weights
 
-    # Weight by the input ability distribution
-    partial_int *= (options['distribution'](theta) * weights)
-
-    # Compute the denominator
-    denominator = np.sum(partial_int, axis=1)
-
-    # compute the numerator
-    partial_int *= theta
-    numerator = np.sum(partial_int, axis=1)
-
-    return numerator / denominator
+    return _ability_eap_abstract(partial_int, distribution_x_weights,
+                                 theta)

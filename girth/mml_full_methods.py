@@ -346,7 +346,7 @@ def pcm_mml(dataset, options=None):
     return {'Discrimination': discrimination,
             'Difficulty': betas[:, 1:],
             'Ability': eap_abilities,
-            'LatentPDf': latent_pdf,
+            'LatentPDF': latent_pdf,
             'AIC': {'final': full_metrics[0],
                     'null': null_metrics[0],
                     'delta': null_metrics[0] - full_metrics[0]},
@@ -355,7 +355,7 @@ def pcm_mml(dataset, options=None):
                     'delta': null_metrics[1] - full_metrics[1]}}
 
 
-def gum_mml(dataset, options=None):
+def gum_mml(dataset, delta_sign=(0, 1), options=None):
     """Estimate parameters for graded unfolding model.
 
     Estimate the discrimination, delta and threshold parameters for
@@ -363,6 +363,8 @@ def gum_mml(dataset, options=None):
 
     Args:
         dataset: [n_items, n_participants] 2d array of measured responses
+        delta_sign: (tuple) (ndx, sign: [+1 | -1]) sets the sign of the 
+                             ndx delta value to positive or negative
         options: dictionary with updates to default options
 
     Returns:
@@ -404,6 +406,10 @@ def gum_mml(dataset, options=None):
     fold_span = ((item_counts[:, None] - 0.5) -
                  np.arange(betas.shape[1] + 1)[None, :])
 
+    # Sets the first value for the 
+    delta_ndx = delta_sign[0]
+    delta_multiplier = np.sign(delta_sign[1])
+
     #############
     # 1. Start the iteration loop
     # 2. Estimate Dicriminatin/Difficulty Jointly
@@ -441,9 +447,10 @@ def gum_mml(dataset, options=None):
                                                   fold_span[item_ndx],
                                                   responses[item_ndx])
             partial_int /= old_values
-
+            
+            new_betas = np.full((betas.shape[1],), np.nan)
             def _local_min_func(estimate):
-                new_betas = estimate[2:]
+                new_betas[:item_length] = estimate[2:]
                 new_values = _unfold_partial_integral(theta, estimate[1],
                                                       new_betas,
                                                       estimate[0], fold_span[item_ndx],
@@ -456,7 +463,7 @@ def gum_mml(dataset, options=None):
             # Initial Guess of Item Parameters
             initial_guess = np.concatenate(([discrimination[item_ndx]],
                                             [delta[item_ndx]],
-                                            betas[item_ndx]))
+                                            betas[item_ndx, :item_length]))
 
             otpt = fmin_slsqp(_local_min_func, initial_guess,
                               disp=False,
@@ -464,7 +471,7 @@ def gum_mml(dataset, options=None):
 
             discrimination[item_ndx] = otpt[0]
             delta[item_ndx] = otpt[1]
-            betas[item_ndx, :] = otpt[2:]
+            betas[item_ndx, :item_length] = otpt[2:]
 
             new_values = _unfold_partial_integral(theta, delta[item_ndx],
                                                   betas[item_ndx],
@@ -474,6 +481,8 @@ def gum_mml(dataset, options=None):
 
             partial_int *= new_values
 
+        # Adjust delta values to conform to delta sign
+        delta *= np.sign(delta[delta_ndx]) * delta_multiplier
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
 
@@ -500,7 +509,7 @@ def gum_mml(dataset, options=None):
             'Ability': eap_abilities,
             'Delta': delta,
             'Tau': betas,
-            'LatentPDf': latent_pdf,
+            'LatentPDF': latent_pdf,
             'AIC': {'final': full_metrics[0],
                     'null': null_metrics[0],
                     'delta': null_metrics[0] - full_metrics[0]},

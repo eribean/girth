@@ -481,10 +481,11 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
 
             partial_int *= new_values
 
-        # Adjust delta values to conform to delta sign
-        delta *= np.sign(delta[delta_ndx]) * delta_multiplier
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
+
+    # Adjust delta values to conform to delta sign
+    delta *= np.sign(delta[delta_ndx]) * delta_multiplier
 
     # Recompute partial int for later calculations
     partial_int = np.ones((responses.shape[1], theta.size))

@@ -403,8 +403,8 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
         syn_data = create_synthetic_irt_polytomous(betas, discrimination,
                                                    thetas, model='GUM',
                                                    seed=546)
-
-        result = gum_mml(syn_data, {'max_iteration': 100})
+        delta_sign = (0, 1)
+        result = gum_mml(syn_data, delta_sign=delta_sign, options={'max_iteration': 100})
 
         rmse_discrimination = np.sqrt(np.square(discrimination.squeeze() - 
                                                 result['Discrimination']).mean())
@@ -413,10 +413,30 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
         rmse_tau = np.sqrt(np.square(difficulty - 
                                      result['Tau']).mean())
 
-        self.assertAlmostEqual(rmse_discrimination, 0.371009140, places=4)
-        self.assertAlmostEqual(rmse_delta, 0.893843069403, places=4)
-        self.assertAlmostEqual(rmse_tau, 0.6406162162, places=4)
+        self.assertAlmostEqual(rmse_discrimination, 0.3649379623, places=4)
+        self.assertAlmostEqual(rmse_delta, 0.231928324169, places=4)
+        self.assertAlmostEqual(rmse_tau, 0.2207963345, places=4)
 
+    def test_unfolding_specify_negative_ndx(self):
+        """Testing specifying a negative index."""
+        np.random.seed(11215)
+        difficulty = -(np.random.rand(10, 2) * 1.5)
+        delta = 0.5 * np.random.rand(10, 1)
+        discrimination = np.random.rand(10) + 0.5
+        thetas = np.random.randn(200)
+
+        betas = np.c_[difficulty, np.zeros((10, 1)), -difficulty[:, ::-1]]
+        betas += delta
+        syn_data = create_synthetic_irt_polytomous(betas, discrimination,
+                                                   thetas, model='GUM',
+                                                   seed=546)
+
+        delta_sign = (2, np.sign(delta[2]))
+        result = gum_mml(syn_data, delta_sign=delta_sign, 
+                         options={'max_iteration': 100})
+
+        self.assertEqual(np.sign(result['Delta'][2]), delta_sign[1])
+        self.assertNotEqual(np.sign(result['Delta'][2]), -delta_sign[1])
 
 if __name__ == '__main__':
     unittest.main()

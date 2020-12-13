@@ -24,7 +24,7 @@ def _parameter_constraints(current_parameters, sample_space):
 
 
 def resample(cubic_spline_pdf, new_number_of_samples):
-    """Resamples a cubic spline pdf to a new_number of points.
+    """Resamples a cubic spline pdf to a new number of points.
 
     Args:
         cubic_spline_pdf: The current cubic spline object
@@ -164,9 +164,7 @@ class CubicSplinePDF(object):
         x_positions = (np.atleast_1d(evaluation_locations)[:, None] - 
                        self.sample_space[None, :])
         x_positions /= self.delta_sample
-        filter_matrix = self.cubic_spline(x_positions) 
-        
-        return filter_matrix
+        return self.cubic_spline(x_positions) 
        
     def __call__(self, evaluation_locations):
         """Evaluate the cubic spline at the input locations.

@@ -39,10 +39,13 @@ def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
     cnt = 0
     for ndx, item in enumerate(the_output):
         values, indices = np.unique(item, return_inverse=True)
-        betas_length[ndx] = values.size
+        betas_length[ndx] = max(values.size, 2)
 
         # Recode from zero to N-1
-        values = np.arange(0, betas_length[ndx]) + cnt * _reference
+        recode = np.arange(0, betas_length[ndx])
+        if values.size == 1:
+            recode = np.array([values[0] != 0], dtype='int')
+        values = recode + cnt * _reference
         the_output[ndx] = values[indices]
 
         # Update linear index
@@ -53,12 +56,18 @@ def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
 
 def _solve_for_constants(item_responses):
     """Computes the ratios needed for grm difficulty estimates."""
-    _, counts = np.unique(item_responses, return_counts=True)
-    diagonal = counts[:-1] + counts[1:]
-    A_matrix = (np.diag(diagonal) + np.diag(-counts[2:], -1) + 
-                np.diag(-counts[:-2], 1))
+    value, counts = np.unique(item_responses, return_counts=True)
+
+    if counts.shape[0] > 1:
+        diagonal = counts[:-1] + counts[1:]
+        A_matrix = (np.diag(diagonal) + np.diag(-counts[2:], -1) + 
+                    np.diag(-counts[:-2], 1))
+        constants = np.linalg.inv(A_matrix)[:, 0] * counts[1]
     
-    return np.linalg.inv(A_matrix)[:, 0] * counts[1]
+    else:
+        constants = np.array([0]) if value == 0 else np.array([1])
+    
+    return constants
     
 
 def _graded_partial_integral(theta, betas, betas_roll,

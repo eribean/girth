@@ -31,7 +31,7 @@ def default_options():
             "distribution": gaussian(0, 1).pdf,
             "quadrature_bounds": (-4.5, 4.5),
             "quadrature_n": 41,
-            "hyper_quadrature_n": 21,
+            "hyper_quadrature_n": 41,
             "use_LUT": True,
             "estimate_distribution": False,
             "number_of_samples": 9

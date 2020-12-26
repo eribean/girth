@@ -7,7 +7,7 @@ if nb.config.NUMBA_DEFAULT_NUM_THREADS > 1:
 
 
 @nb.njit()
-def numba_expit(array):
+def numba_expit(array): #pragma: no cover
     """Computes the logistic function.
 
     Logistic is defined as:
@@ -24,7 +24,7 @@ def numba_expit(array):
 
 @nb.njit(parallel=True)
 def _compute_partial_integral(theta, difficulty, discrimination, 
-                              the_sign, the_output):
+                              the_sign, the_output): #pragma: no cover
     """ Computes the partial integral for an IRT item
 
     The return array is 2D with dimensions
@@ -56,7 +56,7 @@ def _compute_partial_integral(theta, difficulty, discrimination,
 
 
 @nb.njit()
-def _array_LUT(alpha, beta, theta, weight, output):
+def _array_LUT(alpha, beta, theta, weight, output): #pragma: no cover
     """Computes the look up table values used to speed
        up parameter estimation
     """

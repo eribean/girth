@@ -7,7 +7,6 @@ from girth.numba_functions import numba_expit
 from girth.utils import create_beta_LUT
 from girth.latent_ability_distribution import LatentPDF
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
-                                    _solve_integral_equations, 
                                     _solve_integral_equations_LUT)
 from girth.ability_methods import _ability_eap_abstract
 
@@ -36,14 +35,15 @@ def twopl_mml_eap(dataset, options=None):
     Options:
         * estimate_distribution: Boolean    
         * number_of_samples: int >= 5    
-        * use_LUT: boolean
         * max_iteration: int
         * distribution: callable
         * quadrature_bounds: (float, float)
         * quadrature_n: int
         * hyper_quadrature_n: int
     """
-    return grm_mml_eap(dataset.astype('int'), options)
+    result = grm_mml_eap(dataset.astype('int'), options)
+    result['Difficulty'] = result['Difficulty'].squeeze()
+    return result
 
 
 def grm_mml_eap(dataset, options=None):
@@ -69,7 +69,6 @@ def grm_mml_eap(dataset, options=None):
     Options:
         * estimate_distribution: Boolean    
         * number_of_samples: int >= 5    
-        * use_LUT: boolean
         * max_iteration: int
         * distribution: callable
         * quadrature_bounds: (float, float)
@@ -81,12 +80,9 @@ def grm_mml_eap(dataset, options=None):
     responses, item_counts = condition_polytomous_response(dataset, trim_ends=False)
     n_items = responses.shape[0]
     
-    # Should we use the LUT
-    _integral_func = _solve_integral_equations
-    _interp_func = None
-    if options['use_LUT']:
-        _integral_func = _solve_integral_equations_LUT
-        _interp_func = create_beta_LUT((.15, 5.05, 500), (-6, 6, 500), options)
+    # Only use LUT
+    _integral_func = _solve_integral_equations_LUT
+    _interp_func = create_beta_LUT((.15, 5.05, 500), (-6, 6, 500), options)
     
     # Quadrature Locations
     latent_pdf = LatentPDF(options)
@@ -116,13 +112,15 @@ def grm_mml_eap(dataset, options=None):
     # Prior Parameters
     ray_scale = 1.0
     eap_options = {'distribution': stats.rayleigh(loc=.25, scale=ray_scale).pdf,
-                   'quadrature_n': 21, 'quadrature_bounds': (0.25, 5)}
+                   'quadrature_n': options['hyper_quadrature_n'], 
+                   'quadrature_bounds': (0.25, 5)}
     prior_pdf = LatentPDF(eap_options) 
     alpha_evaluation = np.zeros((eap_options['quadrature_n'],))
 
     # Meta-Prior Parameter
     hyper_options = {'distribution': stats.lognorm(loc=0, s=0.25).pdf,
-                     'quadrature_n': 41, 'quadrature_bounds': (0.1, 5)}
+                     'quadrature_n': options['hyper_quadrature_n'], 
+                     'quadrature_bounds': (0.1, 5)}
     hyper_pdf = LatentPDF(hyper_options) 
     hyper_evaluation = np.zeros((hyper_options['quadrature_n'],))
     base_hyper = (hyper_pdf.weights * hyper_pdf.null_distribution).astype('float128')
@@ -146,8 +144,7 @@ def grm_mml_eap(dataset, options=None):
         partial_int *= distribution_x_weight
         
         # Update the lookup table if necessary
-        if (options['use_LUT'] and options['estimate_distribution'] and
-            iteration > 0):
+        if (options['estimate_distribution'] and iteration > 0):
             new_options = dict(options)
             new_options.update({'distribution': latent_pdf.cubic_splines[-1]})
 

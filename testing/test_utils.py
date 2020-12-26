@@ -386,7 +386,7 @@ class TestOptions(unittest.TestCase):
 
         self.assertEqual(output['max_iteration'], 25)
         self.assertEqual(output['quadrature_n'], 41)
-        self.assertEqual(output['hyper_quadrature_n'], 21)        
+        self.assertEqual(output['hyper_quadrature_n'], 41)        
         self.assertEqual(output['use_LUT'], True)
         self.assertEqual(output['estimate_distribution'], False)
         self.assertEqual(output['number_of_samples'], 9)
@@ -405,7 +405,7 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(len(result.keys()), self.expected_length)
         self.assertEqual(result['max_iteration'], 25)
         self.assertEqual(result['quadrature_n'], 41)
-        self.assertEqual(result['hyper_quadrature_n'], 21)        
+        self.assertEqual(result['hyper_quadrature_n'], 41)        
         self.assertEqual(result['use_LUT'], True)
         self.assertEqual(result['estimate_distribution'], False)
         self.assertEqual(result['number_of_samples'], 9)

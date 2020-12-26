@@ -19,6 +19,8 @@ def default_options():
             numerical integration. Default = (-5, 5)
         quadrature_n: [int] number of quadrature points to use
                         Default = 61
+        hyper_quadrature_n: [int] number of quadrature points to use to
+                            estimate hyper prior integral (only mml_eap)
         use_LUT: [boolean] use a look up table in mml functions
         estimate_distribution: [boolean] estimate the latent distribution
                                using cubic splines
@@ -29,6 +31,7 @@ def default_options():
             "distribution": gaussian(0, 1).pdf,
             "quadrature_bounds": (-4.5, 4.5),
             "quadrature_n": 41,
+            "hyper_quadrature_n": 41,
             "use_LUT": True,
             "estimate_distribution": False,
             "number_of_samples": 9
@@ -53,6 +56,8 @@ def validate_estimation_options(options_dict=None):
                     lambda x: isinstance(x, (tuple, list)) and (x[1] > x[0]),
                 'quadrature_n':
                     lambda x: isinstance(x, int) and x > 7,
+                'hyper_quadrature_n':
+                    lambda x: isinstance(x, int) and x > 7,                    
                 'use_LUT':
                     lambda x: isinstance(x, bool),
                 'estimate_distribution':

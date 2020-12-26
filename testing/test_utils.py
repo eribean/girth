@@ -201,6 +201,18 @@ class TestPolytomousUtilities(unittest.TestCase):
         self.assertTrue(output[0].std(axis=0)[0] != 0)
         self.assertTrue(output[0].std(axis=0)[-1] != 0)
 
+        # Set first row to all zeros, should return 0
+        dataset[0] = 1
+        output = condition_polytomous_response(dataset, trim_ends=True)
+        self.assertTrue(output[0][0].mean() == 0)
+        self.assertTrue(output[1][0] == 2)
+
+        # Set first row to all 4, should return 1
+        dataset[0] = 4
+        output = condition_polytomous_response(dataset, trim_ends=True)
+        self.assertTrue(output[0][0].mean() == 1)
+        self.assertTrue(output[1][0] == 2)
+
     def test_solve_for_constants(self):
         """Testing solving for boundary constants."""
         np.random.seed(73)
@@ -224,6 +236,18 @@ class TestPolytomousUtilities(unittest.TestCase):
                              [b31, b32, b33]])
         hand_calcs = np.linalg.inv(b_matrix) @ np.array([counts[1], 0, 0]).T
         np.testing.assert_array_equal(output, hand_calcs)
+
+    def test_solve_for_constants_single_value(self):
+        """Testing constants for a single value."""
+        np.random.seed(11273)
+        dataset = np.zeros((2, 100))
+        dataset[1] = 4
+
+        output = _solve_for_constants(dataset[0])
+        self.assertTrue(output == 0)
+        output = _solve_for_constants(dataset[1])        
+        self.assertTrue(output == 1)
+
 
     def test_integral_equations(self):
         """Tests solving for integral given a ratio."""
@@ -351,6 +375,8 @@ class TestPolytomousUtilities(unittest.TestCase):
 
 class TestOptions(unittest.TestCase):
     """Tests default options."""
+    def setUp(self):
+        self.expected_length = 8
 
     def test_default_creation(self):
         """Testing the default options."""
@@ -360,6 +386,7 @@ class TestOptions(unittest.TestCase):
 
         self.assertEqual(output['max_iteration'], 25)
         self.assertEqual(output['quadrature_n'], 41)
+        self.assertEqual(output['hyper_quadrature_n'], 41)        
         self.assertEqual(output['use_LUT'], True)
         self.assertEqual(output['estimate_distribution'], False)
         self.assertEqual(output['number_of_samples'], 9)
@@ -367,7 +394,7 @@ class TestOptions(unittest.TestCase):
         result = output['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
-        self.assertEqual(len(output.keys()), 7)
+        self.assertEqual(len(output.keys()), self.expected_length)
 
     def test_no_input(self):
         """Testing validation for No input."""
@@ -375,9 +402,10 @@ class TestOptions(unittest.TestCase):
         x = np.linspace(-3, 3, 101)
         expected = stats.norm(0, 1).pdf(x)
 
-        self.assertEqual(len(result.keys()), 7)
+        self.assertEqual(len(result.keys()), self.expected_length)
         self.assertEqual(result['max_iteration'], 25)
         self.assertEqual(result['quadrature_n'], 41)
+        self.assertEqual(result['hyper_quadrature_n'], 41)        
         self.assertEqual(result['use_LUT'], True)
         self.assertEqual(result['estimate_distribution'], False)
         self.assertEqual(result['number_of_samples'], 9)
@@ -420,6 +448,14 @@ class TestOptions(unittest.TestCase):
         with self.assertRaises(AssertionError):
             validate_estimation_options(test)
 
+        test = {'hyper_quadrature_n': 7.2}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)            
+
+        test = {'hyper_quadrature_n': 5}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)   
+
         test = {'quadrature_bounds': 2}
         with self.assertRaises(AssertionError):
             validate_estimation_options(test)
@@ -443,33 +479,35 @@ class TestOptions(unittest.TestCase):
 
         new_parameters = {'distribution': stats.norm(2, 1).pdf}
         output = validate_estimation_options(new_parameters)
-        self.assertEqual(len(output.keys()), 7)
+        self.assertEqual(len(output.keys()), self.expected_length)
         result = output['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
 
         new_parameters = {'quadrature_bounds': (-7, -5),
                           'quadrature_n': 13,
+                          'hyper_quadrature_n': 44,
                           'estimate_distribution': True}
         output = validate_estimation_options(new_parameters)
         self.assertEqual(output['max_iteration'], 25)
         self.assertEqual(output['quadrature_n'], 13)
+        self.assertEqual(output['hyper_quadrature_n'], 44)
         self.assertEqual(output['estimate_distribution'], True)
 
         self.assertTupleEqual(output['quadrature_bounds'], (-7, -5))
-        self.assertEqual(len(output.keys()), 7)
+        self.assertEqual(len(output.keys()), self.expected_length)
 
         new_parameters = {'max_iteration': 43}
         output = validate_estimation_options(new_parameters)
         self.assertEqual(output['max_iteration'], 43)
-        self.assertEqual(len(output.keys()), 7)
+        self.assertEqual(len(output.keys()), self.expected_length)
 
         new_parameters = {'use_LUT': False,
                           'number_of_samples': 142}
         output = validate_estimation_options(new_parameters)
         self.assertEqual(output['use_LUT'], False)
         self.assertEqual(output['number_of_samples'], 142)        
-        self.assertEqual(len(output.keys()), 7)        
+        self.assertEqual(len(output.keys()), self.expected_length)        
 
 
 if __name__ == '__main__':

@@ -23,11 +23,12 @@ jobs:
           name: Install Deps
       - save_cache:
           key: pip-{{ checksum "requirements.txt"  }}
-
+          paths:
+          - /home/circleci/.local/lib/
       - run:
           command: |
-            pip install --user coverage
-            pip install --user nose
+            pip install coverage
+            pip install nose
             nosetests --with-coverage --cover-package=girth testing/
             bash <(curl -s https://codecov.io/bash)
           no_output_timeout: 2m

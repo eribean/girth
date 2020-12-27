@@ -18,13 +18,12 @@ jobs:
           command: |
             for line in $(cat requirements.txt)
             do
-              pip install $line
+              pip install --user $line
             done
           name: Install Deps
       - save_cache:
           key: pip-{{ checksum "requirements.txt"  }}
-          paths:
-          - /home/circleci/.local/lib/
+
       - run:
           command: |
             pip install --user coverage

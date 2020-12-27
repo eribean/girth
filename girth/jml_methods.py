@@ -220,7 +220,9 @@ def grm_jml(dataset, options=None):
     """
     options = validate_estimation_options(options)
 
-    responses, item_counts = condition_polytomous_response(dataset)
+    cpr_result = condition_polytomous_response(dataset)
+    responses, item_counts, valid_response_mask = cpr_result
+    invalid_response_mask = ~valid_response_mask    
     n_items, n_takers = responses.shape
 
     # Set initial parameter estimates to default
@@ -333,8 +335,9 @@ def pcm_jml(dataset, options=None):
     """
     options = validate_estimation_options(options)
 
-    responses, item_counts = condition_polytomous_response(
-        dataset, _reference=0.0)
+    cpr_result = condition_polytomous_response(dataset, _reference=0.0)
+    responses, item_counts, valid_response_mask = cpr_result
+    invalid_response_mask = ~valid_response_mask    
     n_items, n_takers = responses.shape
 
     # Set initial parameter estimates to default

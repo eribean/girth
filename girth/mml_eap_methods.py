@@ -77,7 +77,10 @@ def grm_mml_eap(dataset, options=None):
     """
     options = validate_estimation_options(options)
 
-    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False)
+    cpr_result = condition_polytomous_response(dataset, trim_ends=False)
+    responses, item_counts, valid_response_mask = cpr_result
+    invalid_response_mask = ~valid_response_mask
+
     n_items = responses.shape[0]
     
     # Only use LUT
@@ -91,7 +94,7 @@ def grm_mml_eap(dataset, options=None):
     # Compute the values needed for integral equations
     integral_counts = list()
     for ndx in range(n_items):
-        temp_output = _solve_for_constants(responses[ndx])
+        temp_output = _solve_for_constants(responses[ndx, valid_response_mask[ndx]])
         integral_counts.append(temp_output)
     
     # Initialize difficulty parameters for estimation
@@ -109,6 +112,11 @@ def grm_mml_eap(dataset, options=None):
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = 10000
     
+    # Set invalid index to zero, this allows minimal
+    # changes for invalid data and it is corrected
+    # during integration
+    responses[invalid_response_mask] = 0    
+
     # Prior Parameters
     ray_scale = 1.0
     eap_options = {'distribution': stats.rayleigh(loc=.25, scale=ray_scale).pdf,
@@ -137,7 +145,8 @@ def grm_mml_eap(dataset, options=None):
         for item_ndx in range(n_items):
             partial_int *= _graded_partial_integral(theta, betas, betas_roll,
                                                     discrimination,
-                                                    responses[item_ndx])
+                                                    responses[item_ndx],
+                                                    invalid_response_mask[item_ndx])
         
         # Estimate the distribution if requested
         distribution_x_weight = latent_pdf(partial_int, iteration)
@@ -168,7 +177,8 @@ def grm_mml_eap(dataset, options=None):
             old_values = _graded_partial_integral(theta, previous_betas,
                                                   previous_betas_roll,
                                                   previous_discrimination,
-                                                  responses[item_ndx])
+                                                  responses[item_ndx],
+                                                  invalid_response_mask[item_ndx])
             partial_int /= old_values
 
             def _local_min_func(estimate):
@@ -183,7 +193,8 @@ def grm_mml_eap(dataset, options=None):
 
                 new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                       discrimination,
-                                                      responses[item_ndx])
+                                                      responses[item_ndx],
+                                                      invalid_response_mask[item_ndx])
 
                 new_values *= partial_int
                 otpt = np.sum(new_values, axis=1)
@@ -206,7 +217,8 @@ def grm_mml_eap(dataset, options=None):
      
             new_values = _graded_partial_integral(theta, betas, betas_roll,
                                                   discrimination,
-                                                  responses[item_ndx])
+                                                  responses[item_ndx],
+                                                  invalid_response_mask[item_ndx])
 
             partial_int *= new_values
             
@@ -230,7 +242,8 @@ def grm_mml_eap(dataset, options=None):
     for item_ndx in range(n_items):
         partial_int *= _graded_partial_integral(theta, betas, betas_roll,
                                                 discrimination,
-                                                responses[item_ndx])
+                                                responses[item_ndx],
+                                                invalid_response_mask[item_ndx])
 
     # Trim difficulties to conform to standard output
     # TODO:  look where missing values are and place NAN there instead

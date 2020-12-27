@@ -248,7 +248,6 @@ class TestPolytomousUtilities(unittest.TestCase):
         output = _solve_for_constants(dataset[1])        
         self.assertTrue(output == 1)
 
-
     def test_integral_equations(self):
         """Tests solving for integral given a ratio."""
         np.random.seed(786)

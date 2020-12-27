@@ -221,7 +221,7 @@ class TestMissingPolytomous(unittest.TestCase):
 
     def test_gum_mml(self):
         """Testing unfolding response mml/jml for missing data."""
-        np.random.seed(25746)
+        np.random.seed(169987)
         n_items = 15
         n_people = 600
 
@@ -234,16 +234,16 @@ class TestMissingPolytomous(unittest.TestCase):
 
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination, 
                                                    theta, model='gum')
-        syn_data_tagged = _create_missing_data(syn_data, 69879, 0.1)
+        syn_data_tagged = _create_missing_data(syn_data, 857744, 0.1)
         syn_data_missing = tag_missing_data(syn_data_tagged, [1, 2, 3, 4])
 
         # MML
         result_all_good = gum_mml(syn_data)
         result_missing = gum_mml(syn_data_missing)
         difference_rmse = _rmse(result_all_good['Delta'], result_missing['Delta'])
-        self.assertAlmostEqual(difference_rmse, 0.031846, 4)
+        self.assertAlmostEqual(difference_rmse, 0.034763, 4)
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
-        self.assertAlmostEqual(difference_rmse, 0.057199, 4)
+        self.assertAlmostEqual(difference_rmse, 0.129724, 4)
 
 if __name__ == '__main__':
     unittest.main()

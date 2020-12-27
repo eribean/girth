@@ -58,7 +58,7 @@ def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
     # convert to binary based on probability
     random_compare = np.random.rand(*continuous_output.shape)
 
-    return random_compare <= continuous_output
+    return (random_compare <= continuous_output).astype('int')
 
 
 def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
@@ -103,7 +103,7 @@ def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
     # convert to binary based on probability
     random_compare = np.random.rand(*continuous_output.shape)
 
-    return random_compare <= continuous_output
+    return (random_compare <= continuous_output).astype('int')
 
 
 # Private functions for polytomous outputs

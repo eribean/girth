@@ -194,7 +194,7 @@ class TestPolytomousUtilities(unittest.TestCase):
         self.assertTrue(output[0].std(axis=0)[0] != 0)
 
         # Trim First/Last Column but not last
-        dataset[:, -1] = 1
+        dataset[:, -1] = 5
         output = condition_polytomous_response(dataset, trim_ends=True)
         self.assertTupleEqual(
             output[0].shape, (dataset.shape[0], dataset.shape[1]-2))

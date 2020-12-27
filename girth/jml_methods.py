@@ -243,6 +243,11 @@ def grm_jml(dataset, options=None):
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = 10000
 
+    # Set invalid index to zero, this allows minimal
+    # changes for invalid data and it is corrected
+    # during integration
+    responses[invalid_response_mask] = 0
+    
     for iteration in range(options['max_iteration']):
         previous_betas = betas.copy()
 
@@ -258,7 +263,7 @@ def grm_jml(dataset, options=None):
                                irt_evaluation(betas_roll, discrimination, theta))
 
                 values = graded_prob[responses[:, ndx]]
-                return -np.log(values).sum()
+                return -np.log(values[valid_response_mask[:, ndx]] + 1e-313).sum()
 
             thetas[ndx] = fminbound(_theta_min, -6, 6)
 
@@ -286,9 +291,9 @@ def grm_jml(dataset, options=None):
                                irt_evaluation(betas_roll, discrimination, thetas))
 
                 values = np.take_along_axis(
-                    graded_prob, responses[None, ndx], axis=0)
+                    graded_prob, responses[None, ndx], axis=0).squeeze()
                 np.clip(values, 1e-23, np.inf, out=values)
-                return -np.log(values).sum()
+                return -np.log(values[valid_response_mask[ndx]]).sum()
 
             # Solves jointly for parameters using numerical derivatives
             initial_guess = np.concatenate(([discrimination[start_ndx]],
@@ -352,6 +357,11 @@ def pcm_jml(dataset, options=None):
         item_length = item_counts[ndx] - 1
         betas[ndx, :item_length] = np.linspace(-1, 1, item_length)
 
+    # Set invalid index to zero, this allows minimal
+    # changes for invalid data and it is corrected
+    # during integration
+    responses[invalid_response_mask] = 0        
+
     for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
 
@@ -377,8 +387,8 @@ def pcm_jml(dataset, options=None):
 
                 # Probability associated with response
                 values = np.take_along_axis(
-                    scratch, response_set[:, None], axis=1)
-                return -np.log(values + 1e-23).sum()
+                    scratch, response_set[:, None], axis=1).squeeze()
+                return -np.log(values[valid_response_mask[:, ndx]] + 1e-313).sum()
 
             thetas[ndx] = fminbound(_theta_min, -6, 6, args=(scratch,))
 
@@ -406,8 +416,8 @@ def pcm_jml(dataset, options=None):
                 kernel /= np.nansum(kernel, axis=1)[:, None]
                 # Probability associated with response
                 values = np.take_along_axis(
-                    kernel, response_set[:, None], axis=1)
-                return -np.log(values).sum()
+                    kernel, response_set[:, None], axis=1).squeeze()
+                return -np.log(values[valid_response_mask[ndx]]).sum()
 
             # Solves jointly for parameters using numerical derivatives
             initial_guess = np.concatenate(([discrimination[ndx]],

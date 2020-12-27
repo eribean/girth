@@ -3,7 +3,7 @@ from .utils import (validate_estimation_options, irt_evaluation,
                     trim_response_set_and_counts,
                     convert_responses_to_kernel_sign,
                     get_true_false_counts, mml_approx, create_beta_LUT,
-                    INVALID_RESPONSE)
+                    tag_missing_data, INVALID_RESPONSE)
 from .polytomous_utils import condition_polytomous_response
 from .synthetic import (create_correlated_abilities,
                         create_synthetic_irt_dichotomous,

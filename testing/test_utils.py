@@ -10,7 +10,8 @@ from girth import (create_synthetic_irt_dichotomous,
                    convert_responses_to_kernel_sign,
                    validate_estimation_options, condition_polytomous_response,
                    get_true_false_counts, mml_approx)
-from girth.utils import _get_quadrature_points, default_options, create_beta_LUT
+from girth.utils import (_get_quadrature_points, default_options, 
+                         create_beta_LUT, tag_missing_data, INVALID_RESPONSE)
 from girth.numba_functions import _compute_partial_integral
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral,
@@ -163,6 +164,19 @@ class TestUtilitiesMethods(unittest.TestCase):
         np.testing.assert_array_almost_equal(expected, result)
         np.testing.assert_array_almost_equal(expected, result2)
 
+    def test_tag_missing_values(self):
+        """Testing the tagging missing values."""
+        np.random.seed(148549)
+        synthetic_data = np.random.randint(1, 6, (20, 650))
+        mask = np.random.rand(*synthetic_data.shape) < .15
+        synthetic_data[mask] = 5555
+        
+        updated_data = tag_missing_data(synthetic_data, list(range(1, 6)))
+
+        new_mask = updated_data == INVALID_RESPONSE
+
+        np.testing.assert_equal(new_mask, mask)
+
 
 class TestPolytomousUtilities(unittest.TestCase):
     """Tests the polytomous utilities"""
@@ -258,8 +272,8 @@ class TestPolytomousUtilities(unittest.TestCase):
         # Compare against dichotomous data
         syn_data = create_synthetic_irt_dichotomous(
             difficulty, discrimination, theta)
-        n0 = np.count_nonzero(~syn_data, axis=1)
-        n1 = np.count_nonzero(syn_data, axis=1)
+        n0 = np.count_nonzero(syn_data == 0, axis=1)
+        n1 = np.count_nonzero(syn_data == 1, axis=1)
         ratio = n1 / (n1 + n0)
 
         theta, weights = _get_quadrature_points(61, -5, 5)
@@ -275,11 +289,13 @@ class TestPolytomousUtilities(unittest.TestCase):
         betas = np.array([-10000, -.3, 0.1, 1.2])
         betas_roll = np.roll(betas, -1)
         betas_roll[-1] = 10000
+        invalid_response_mask = np.zeros_like(responses, dtype='bool')
 
         output = np.ones((responses.shape[1], theta.size))
         for ndx in range(responses.shape[0]):
             output *= _graded_partial_integral(theta, betas, betas_roll,
-                                               np.array([1,]), responses[ndx])
+                                               np.array([1,]), responses[ndx],
+                                               invalid_response_mask[ndx])
 
         # Compare to hand calculations
         hand_calc = list()
@@ -294,12 +310,27 @@ class TestPolytomousUtilities(unittest.TestCase):
 
         np.testing.assert_array_equal(hand_calc, output)
 
+        # Test invalid response
+        invalid_response_mask[0, 1] = True
+        invalid_response_mask[0, 7] = True
+        output = _graded_partial_integral(theta, betas, betas_roll,
+                                          np.array([1,]), responses[0],
+                                          invalid_response_mask[0])
+        
+        np.testing.assert_equal(output[1], np.ones(61,))
+        np.testing.assert_equal(output[7], np.ones(61,))
+
+        with np.testing.assert_raises(AssertionError):
+            for ndx in [0, 2, 3, 4, 5, 6, 8, 9]:
+                np.testing.assert_equal(output[ndx], np.ones(61,))
+
     def test_credit_partial_integration(self):
         """Testing the partial integral in the graded model."""
         theta, _ = _get_quadrature_points(61, -5, 5)
         response_set = np.array([0, 1, 2, 2, 1, 0, 3, 1, 3, 2, 2, 2])
         betas = np.array([0, -0.4, 0.94, -.37])
         discrimination = 1.42
+        invalid_response_mask = np.zeros_like(response_set, dtype='bool')
 
         # Hand calculations
         offsets = np.cumsum(betas)[1:]
@@ -316,9 +347,21 @@ class TestPolytomousUtilities(unittest.TestCase):
             expected[ndx] = probability_values[response]
 
         result = _credit_partial_integral(theta, betas, discrimination,
-                                          response_set)
+                                          response_set, invalid_response_mask)
 
         np.testing.assert_array_almost_equal(result, expected)
+
+        invalid_response_mask[1] = True
+        invalid_response_mask[7] = True
+        result = _credit_partial_integral(theta, betas, discrimination,
+                                          response_set, invalid_response_mask)
+
+        np.testing.assert_equal(result[1], np.ones(61,))
+        np.testing.assert_equal(result[7], np.ones(61,))
+
+        with np.testing.assert_raises(AssertionError):
+            for ndx in [0, 2, 3, 4, 5, 6, 8, 9]:
+                np.testing.assert_equal(result[ndx], np.ones(61,))
 
     def test_unfold_partial_integration(self):
         """Testing the unfolding integral."""
@@ -326,6 +369,8 @@ class TestPolytomousUtilities(unittest.TestCase):
         response_set = np.array([0, 1, 2, 2, 1, 0, 3, 1, 3, 2, 2, 2])
         betas = np.array([-1.3, -.4, 0.2])
         delta = -0.76
+        invalid_response_mask = np.zeros_like(response_set, dtype='bool')
+
         # (2N -1) / 2 - n
         folding = 3.5 - np.arange(4)
         discrimination = 1.42
@@ -342,8 +387,21 @@ class TestPolytomousUtilities(unittest.TestCase):
 
         result = _unfold_partial_integral(theta, delta, betas,
                                           discrimination, folding,
-                                          response_set)
+                                          response_set, invalid_response_mask)
         np.testing.assert_array_almost_equal(result, expected)
+
+        invalid_response_mask[1] = True
+        invalid_response_mask[7] = True
+        result = _unfold_partial_integral(theta, delta, betas,
+                                          discrimination, folding,
+                                          response_set, invalid_response_mask)
+
+        np.testing.assert_equal(result[1], np.ones(61,))
+        np.testing.assert_equal(result[7], np.ones(61,))
+
+        with np.testing.assert_raises(AssertionError):
+            for ndx in [0, 2, 3, 4, 5, 6, 8, 9]:
+                np.testing.assert_equal(result[ndx], np.ones(61,))
 
     def test_lut_creation(self):
         """Test the lookup table creation function."""

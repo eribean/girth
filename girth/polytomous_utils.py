@@ -2,6 +2,7 @@ import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound
 
+from girth import INVALID_RESPONSE
 from girth.numba_functions import numba_expit
 
 
@@ -19,16 +20,24 @@ def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
     Returns:
         dataset: (2d array) ordinal values converted to linear indices
         beta_length: (1d array) number of unique values per item
+        valid_response_mask: (2d_array) boolean mask of valid responses
+                             that is the same size as dataset
     """
     # Remove all no / yes endorsements
-    min_value, max_value = dataset.min(), dataset.max()
+    valid_response_mask = dataset != INVALID_RESPONSE
+    min_value = np.min(dataset[valid_response_mask])
+    max_value = np.max(dataset[valid_response_mask])
     n_items = dataset.shape[0]
 
     if trim_ends:
-        raw_score_sums = dataset.sum(0)
-        mask = ((raw_score_sums == (n_items * min_value)) | 
-                (raw_score_sums == (n_items * max_value)))
+        raw_score_sums = np.sum(dataset, where=valid_response_mask, axis=0)
+        valid_score_sums = np.count_nonzero(valid_response_mask, axis=0)
+        ratio_score_sums = raw_score_sums / valid_score_sums
+
+        mask = ((ratio_score_sums == min_value) | 
+                (ratio_score_sums == max_value))
         dataset = dataset[:, ~mask]
+        valid_response_mask = dataset != INVALID_RESPONSE
     
     betas_length = np.zeros((n_items,), dtype='int')
     the_output = dataset.copy()
@@ -38,7 +47,8 @@ def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
     # responses, and replace with linear indexing
     cnt = 0
     for ndx, item in enumerate(the_output):
-        values, indices = np.unique(item, return_inverse=True)
+        values, indices = np.unique(item[valid_response_mask[ndx]], 
+                                    return_inverse=True)
         betas_length[ndx] = max(values.size, 2)
 
         # Recode from zero to N-1
@@ -46,12 +56,15 @@ def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
         if values.size == 1:
             recode = np.array([values[0] != 0], dtype='int')
         values = recode + cnt * _reference
-        the_output[ndx] = values[indices]
+        the_output[ndx, valid_response_mask[ndx]] = values[indices]
 
         # Update linear index
         cnt += betas_length[ndx]
+    
+    # Reset the invalid responses
+    the_output[~valid_response_mask] = INVALID_RESPONSE
 
-    return the_output, betas_length
+    return the_output, betas_length, valid_response_mask
 
 
 def _solve_for_constants(item_responses):
@@ -71,14 +84,19 @@ def _solve_for_constants(item_responses):
     
 
 def _graded_partial_integral(theta, betas, betas_roll,
-                             discrimination, responses):
+                             discrimination, response_set,
+                             invalid_response_mask):
     """Computes the partial integral for the graded response."""
     temp1 = (betas[:, None] - theta) * discrimination[:, None]
     temp2 = (betas_roll[:, None] - theta) * discrimination[:, None]
     graded_prob = numba_expit(temp1) 
     graded_prob -= numba_expit(temp2)
 
-    return graded_prob[responses, :]
+    # Set all the responses and fix afterward
+    temp_output = graded_prob[response_set, :]
+    temp_output[invalid_response_mask] = 1.0
+
+    return temp_output
 
 
 def _solve_integral_equations_LUT(discrimination, ratio, _, __, interpolate_function):
@@ -104,7 +122,7 @@ def _solve_integral_equations(discrimination, ratio, distribution, theta, _):
 
 
 def _credit_partial_integral(theta, betas, discrimination, 
-                             response_set):
+                             response_set, invalid_response_mask):
     """Computes the partial integral for the partial credit model."""
     # Creates a 2d array [beta x thetas]
     kernel = theta[None, :] - betas[:, None]
@@ -121,12 +139,16 @@ def _credit_partial_integral(theta, betas, discrimination,
     # Normalize probability to equal one
     kernel /= np.nansum(kernel, axis=0)[None, :]
 
-    return kernel[response_set, :]
+    # Set all the responses and fix afterward
+    temp_output = kernel[response_set, :]
+    temp_output[invalid_response_mask] = 1.0
+
+    return temp_output
 
 
 def _unfold_partial_integral(theta, delta, betas, 
                              discrimination, fold_span,
-                             response_set):
+                             response_set, invalid_response_mask):
     """Computes the partial integral for the _GGUM model."""
     # Unfolding_Model
     thresholds = np.exp(-discrimination * np.cumsum(betas))
@@ -137,4 +159,8 @@ def _unfold_partial_integral(theta, delta, betas,
     kernel[1:, :] *= thresholds[:, None]
     kernel /= np.nansum(kernel, axis=0)
 
-    return kernel[response_set, :]
+    # Set all the responses and fix afterward
+    temp_output = kernel[response_set, :]
+    temp_output[invalid_response_mask] = 1.0
+
+    return temp_output

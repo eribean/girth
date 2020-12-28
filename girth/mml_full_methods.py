@@ -243,8 +243,10 @@ def pcm_mml(dataset, options=None):
     """
     options = validate_estimation_options(options)
 
-    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
-                                                           _reference=0.0)
+    cpr_result =  condition_polytomous_response(dataset, trim_ends=False, _reference=0.0)
+    responses, item_counts, valid_response_mask = cpr_result
+    invalid_response_mask = ~valid_response_mask
+
     n_items = responses.shape[0]
 
     # Quadrature Locations
@@ -261,6 +263,11 @@ def pcm_mml(dataset, options=None):
     betas[:, 0] = 0
     for ndx in range(n_items):
         betas[ndx, 1:item_counts[ndx]] = np.linspace(-1, 1, item_counts[ndx]-1)
+
+    # Set invalid index to zero, this allows minimal
+    # changes for invalid data and it is corrected
+    # during integration
+    responses[invalid_response_mask] = 0
 
     #############
     # 1. Start the iteration loop
@@ -279,7 +286,8 @@ def pcm_mml(dataset, options=None):
         for item_ndx in range(n_items):
             partial_int *= _credit_partial_integral(theta, betas[item_ndx],
                                                     discrimination[item_ndx],
-                                                    responses[item_ndx])
+                                                    responses[item_ndx],
+                                                    invalid_response_mask[item_ndx])
         # Estimate the distribution if requested
         distribution_x_weight = latent_pdf(partial_int, iteration)
         partial_int *= distribution_x_weight        
@@ -293,14 +301,16 @@ def pcm_mml(dataset, options=None):
             # Remove the previous output
             old_values = _credit_partial_integral(theta, previous_betas[item_ndx],
                                                   previous_discrimination[item_ndx],
-                                                  responses[item_ndx])
+                                                  responses[item_ndx],
+                                                  invalid_response_mask[item_ndx])
             partial_int /= old_values
 
             def _local_min_func(estimate):
                 new_betas[1:] = estimate[1:]
                 new_values = _credit_partial_integral(theta, new_betas,
                                                       estimate[0],
-                                                      responses[item_ndx])
+                                                      responses[item_ndx],
+                                                      invalid_response_mask[item_ndx])
                 new_values *= partial_int
                 otpt = np.sum(new_values, axis=1)
                 return -np.log(otpt).sum()
@@ -318,7 +328,8 @@ def pcm_mml(dataset, options=None):
 
             new_values = _credit_partial_integral(theta, betas[item_ndx],
                                                   discrimination[item_ndx],
-                                                  responses[item_ndx])
+                                                  responses[item_ndx],
+                                                  invalid_response_mask[item_ndx])
 
             partial_int *= new_values
 
@@ -330,7 +341,8 @@ def pcm_mml(dataset, options=None):
     for item_ndx in range(n_items):
         partial_int *= _credit_partial_integral(theta, betas[item_ndx],
                                                 discrimination[item_ndx],
-                                                responses[item_ndx])
+                                                responses[item_ndx],
+                                                invalid_response_mask[item_ndx])
 
     # TODO:  look where missing values are and place NAN there instead
     # of appending them to the end
@@ -382,8 +394,10 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
     """
     options = validate_estimation_options(options)
 
-    responses, item_counts = condition_polytomous_response(dataset, trim_ends=False,
-                                                           _reference=0.0)
+    cpr_result = condition_polytomous_response(dataset, trim_ends=False, _reference=0.0)
+    responses, item_counts, valid_response_mask = cpr_result
+    invalid_response_mask = ~valid_response_mask
+
     n_items = responses.shape[0]
 
     # Interpolation Locations
@@ -410,6 +424,11 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
     delta_ndx = delta_sign[0]
     delta_multiplier = np.sign(delta_sign[1])
 
+    # Set invalid index to zero, this allows minimal
+    # changes for invalid data and it is corrected
+    # during integration
+    responses[invalid_response_mask] = 0    
+
     #############
     # 1. Start the iteration loop
     # 2. Estimate Dicriminatin/Difficulty Jointly
@@ -430,7 +449,9 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
                                                     betas[item_ndx],
                                                     discrimination[item_ndx],
                                                     fold_span[item_ndx],
-                                                    responses[item_ndx])
+                                                    responses[item_ndx],
+                                                    invalid_response_mask[item_ndx])
+
         # Estimate the distribution if requested
         distribution_x_weight = latent_pdf(partial_int, iteration)
         partial_int *= distribution_x_weight
@@ -445,7 +466,8 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
                                                   previous_betas[item_ndx],
                                                   previous_discrimination[item_ndx],
                                                   fold_span[item_ndx],
-                                                  responses[item_ndx])
+                                                  responses[item_ndx],
+                                                  invalid_response_mask[item_ndx])
             partial_int /= old_values
             
             new_betas = np.full((betas.shape[1],), np.nan)
@@ -454,7 +476,8 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
                 new_values = _unfold_partial_integral(theta, estimate[1],
                                                       new_betas,
                                                       estimate[0], fold_span[item_ndx],
-                                                      responses[item_ndx])
+                                                      responses[item_ndx], 
+                                                      invalid_response_mask[item_ndx])
 
                 new_values *= partial_int
                 otpt = np.sum(new_values, axis=1)
@@ -477,7 +500,8 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
                                                   betas[item_ndx],
                                                   discrimination[item_ndx],
                                                   fold_span[item_ndx],
-                                                  responses[item_ndx])
+                                                  responses[item_ndx],
+                                                  invalid_response_mask[item_ndx])
 
             partial_int *= new_values
 
@@ -494,7 +518,8 @@ def gum_mml(dataset, delta_sign=(0, 1), options=None):
                                                 betas[item_ndx],
                                                 discrimination[item_ndx],
                                                 fold_span[item_ndx],
-                                                responses[item_ndx])    
+                                                responses[item_ndx],
+                                                invalid_response_mask[item_ndx])    
     # Compute statistics for final iteration
     null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
                                               latent_pdf.weights, 0)

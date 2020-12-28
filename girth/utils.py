@@ -6,6 +6,10 @@ from scipy.special import roots_legendre
 from girth import _array_LUT
 
 
+# There is no int nan, so use this as a placeholder
+INVALID_RESPONSE = -99999
+
+
 def default_options():
     """ Dictionary of options used in Girth.
 
@@ -83,6 +87,24 @@ def validate_estimation_options(options_dict=None):
         full_options.update(options_dict)
 
     return full_options
+
+
+def tag_missing_data(dataset, valid_responses):
+    """Checks the data for valid responses.
+    
+    Args:
+        dataset: (array) array to validate
+        valid_responses: (array-like) list of valid responses
+        
+    Returns:
+        updated_dataset: (array) data that holds only valid_responses and
+                         invalid_fill
+    """
+    mask = np.isin(dataset, valid_responses)
+    output = dataset.copy()
+    output[~mask] = INVALID_RESPONSE
+    
+    return output
 
 
 def get_true_false_counts(responses):

@@ -10,6 +10,7 @@
 
 Girth is a python package for estimating item response theory (IRT) parameters.  In addition, synthetic IRT data generation is supported. Below is a list of available functions, for more information visit the GIRTH [homepage](https://eribean.github.io/girth/).
 
+Interested in Bayesian Models? Check out [GIRTH_MCMC](https://github.com/eribean/girth_mcmc).
 
 **Dichotomous Models**
 1. Rasch Model

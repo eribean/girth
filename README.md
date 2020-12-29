@@ -4,13 +4,13 @@
 [![PyPI version](https://badge.fury.io/py/girth.svg)](https://badge.fury.io/py/girth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory Package
+# <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory
 
 [![GIRTH](https://eribean.github.io/girth/featured-background_hubf3811d606e709c4b8d3b39f7338865e_285315_960x540_fill_q75_catmullrom_top.jpg)](https://eribean.github.io/girth/)
 
 Girth is a python package for estimating item response theory (IRT) parameters.  In addition, synthetic IRT data generation is supported. Below is a list of available functions, for more information visit the GIRTH [homepage](https://eribean.github.io/girth/).
 
-Interested in Bayesian Models? Check out [GIRTH_MCMC](https://github.com/eribean/girth_mcmc).
+Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean/girth_mcmc). It provides markov chain and variational inference estimation methods.
 
 **Dichotomous Models**
 1. Rasch Model

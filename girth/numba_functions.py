@@ -6,22 +6,6 @@ if nb.config.NUMBA_DEFAULT_NUM_THREADS > 1:
     nb.set_num_threads(2)
 
 
-@nb.njit()
-def numba_expit(array): #pragma: no cover
-    """Computes the logistic function.
-
-    Logistic is defined as:
-        1 / (1 + exp(x))
-
-    Args:
-        array: Input array 'x' values
-    
-    Returns:
-        array: Output array of logistic values
-    """
-    return 1.0 / (1.0 + np.exp(array))
-
-
 @nb.njit(parallel=True)
 def _compute_partial_integral(theta, difficulty, discrimination, 
                               the_sign, the_output): #pragma: no cover

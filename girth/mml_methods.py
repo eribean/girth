@@ -1,10 +1,11 @@
 import numpy as np
 from scipy import integrate, stats
 from scipy.optimize import fminbound
+from scipy.special import expit
 
 from girth import (condition_polytomous_response, validate_estimation_options,
                    get_true_false_counts, convert_responses_to_kernel_sign)
-from girth.numba_functions import numba_expit, _compute_partial_integral
+from girth.numba_functions import _compute_partial_integral
 from girth.utils import _get_quadrature_points, create_beta_LUT
 from girth.latent_ability_distribution import LatentPDF
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
@@ -23,8 +24,8 @@ def _mml_abstract(difficulty, scalar, discrimination,
     for item_ndx in range(difficulty.shape[0]):
         # pylint: disable=cell-var-from-loop
         def min_zero_local(estimate):
-            temp = discrimination[item_ndx] * (estimate - theta)
-            kernel = numba_expit(temp)
+            temp = discrimination[item_ndx] * (theta - estimate)
+            kernel = expit(temp)
             integral = kernel.dot(distribution)
             
             return np.square(integral - scalar[item_ndx])

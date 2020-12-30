@@ -121,8 +121,8 @@ class TestMissingDichotomous(unittest.TestCase):
         self.assertAlmostEqual(difference_rmse, 0.669763, 4)        
 
         # MML
-        result_all_good = twopl_mml(syn_data)
-        result_missing = twopl_mml(syn_data_missing)
+        result_all_good = twopl_mml(syn_data, {'use_LUT': False})
+        result_missing = twopl_mml(syn_data_missing, {'use_LUT': False})
         difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
         self.assertAlmostEqual(difference_rmse, 0.064496, 4)
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])

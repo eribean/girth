@@ -106,17 +106,19 @@ class TestUtilitiesMethods(unittest.TestCase):
         np.testing.assert_array_equal(dataset[:, 1:-1], new_set)
         np.testing.assert_array_equal(counts[1:-1], new_counts)
 
-        # Test when array contains nans
-        mask = np.random.rand(*dataset.shape) < 0.1
-        dataset[mask] = np.nan
-
-        # There are responses with zero variance
-        locations = np.where(np.nanstd(dataset, axis=0) == 0)
-        self.assertTrue(locations[0].size > 0)
-
+        # Test when bad value is present
+        dataset = np.ones((10, 300), dtype=int)
+        dataset[0] = -1
+        dataset[0, 0] = INVALID_RESPONSE
+        counts = np.random.randint(0, 10, 300)
         new_set, new_counts = trim_response_set_and_counts(dataset, counts)
-        locations = np.where(np.nanstd(new_set, axis=0) == 0)
-        self.assertTrue(locations[0].size == 0)
+        self.assertEqual(new_set.shape[1], dataset.shape[1] - 1)
+        np.testing.assert_array_equal(dataset[:, 1:], new_set)
+        np.testing.assert_array_equal(counts[1:], new_counts)
+
+
+
+
 
     def test_get_true_false_counts(self):
         """Testing the counting of true and false."""

@@ -192,8 +192,11 @@ def trim_response_set_and_counts(response_sets, counts):
         response_set: updated response set with removal of undesired response patterns
         counts: updated counts to account for removal
     """
+    # Find any missing data
+    bad_mask = response_sets == INVALID_RESPONSE
+
     # Remove response sets where output is all true/false
-    mask = ~(np.nanvar(response_sets, axis=0) == 0)
+    mask = ~(np.ma.masked_array(response_sets, bad_mask).var(axis=0) == 0)
     response_sets = response_sets[:, mask]
     counts = counts[mask]
 

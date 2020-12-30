@@ -47,7 +47,7 @@ class TestMissingDichotomous(unittest.TestCase):
         result_all_good = rasch_jml(syn_data)
         result_missing = rasch_jml(syn_data_missing)
         difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
-        self.assertAlmostEqual(difference_rmse, 0.100458, 4)
+        self.assertAlmostEqual(difference_rmse, 0.072384, 4)
 
         # MML
         result_all_good = rasch_mml(syn_data)
@@ -74,13 +74,13 @@ class TestMissingDichotomous(unittest.TestCase):
         syn_data_tagged = _create_missing_data(syn_data, 66877, 0.1)
         syn_data_missing = tag_missing_data(syn_data_tagged, [0, 1])
 
-        # JML (This is weirdly bad)
+        # JML 
         result_all_good = onepl_jml(syn_data)
         result_missing = onepl_jml(syn_data_missing)
         difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
-        self.assertAlmostEqual(difference_rmse, 0.862138914, 4)        
+        self.assertAlmostEqual(difference_rmse, 0.048643, 4)        
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
-        self.assertAlmostEqual(difference_rmse, 2.99675, 4)        
+        self.assertAlmostEqual(difference_rmse, 0.017526, 4)        
 
         # MML
         result_all_good = onepl_mml(syn_data)
@@ -99,7 +99,7 @@ class TestMissingDichotomous(unittest.TestCase):
         self.assertAlmostEqual(difference_rmse, 0.052542, 4)
 
     def test_twopl_jml_mml(self):
-        """Testing rasch mml/jml for missing data."""
+        """Testing twopl mml/jml for missing data."""
         np.random.seed(15335)
         n_items = 10
         n_people = 200
@@ -112,13 +112,13 @@ class TestMissingDichotomous(unittest.TestCase):
         syn_data_tagged = _create_missing_data(syn_data, 84433, 0.1)
         syn_data_missing = tag_missing_data(syn_data_tagged, [0, 1])
 
-        # JML (This is weirdly bad)
+        # JML 
         result_all_good = twopl_jml(syn_data)
         result_missing = twopl_jml(syn_data_missing)
         difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
-        self.assertAlmostEqual(difference_rmse, 0.636390, 4)        
+        self.assertAlmostEqual(difference_rmse, 0.283604, 4)        
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
-        self.assertAlmostEqual(difference_rmse, 2.027410, 4)        
+        self.assertAlmostEqual(difference_rmse, 0.669763, 4)        
 
         # MML
         result_all_good = twopl_mml(syn_data)

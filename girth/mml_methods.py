@@ -4,7 +4,7 @@ from scipy.optimize import fminbound
 from scipy.special import expit
 
 from girth import (condition_polytomous_response, validate_estimation_options,
-                   get_true_false_counts, convert_responses_to_kernel_sign)
+                   get_true_false_counts)
 from girth.utils import (_get_quadrature_points, create_beta_LUT,
                          _compute_partial_integral, INVALID_RESPONSE)
 from girth.latent_ability_distribution import LatentPDF

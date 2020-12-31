@@ -7,7 +7,6 @@ from girth import tag_missing_data
 from girth import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
 from girth import rasch_jml, onepl_jml, twopl_jml
 from girth import rasch_mml, onepl_mml, twopl_mml
-from girth import rasch_full, onepl_full, twopl_full
 
 from girth import grm_jml, pcm_jml
 from girth import grm_mml_eap, grm_mml, pcm_mml, gum_mml
@@ -53,13 +52,7 @@ class TestMissingDichotomous(unittest.TestCase):
         result_all_good = rasch_mml(syn_data)
         result_missing = rasch_mml(syn_data_missing)
         difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
-        self.assertAlmostEqual(difference_rmse, 0.054726, 4)
-
-        # MML FULL
-        result_all_good = rasch_full(syn_data)
-        result_missing = rasch_full(syn_data_missing)
-        difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
-        self.assertAlmostEqual(difference_rmse, 0.0590626, 4)        
+        self.assertAlmostEqual(difference_rmse, 0.054726, 4)      
 
     def test_onepl_jml_mml(self):
         """Testing oneple mml/jml for missing data."""
@@ -90,14 +83,6 @@ class TestMissingDichotomous(unittest.TestCase):
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
         self.assertAlmostEqual(difference_rmse, 0.045726, 4)
 
-        # MML FULL
-        result_all_good = onepl_full(syn_data)
-        result_missing = onepl_full(syn_data_missing)
-        difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
-        self.assertAlmostEqual(difference_rmse, 0.038550, 4)
-        difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
-        self.assertAlmostEqual(difference_rmse, 0.052542, 4)
-
     def test_twopl_jml_mml(self):
         """Testing twopl mml/jml for missing data."""
         np.random.seed(15335)
@@ -127,14 +112,6 @@ class TestMissingDichotomous(unittest.TestCase):
         self.assertAlmostEqual(difference_rmse, 0.064496, 4)
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
         self.assertAlmostEqual(difference_rmse, 0.155868, 4)
-
-        # MML FULL
-        result_all_good = twopl_full(syn_data)
-        result_missing = twopl_full(syn_data_missing)
-        difference_rmse = _rmse(result_all_good['Difficulty'], result_missing['Difficulty'])
-        self.assertAlmostEqual(difference_rmse, 0.066202, 4)
-        difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
-        self.assertAlmostEqual(difference_rmse, 0.166226, 4)
 
 
 class TestMissingPolytomous(unittest.TestCase):

@@ -3,7 +3,7 @@ import unittest  # pylint: disable=cyclic-import
 import numpy as np
 
 from girth import create_synthetic_irt_dichotomous
-from girth.three_pl import (threepl_full, threepl_mml, 
+from girth.three_pl import (threepl_mml, 
                             ability_3pl_eap, ability_3pl_map,
                             ability_3pl_mle)
 
@@ -37,21 +37,6 @@ class TestMMLThreePLMethods(unittest.TestCase):
         expected_output = np.array([-0.235392, -1.996236,  0.09334 ,  0.932623,  1.432708])
         expected_guess = np.array([3.300000e-01, 5.572645e-08, 2.432607e-01, 3.274185e-01,
                                    1.818037e-01])
-
-        np.testing.assert_allclose(
-            expected_discrimination, output['Discrimination'], rtol=1e-2, atol=1e-2)
-        np.testing.assert_allclose(expected_output, output['Difficulty'], rtol=1e-2, atol=1e-2)
-        np.testing.assert_allclose(expected_guess, output['Guessing'], rtol=1e-2, atol=1e-2)
-
-    def test_twopl_regression_full(self):
-        """Testing twopl full methods."""
-        syn_data = self.data.copy()
-        output = threepl_full(syn_data)
-
-        expected_discrimination = np.array([0.595896, 0.538749, 1.035768, 4., 4.])
-        expected_output = np.array([-0.235112, -1.997106,  0.090057,  0.932323,  1.432479])
-        expected_guess = np.array([3.300000e-01, 6.282188e-18, 2.422328e-01, 3.274102e-01,
-                                   1.817438e-01])
 
         np.testing.assert_allclose(
             expected_discrimination, output['Discrimination'], rtol=1e-2, atol=1e-2)

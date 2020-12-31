@@ -4,7 +4,6 @@ import numpy as np
 
 from girth import create_synthetic_irt_dichotomous
 from girth import rasch_mml, onepl_mml, twopl_mml
-from girth import rasch_full, onepl_full, twopl_full
 
 from girth import create_synthetic_irt_polytomous
 from girth import grm_mml, pcm_mml, gum_mml
@@ -32,15 +31,6 @@ class TestMMLRaschMethods(unittest.TestCase):
         syn_data = self.data.copy()
         output = rasch_mml(syn_data, self.discrimination)['Difficulty']
         expected_output = np.array([-1.324751, -0.814625, -0.082224,  0.658678,  1.470566])
-
-        np.testing.assert_allclose(expected_output, output, atol=1e-3, rtol=1e-3)
-
-    def test_rasch_regression_full(self):
-        """Testing rasch full methods."""
-        syn_data = self.data.copy()
-        output = rasch_full(syn_data, self.discrimination)['Difficulty']
-        expected_output = np.array([-1.32206195, -0.81438101, -0.0847999, 
-                                     0.65460933,  1.4664586])
 
         np.testing.assert_allclose(expected_output, output, atol=1e-3, rtol=1e-3)
 
@@ -85,17 +75,6 @@ class TestMMLOnePLMethods(unittest.TestCase):
         np.testing.assert_allclose(expected_output, output['Difficulty'], 
                                    atol= 1e-3, rtol=1e-3)
 
-    def test_onepl_regression_full(self):
-        """Testing onepl full methods."""
-        syn_data = self.data.copy()
-        output = onepl_full(syn_data)
-        expected_output = np.array([-1.37825764, -0.64679736, -0.03537104, 
-                                     0.78121678,  1.38471631])
-
-        self.assertAlmostEqual(output['Discrimination'], 1.9019012, places=4)
-        np.testing.assert_allclose(expected_output, output['Difficulty'], 
-                                   atol= 1e-3, rtol=1e-3)
-
     def test_onepl_close(self):
         """Testing onepl converging methods."""
         np.random.seed(843)
@@ -135,21 +114,6 @@ class TestMMLTwoPLMethods(unittest.TestCase):
         expected_discrimination = np.array([0.99981316, 1.86369226, 1.35526711, 
                                             0.52935723, 0.90899136])
         expected_output = np.array([-1.315087, -0.648258, -0.079815,  0.774052,  1.66791])
-
-        np.testing.assert_allclose(
-            expected_discrimination, output['Discrimination'], atol = 1e-4, rtol=1e-5)
-        np.testing.assert_allclose(expected_output, output['Difficulty'], 
-                                   atol = 1e-3, rtol=1e-3)
-
-    def test_twopl_regression_full(self):
-        """Testing twopl full methods."""
-        syn_data = self.data.copy()
-        output = twopl_full(syn_data)
-
-        expected_discrimination = np.array([0.99979828, 1.86386639, 1.35529227, 
-                                            0.5293589 , 0.90905802])
-        expected_output = np.array([-1.31527794, -0.6482246 , -0.08031856, 
-                                     0.77397527,  1.66750714])
 
         np.testing.assert_allclose(
             expected_discrimination, output['Discrimination'], atol = 1e-4, rtol=1e-5)

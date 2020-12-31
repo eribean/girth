@@ -4,7 +4,7 @@ import numpy as np
 import numba as nb
 
 from girth.utils import _get_quadrature_points
-from girth.numba_functions import _compute_partial_integral, _array_LUT
+from girth.numba_functions import _array_LUT
 
 # These don't register as covered tests in nose but
 # The tests do run

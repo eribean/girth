@@ -11,8 +11,8 @@ from girth import (create_synthetic_irt_dichotomous,
                    validate_estimation_options, condition_polytomous_response,
                    get_true_false_counts, mml_approx)
 from girth.utils import (_get_quadrature_points, default_options, 
-                         create_beta_LUT, tag_missing_data, INVALID_RESPONSE)
-from girth.numba_functions import _compute_partial_integral
+                        create_beta_LUT, tag_missing_data, INVALID_RESPONSE,
+                        _compute_partial_integral)
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral,
                                     _unfold_partial_integral)
@@ -69,15 +69,15 @@ class TestUtilitiesMethods(unittest.TestCase):
 
         discrimination = 1.32
         difficulty = .67
-        the_sign = (-1)**np.random.randint(low=0, high=2, size=(1, 10))
+        response = np.random.randint(low=0, high=2, size=(1, 10))
 
         quad_points, _ = _get_quadrature_points(61, -6, 6)
-        the_output = np.zeros((the_sign.shape[1], quad_points.size))        
-        value = _compute_partial_integral(quad_points, difficulty, 
-                                          discrimination, the_sign[0],
-                                          the_output)
 
-        discrrm = discrimination * the_sign
+        value = _compute_partial_integral(quad_points, difficulty, 
+                                          discrimination, response[0],
+                                          np.zeros_like(response, dtype='bool')[0])
+
+        discrrm = discrimination * np.power(-1, response)
         expected = 1.0 / (1 + np.exp(np.outer(discrrm, (quad_points - difficulty))))
         np.testing.assert_allclose(value, expected)
 

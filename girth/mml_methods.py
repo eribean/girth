@@ -5,8 +5,8 @@ from scipy.special import expit
 
 from girth import (condition_polytomous_response, validate_estimation_options,
                    get_true_false_counts, convert_responses_to_kernel_sign)
-from girth.numba_functions import _compute_partial_integral
-from girth.utils import _get_quadrature_points, create_beta_LUT
+from girth.utils import (_get_quadrature_points, create_beta_LUT,
+                         _compute_partial_integral, INVALID_RESPONSE)
 from girth.latent_ability_distribution import LatentPDF
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, 
@@ -81,7 +81,8 @@ def onepl_mml(dataset, alpha=None, options=None):
     scalar = n_yes / (n_yes + n_no)
 
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    the_sign = convert_responses_to_kernel_sign(unique_sets)
+    invalid_response_mask = unique_sets == INVALID_RESPONSE
+    unique_sets[invalid_response_mask] = 0 # For Indexing, fixed later
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
@@ -90,8 +91,6 @@ def onepl_mml(dataset, alpha=None, options=None):
     theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
     distribution_x_weights = distribution * weights
-    the_output = np.zeros((the_sign.shape[1], theta.size), dtype='float64')
-
 
     # Inline definition of cost function to minimize
     def min_func(estimate):
@@ -99,11 +98,12 @@ def onepl_mml(dataset, alpha=None, options=None):
         _mml_abstract(difficulty, scalar, discrimination,
                       theta, distribution_x_weights)
 
-        partial_int = np.ones_like(the_output)
+        partial_int = np.ones((unique_sets.shape[1], theta.size))
         for ndx in range(n_items):
             partial_int *= _compute_partial_integral(theta, difficulty[ndx], 
-                                                      discrimination[ndx], the_sign[ndx],
-                                                      the_output)
+                                                      discrimination[ndx], 
+                                                      unique_sets[ndx],
+                                                      invalid_response_mask[ndx])
         partial_int *= distribution_x_weights
 
         # compute_integral

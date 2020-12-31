@@ -4,9 +4,9 @@ from scipy.optimize import fminbound, fmin_powell, fmin_slsqp
 
 from girth import (irt_evaluation, convert_responses_to_kernel_sign,
                    validate_estimation_options, mml_approx)
-from girth.utils import _get_quadrature_points
+from girth.utils import (INVALID_RESPONSE, _get_quadrature_points, 
+                         _compute_partial_integral)
 from girth.latent_ability_distribution import LatentPDF
-from girth.numba_functions import _compute_partial_integral
 from girth.polytomous_utils import (condition_polytomous_response,
                                     _credit_partial_integral,
                                     _unfold_partial_integral)
@@ -62,7 +62,8 @@ def onepl_full(dataset, alpha=None, options=None):
 
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    the_sign = convert_responses_to_kernel_sign(unique_sets)
+    invalid_response_mask = unique_sets == INVALID_RESPONSE
+    unique_sets[invalid_response_mask] = 0 # For Indexing, fixed later
 
     theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
@@ -70,7 +71,6 @@ def onepl_full(dataset, alpha=None, options=None):
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
-    the_output = np.zeros((the_sign.shape[1], theta.size), dtype='float64')
 
     def alpha_min_func(alpha_estimate):
         discrimination[:] = alpha_estimate
@@ -79,11 +79,12 @@ def onepl_full(dataset, alpha=None, options=None):
             previous_difficulty = difficulty.copy()
 
             # Quadrature evaluation for values that do not change
-            partial_int = np.ones_like(the_output)
+            partial_int = np.ones((unique_sets.shape[1], theta.size))
             for ndx in range(n_items):
                 partial_int *= _compute_partial_integral(theta, difficulty[ndx], 
-                                                         discrimination[ndx], the_sign[ndx],
-                                                         the_output)
+                                                         discrimination[ndx], 
+                                                         unique_sets[ndx],
+                                                         invalid_response_mask[ndx])
             partial_int *= distribution_x_weights
 
             for item_ndx in range(n_items):
@@ -92,7 +93,8 @@ def onepl_full(dataset, alpha=None, options=None):
                 # remove contribution from current item
                 local_int = _compute_partial_integral(theta, difficulty[item_ndx],
                                                       discrimination[item_ndx],
-                                                      the_sign[item_ndx], the_output)
+                                                      unique_sets[item_ndx], 
+                                                      invalid_response_mask[item_ndx])
 
                 partial_int /= local_int
 
@@ -101,7 +103,8 @@ def onepl_full(dataset, alpha=None, options=None):
 
                     estimate_int = _compute_partial_integral(theta, difficulty[item_ndx],
                                                              discrimination[item_ndx],
-                                                             the_sign[item_ndx], the_output)
+                                                             unique_sets[item_ndx], 
+                                                             invalid_response_mask[item_ndx])
 
                     estimate_int *= partial_int
                     otpt = np.sum(estimate_int, axis=1)
@@ -112,7 +115,8 @@ def onepl_full(dataset, alpha=None, options=None):
                 # Update the partial integral based on the new found values
                 estimate_int = _compute_partial_integral(theta, difficulty[item_ndx],
                                                          discrimination[item_ndx],
-                                                         the_sign[item_ndx], the_output)
+                                                         unique_sets[item_ndx], 
+                                                         invalid_response_mask[item_ndx])
                 # update partial integral
                 partial_int *= estimate_int
 
@@ -156,7 +160,8 @@ def twopl_full(dataset, options=None):
 
     n_items = dataset.shape[0]
     unique_sets, counts = np.unique(dataset, axis=1, return_counts=True)
-    the_sign = convert_responses_to_kernel_sign(unique_sets)
+    invalid_response_mask = unique_sets == INVALID_RESPONSE
+    unique_sets[invalid_response_mask] = 0 # For Indexing, fixed later
 
     theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
     distribution = options['distribution'](theta)
@@ -164,24 +169,25 @@ def twopl_full(dataset, options=None):
 
     discrimination = np.ones((n_items,))
     difficulty = np.zeros((n_items,))
-    the_output = np.zeros((the_sign.shape[1], theta.size), dtype='float64')
 
     for iteration in range(options['max_iteration']):
         previous_discrimination = discrimination.copy()
 
         # Quadrature evaluation for values that do not change
-        partial_int = np.ones_like(the_output)
+        partial_int = np.ones((unique_sets.shape[1], theta.size))
         for ndx in range(n_items):
             partial_int *= _compute_partial_integral(theta, difficulty[ndx], 
-                                                     discrimination[ndx], the_sign[ndx],
-                                                     the_output)
+                                                     discrimination[ndx], 
+                                                     unique_sets[ndx],
+                                                     invalid_response_mask[ndx])
         partial_int *= distribution_x_weights
 
         for item_ndx in range(n_items):
             # pylint: disable=cell-var-from-loop
             local_int = _compute_partial_integral(theta, difficulty[item_ndx],
                                                   discrimination[item_ndx],
-                                                  the_sign[item_ndx], the_output)
+                                                  unique_sets[item_ndx], 
+                                                  invalid_response_mask[item_ndx])
 
             partial_int /= local_int
 
@@ -192,7 +198,8 @@ def twopl_full(dataset, options=None):
                 estimate_int = _compute_partial_integral(theta,
                                                          difficulty[item_ndx],
                                                          discrimination[item_ndx],
-                                                         the_sign[item_ndx], the_output)
+                                                         unique_sets[item_ndx], 
+                                                         invalid_response_mask[item_ndx])
 
                 estimate_int *= partial_int
                 otpt = np.sum(estimate_int, axis=1)
@@ -208,7 +215,8 @@ def twopl_full(dataset, options=None):
             # Update the partial integral based on the new found values
             estimate_int = _compute_partial_integral(theta, difficulty[item_ndx],
                                                      discrimination[item_ndx],
-                                                     the_sign[item_ndx], the_output)
+                                                     unique_sets[item_ndx], 
+                                                     invalid_response_mask[item_ndx])
             # update partial integral
             partial_int *= estimate_int
 

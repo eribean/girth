@@ -1,8 +1,9 @@
-from .numba_functions import _compute_partial_integral, _array_LUT
+from .numba_functions import _array_LUT
 from .utils import (validate_estimation_options, irt_evaluation,
                     trim_response_set_and_counts,
                     convert_responses_to_kernel_sign,
-                    get_true_false_counts, mml_approx, create_beta_LUT,
+                    get_true_false_counts, mml_approx, 
+                    create_beta_LUT, _compute_partial_integral,
                     tag_missing_data, INVALID_RESPONSE)
 from .polytomous_utils import condition_polytomous_response
 from .synthetic import (create_correlated_abilities,

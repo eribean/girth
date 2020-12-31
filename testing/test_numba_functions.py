@@ -4,25 +4,15 @@ import numpy as np
 import numba as nb
 
 from girth.utils import _get_quadrature_points
-from girth.numba_functions import numba_expit, _compute_partial_integral, _array_LUT
+from girth.numba_functions import _array_LUT
 
 # These don't register as covered tests in nose but
 # The tests do run
 
 class NumbaTests(unittest.TestCase):
 
-
-    def test_numba_expit(self):
-        """Test the numba function for expit function."""
-        np.random.seed(342342)
-        output = np.random.randn(300, 300) * 2
-
-        numba_result = numba_expit(output)
-        numpy_result = 1.0 / (1.0 + np.exp(output))
-
-        np.testing.assert_allclose(numba_result, numpy_result, 
-        atol=1e-4, rtol=1e-5)
-
+    # Testing numba functions
+    
     def test_array_LUT(self):
         """Test the creation of the array look up table."""
         alpha = np.linspace(.2, 4, 500)

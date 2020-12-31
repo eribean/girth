@@ -1,9 +1,9 @@
 import numpy as np
 from scipy import integrate
 from scipy.optimize import fminbound
+from scipy.special import expit
 
 from girth import INVALID_RESPONSE
-from girth.numba_functions import numba_expit
 
 
 def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
@@ -87,10 +87,10 @@ def _graded_partial_integral(theta, betas, betas_roll,
                              discrimination, response_set,
                              invalid_response_mask):
     """Computes the partial integral for the graded response."""
-    temp1 = (betas[:, None] - theta) * discrimination[:, None]
-    temp2 = (betas_roll[:, None] - theta) * discrimination[:, None]
-    graded_prob = numba_expit(temp1) 
-    graded_prob -= numba_expit(temp2)
+    temp1 = (theta - betas[:, None]) * discrimination[:, None]
+    temp2 = (theta - betas_roll[:, None]) * discrimination[:, None]
+    graded_prob = expit(temp1) 
+    graded_prob -= expit(temp2)
 
     # Set all the responses and fix afterward
     temp_output = graded_prob[response_set, :]

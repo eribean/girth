@@ -5,8 +5,8 @@ from scipy.stats import uniform
 from scipy.stats import norm as gaussian
 from scipy.optimize import fminbound
 from girth import convert_responses_to_kernel_sign, validate_estimation_options
-from girth.numba_functions import _compute_partial_integral
-from girth.utils import _get_quadrature_points
+from girth.utils import (INVALID_RESPONSE, _get_quadrature_points, 
+                         _compute_partial_integral)
 
 
 def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
@@ -27,8 +27,11 @@ def ability_mle(dataset, difficulty, discrimination, no_estimate=np.nan):
     Returns:
         abilities: (1d array) estimated abilities
     """
+    # Find any missing data
+    bad_mask = dataset == INVALID_RESPONSE
+
     # Locations where endorsement isn't constant
-    mask = np.nanvar(dataset, axis=0) > 0
+    mask = ~(np.ma.masked_array(dataset, bad_mask).var(axis=0) == 0)
 
     # Use only appropriate data
     valid_dataset = dataset[:, mask]
@@ -152,15 +155,17 @@ def ability_eap(dataset, difficulty, discrimination, options=None):
         discrimination = np.full(dataset.shape[0], discrimination,
                                  dtype='float')
 
-    the_sign = convert_responses_to_kernel_sign(dataset)
-    the_output = np.zeros((the_sign.shape[1], quad_n), dtype='float64')
+    invalid_response_mask = dataset == INVALID_RESPONSE
+    unique_sets = dataset.copy()
+    unique_sets[invalid_response_mask] = 0 # For Indexing, fixed later
 
     theta, weights = _get_quadrature_points(quad_n, quad_start, quad_stop)
-    partial_int = np.ones_like(the_output)
-    for ndx in range(the_sign.shape[0]):
+    partial_int = np.ones((dataset.shape[1], quad_n))
+    for ndx in range(dataset.shape[0]):
         partial_int *= _compute_partial_integral(theta, difficulty[ndx], 
-                                                 discrimination[ndx], the_sign[ndx],
-                                                 the_output)
+                                                 discrimination[ndx],
+                                                 unique_sets[ndx],
+                                                 invalid_response_mask[ndx])
     distribution_x_weights = options['distribution'](theta) * weights
 
     return _ability_eap_abstract(partial_int, distribution_x_weights,

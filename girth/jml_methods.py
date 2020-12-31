@@ -39,10 +39,9 @@ def _jml_abstract(dataset, _item_min_func,
             scalar = the_sign[:, ndx] * alphas
 
             def _theta_min(theta):
-                otpt = 1.0 / (1.0 + np.exp(scalar *
-                                           (theta - betas)))
+                otpt = np.exp(scalar * (theta - betas))
 
-                return -np.log(otpt).sum()
+                return np.log1p(otpt).sum()
 
             # Solves for the ability for each person
             thetas[ndx] = fminbound(_theta_min, -6, 6)
@@ -91,9 +90,8 @@ def rasch_jml(dataset, discrimination=1, options=None):
             scalar = alphas[0] * the_sign[ndx, :]
 
             def _beta_min(beta):
-                otpt = 1.0 / (1.0 + np.exp(scalar *
-                                           (thetas - beta)))
-                return -np.log(otpt).dot(counts)
+                otpt = np.exp(scalar * (thetas - beta))
+                return np.log1p(otpt).dot(counts)
 
             # Solves for the beta parameters
             betas[ndx] = fminbound(_beta_min, -6, 6)
@@ -135,9 +133,8 @@ def onepl_jml(dataset, options=None):
                 scalar = the_sign[ndx, :] * estimate
 
                 def _beta_min(beta):
-                    otpt = 1.0 / (1.0 + np.exp(scalar *
-                                               (thetas - beta)))
-                    return -np.log(otpt).dot(counts)
+                    otpt = np.exp(scalar * (thetas - beta))
+                    return np.log1p(otpt).dot(counts)
 
                 # Solves for the difficulty parameter for a given item at
                 # a specific discrimination parameter
@@ -180,9 +177,9 @@ def twopl_jml(dataset, options=None):
         # pylint: disable=cell-var-from-loop
         for ndx in range(n_items):
             def _alpha_beta_min(estimates):
-                otpt = 1.0 / (1.0 + np.exp((thetas - estimates[1]) *
-                                           the_sign[ndx, :] * estimates[0]))
-                return -np.log(otpt).dot(counts)
+                otpt = np.exp((thetas - estimates[1]) *
+                              the_sign[ndx, :] * estimates[0])
+                return np.log1p(otpt).dot(counts)
 
             # Solves jointly for parameters using numerical derivatives
             otpt = fmin_slsqp(_alpha_beta_min, (alphas[ndx], betas[ndx]),

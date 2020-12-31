@@ -7,7 +7,8 @@ from girth.ability_methods import _ability_eap_abstract
 from girth import (ability_eap, ability_map, 
                    ability_mle)
 
-from girth import create_synthetic_irt_dichotomous                   
+from girth import create_synthetic_irt_dichotomous
+from girth.utils import INVALID_RESPONSE                
 
 
 def _rmse(expected, result):
@@ -45,9 +46,8 @@ class TestAbilityEstimates(unittest.TestCase):
         # Add missing values
         dataset = create_synthetic_irt_dichotomous(self.difficulty, self.discrimination,
                                                    self.expected_theta, seed=312)
-        dataset = dataset.astype('float')
         mask = np.random.rand(*dataset.shape) < 0.1
-        dataset[mask] = np.nan
+        dataset[mask] = INVALID_RESPONSE
         self.set_four = dataset
 
         # Regression Test

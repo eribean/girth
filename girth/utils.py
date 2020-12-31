@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import interpolate
 from scipy.stats import norm as gaussian
-from scipy.special import roots_legendre
+from scipy.special import roots_legendre, expit
 
 from girth import _array_LUT
 
@@ -148,6 +148,32 @@ def mml_approx(dataset, discrimination=1, scalar=None):
 
     return (np.sqrt(1 + discrimination**2 / 3) *
             scalar / discrimination)
+
+
+def _compute_partial_integral(theta, difficulty, discrimination, 
+                              responses, invalid_response_mask):
+    """ Computes the partial integral for an IRT item
+
+    The return array is 2D with dimensions
+        (person x theta)
+
+    Args:
+        theta: (1d array) Quadrature locations
+        difficulty: (float) Item difficulty parameter
+        discrimination: (float) Item discrimination parameter
+        responses: (1d array) Correct (1) or Incorrect (0)
+        invalid_response_mask: (1d array) mask where data is missing
+
+    Returns:
+        the_output: (2d array) is modified in-place
+    """                               
+    probability = expit(np.outer([-1, 1], 
+                        discrimination * (theta - difficulty)))
+    
+    # Mask out missing responses
+    temp_output = probability[responses, :]
+    temp_output[invalid_response_mask] = 1
+    return temp_output
 
 
 def convert_responses_to_kernel_sign(responses):

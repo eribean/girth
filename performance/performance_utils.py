@@ -8,9 +8,8 @@ from scipy.stats import distributions
 
 
 _available_models = ["rasch_conditional",
-                     "rasch_mml", "rasch_full", "rasch_jml", 
-                     "onepl_mml", "onepl_full", 
-                     "onepl_jml", "twopl_full",
+                     "rasch_mml", "rasch_jml", 
+                     "onepl_mml", "onepl_jml", 
                      "twopl_mml", "twopl_jml", "grm_jml",
                      "grm_mml", "pcm_mml", "pcm_jml"]
 

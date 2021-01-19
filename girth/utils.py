@@ -179,7 +179,7 @@ def _compute_partial_integral(theta, difficulty, discrimination,
 def convert_responses_to_kernel_sign(responses):
     """Converts dichotomous responses to the appropriate kernel sign.
 
-    Takes in an array of responses coded as either [True/False] or [0/1]
+    Takes in an array of responses coded as either [True/False] or [1/0]
     and converts it into [+1 / -1] to be used during parameter estimation.
 
     Values that are not 0 or 1 are converted into a zero which means these

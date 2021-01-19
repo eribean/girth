@@ -98,6 +98,22 @@ discrimination_estimates = estimates['Discrimination']
 difficulty_estimates = estimates['Difficulty']
 ```
 
+### Missing Data
+Missing data is supported with the `tag_missing_data` function.
+```python
+from girth import tag_missing_data
+from girth import twopl_mml
+
+# import data (you supply this function)
+my_data = import_data(filename)
+
+# Assume its dichotomous data with True -> 1 and False -> 0
+tagged_data = tag_missing_data(my_data, [0, 1])
+
+# Run Estimation
+results = twopl_mml(tagged_data)
+```
+
 ## Unittests
 
 **Without** coverage.py module

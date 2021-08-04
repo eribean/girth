@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-and-test:
     docker:
-    - image: circleci/python:3.8.11
+    - image: cimg/python:3.8.11
     steps:
       - checkout
       - restore_cache:

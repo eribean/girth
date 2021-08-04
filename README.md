@@ -129,13 +129,13 @@ nosetests --with-coverage --cover-package=girth testing/
 ## Contact
 
 Ryan Sanchez  
-rsanchez44@gatech.edu
+ryan.sanchez@gofactr.com
 
 ## License
 
 MIT License
 
-Copyright (c) 2020 Ryan Sanchez
+Copyright (c) 2021 Ryan C. Sanchez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

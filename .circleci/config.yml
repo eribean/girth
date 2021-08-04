@@ -11,7 +11,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - pip-{{ checksum "requirements.txt"  }}      
+          - pip-{{ checksum "requirements1.txt"  }}      
       - run:
           environment:
             LLVM_CONFIG: /home/circleci/.local/bin/llvm-config
@@ -22,7 +22,7 @@ jobs:
             done
           name: Install Deps
       - save_cache:
-          key: pip-{{ checksum "requirements.txt"  }}
+          key: pip-{{ checksum "requirements1.txt"  }}
           paths:
           - /home/circleci/.local/lib/
       - run:

@@ -6,7 +6,11 @@ orbs:
 jobs:
   build-and-test:
     docker:
+<<<<<<< HEAD
     - image: cimg/python:3.9
+=======
+    - image: cimg/python:3.8.8
+>>>>>>> master
     steps:
       - checkout
       - restore_cache:

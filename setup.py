@@ -29,8 +29,7 @@ if __name__ == '__main__':
             'Development Status :: 3 - Alpha',
             'Intended Audience :: Science/Research',
             'Topic :: Scientific/Engineering', 
-            'License :: OSI Approved :: MIT License',
-            'Programming Language :: Python :: 3.6',            
+            'License :: OSI Approved :: MIT License',          
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8'
         ]

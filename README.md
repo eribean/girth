@@ -1,5 +1,5 @@
 [![girth-tests Actions Status](https://github.com/eribean/girth/workflows/girth-tests/badge.svg)](https://github.com/eribean/girth/actions)
-![codecov.io](https://codecov.io/gh/eribean/girth/coverage.svg?branch=master)
+[![codecov](https://codecov.io/gh/eribean/girth/branch/master/graph/badge.svg?token=M7QW1P6V6X)](https://codecov.io/gh/eribean/girth)
 [![CodeFactor](https://www.codefactor.io/repository/github/eribean/girth/badge)](https://www.codefactor.io/repository/github/eribean/girth)
 [![PyPI version](https://badge.fury.io/py/girth.svg)](https://badge.fury.io/py/girth)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)

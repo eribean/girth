@@ -40,7 +40,7 @@ jobs:
       run: |
         pip install pytest-cov
         pip install . --upgrade
-        pytest --cov=RyStats
+        pytest --cov=girth
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

@@ -6,8 +6,6 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-
-print(convert_path('/performance'))
 if __name__ == '__main__':
     setup(
         name="girth", 
@@ -20,9 +18,8 @@ if __name__ == '__main__':
         long_description=long_description.replace('<ins>','').replace('</ins>',''),
         long_description_content_type='text/markdown',
         author='Ryan C. Sanchez',
-        author_email='rsanchez44@gatech.edu',
+        author_email='ryan.sanchez@gofactr.com',
         url = 'https://eribean.github.io/girth/',
-        download_url = 'https://github.com/eribean/girth/archive/v0.4.0.tar.gz',
         keywords = ['IRT', 'Psychometrics', 'Item Response Theory'],
         install_requires = ['numpy', 'scipy', 'numba'],
         classifiers = [
@@ -31,6 +28,7 @@ if __name__ == '__main__':
             'Topic :: Scientific/Engineering', 
             'License :: OSI Approved :: MIT License',          
             'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: 3.8'
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9'
         ]
     )

@@ -13,7 +13,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-      
     strategy:
       fail-fast: false
       matrix:
@@ -44,4 +43,4 @@ jobs:
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        fail_ci_if_error: true    
+        fail_ci_if_error: true

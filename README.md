@@ -116,12 +116,12 @@ results = twopl_mml(tagged_data)
 
 ## Unittests
 
-**Without** coverage.py module
+**pytest** with coverage.py module
 ```
-nosetests testing/
+pytest --cov=girth --cov-report term
 ```
 
-**With** coverage.py module
+**nose** with coverage.py module
 ```
 nosetests --with-coverage --cover-package=girth testing/
 ```

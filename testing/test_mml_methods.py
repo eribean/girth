@@ -354,7 +354,6 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
     """Tests the marginal maximum likelihood for GUM."""
 
     # Smoke / Regression Tests
-    @unittest.skip("CI Issue")
     def test_unfolding_run(self):
         """Testing the unfolding model runs."""
         np.random.seed(555)

@@ -43,8 +43,7 @@ def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
         synthetic_data: (2d array) realization of possible response given parameters
 
     """
-    if seed:
-        np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     if np.ndim(guessing) < 1:
         guessing = np.full_like(difficulty, guessing)
@@ -56,7 +55,7 @@ def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
     continuous_output += guessing[:, None]
 
     # convert to binary based on probability
-    random_compare = np.random.rand(*continuous_output.shape)
+    random_compare = rng.uniform(size=continuous_output.shape)
 
     return (random_compare <= continuous_output).astype('int')
 
@@ -88,8 +87,7 @@ def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
 
         synthetic_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
     """
-    if seed:
-        np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     # If the input is just a vector of discriminations
     if (np.ndim(discrimination) == 1) or (discrimination.shape[0] == 1):
@@ -101,7 +99,7 @@ def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
     continuous_output = 1.0 / (1.0 + np.exp(-kernel_terms))
 
     # convert to binary based on probability
-    random_compare = np.random.rand(*continuous_output.shape)
+    random_compare = rng.uniform(size=continuous_output.shape)
 
     return (random_compare <= continuous_output).astype('int')
 
@@ -233,8 +231,7 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
     if n_levels == 1:
         raise AssertionError("Polytomous items must have more than 1 threshold")
 
-    if seed:
-        np.random.seed(seed)
+    rng = np.random.default_rng(seed)
 
     # Check for single input of discrimination
     if np.atleast_1d(discrimination).size == 1:
@@ -262,7 +259,7 @@ def create_synthetic_irt_polytomous(difficulty, discrimination, thetas,
 
         # Get the thresholds of the levels
         np.cumsum(level_scratch[1:, :], axis=0, out=level_scratch[1:, :])
-        level_scratch[0] = np.random.rand(thetas.size)
+        level_scratch[0] = rng.uniform(size=thetas.size)
 
         # Discritize the outputs based on the thresholds
         output[item_ndx] = np.apply_along_axis(

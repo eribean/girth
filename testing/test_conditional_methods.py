@@ -12,44 +12,44 @@ class TestConditionalRasch(unittest.TestCase):
 
     def test_conditional_regression(self):
         """Testing conditional rasch model."""
-        np.random.seed(91)
+        rng = np.random.default_rng(1643242198124)
         difficuly = np.linspace(-1.5, 1.5, 5)
         discrimination = 1
-        thetas = np.random.randn(600)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = rasch_conditional(syn_data)['Difficulty']
-        expected_output = np.array([-1.39893814, -0.80083855,
-                                    -0.00947712,  0.61415543,  1.59509838])
+        expected_output = np.array([-1.543584, -0.732148, -0.01494,  
+                                    0.768816,  1.521855])
 
-        np.testing.assert_allclose(expected_output, output)
+        np.testing.assert_allclose(expected_output, output, atol=1e-6)
 
 
     def test_conditional_regression_discrimination(self):
         """Testing conditional rasch model with non-unity discrimination."""
-        np.random.seed(142)
+        rng = np.random.default_rng(88743218879951231)
         difficuly = np.linspace(-1.5, 1.5, 5)
         discrimination = 1.7
-        thetas = np.random.randn(600)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = rasch_conditional(syn_data, discrimination)['Difficulty']
-        expected_output = np.array([-1.38086088, -0.74781933,
-                                    -0.01267694,  0.77906715,  1.36228999])
+        expected_output = np.array([-1.565442, -0.905947,  0.118824,  
+                                     0.767591,  1.584975])
 
-        np.testing.assert_allclose(expected_output, output)
+        np.testing.assert_allclose(expected_output, output, atol=1e-6)
 
 
     def test_conditional_close(self):
         """Testing conditional rasch model for accuracy."""
-        np.random.seed(574)
+        rng = np.random.default_rng(468135249816547)
         difficuly = np.linspace(-1.5, 1.5, 5)
         discrimination = 1.2
-        thetas = np.random.randn(1600)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
         output = rasch_conditional(syn_data, discrimination)['Difficulty']
 
         np.testing.assert_array_almost_equal(difficuly, output, decimal=1)
@@ -57,7 +57,8 @@ class TestConditionalRasch(unittest.TestCase):
 
     def test_symmetric_function(self):
         """Testing the generation of symmetric functions."""
-        betas = np.random.randn(10)
+        rng = np.random.default_rng(587731189834)
+        betas = rng.standard_normal(10)
 
         # Compare by checking against fft method
         fft_size = betas.size + 1

@@ -22,13 +22,13 @@ class TestAbilityEstimates(unittest.TestCase):
     @classmethod
     def setUp(self):
         """Sets up synthetic data to use for estimation."""
-        np.random.seed(7)
+        rng = np.random.default_rng(55546546448096)
         self.difficulty = np.linspace(-2.4, 1.7, 15)
-        self.discrimination = 0.5 + np.random.rand(15) * 2
+        self.discrimination = 0.5 + rng.uniform(0, 2, size=15)
         self.discrimination_single = 1.702
-        self.expected_theta = np.random.randn(300)
+        self.expected_theta = rng.standard_normal(300)
         distribution = skewnorm(0.5, 0.2, 1.1)
-        self.expected_skew = distribution.rvs(size=300)
+        self.expected_skew = distribution.rvs(size=300, random_state=rng)
         self.skew_expected_theta_func = distribution.pdf
 
         # Create first synthetic data test
@@ -46,14 +46,14 @@ class TestAbilityEstimates(unittest.TestCase):
         # Add missing values
         dataset = create_synthetic_irt_dichotomous(self.difficulty, self.discrimination,
                                                    self.expected_theta, seed=312)
-        mask = np.random.rand(*dataset.shape) < 0.1
+        mask = rng.uniform(0, 1, size=dataset.shape) < 0.1
         dataset[mask] = INVALID_RESPONSE
         self.set_four = dataset
 
         # Regression Test
         self.regression_difficulty = np.linspace(-1.5, 1.5, 5)
         self.regression_discrimination = np.linspace(0.8, 1.8, 5)
-        self.regression_theta = np.random.randn(10)
+        self.regression_theta = rng.standard_normal(10)
         self.set_five = create_synthetic_irt_dichotomous(self.regression_difficulty,
                                                          self.regression_discrimination,
                                                          self.regression_theta, seed=422)
@@ -65,49 +65,49 @@ class TestAbilityEstimates(unittest.TestCase):
 
         # Full discrimination
         theta1 = ability_mle(self.set_one, self.difficulty, self.discrimination)
-        self.assertAlmostEqual(_rmse(theta1, self.expected_theta), 0.516, places=3)
+        self.assertAlmostEqual(_rmse(theta1, self.expected_theta), 0.463, places=3)
 
         # Single discrimination
         theta2 = ability_mle(self.set_two, self.difficulty, self.discrimination_single)
-        self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.443, places=3)
+        self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.437, places=3)
 
         # Skewed distribution
         theta3 = ability_mle(self.set_three, self.difficulty, self.discrimination)
-        self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.582, places=3)
+        self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.449, places=3)
 
         # Missing Values
         theta4 = ability_mle(self.set_four, self.difficulty, self.discrimination)
-        self.assertAlmostEqual(_rmse(theta4, self.expected_theta), 0.542, places=3)
+        self.assertAlmostEqual(_rmse(theta4, self.expected_theta), 0.478, places=3)
 
         # Regression
-        expected = [-1.73287257, -0.48635278,  0.45113559, np.nan, -0.08638913, 
-                     1.69245051, -1.03434564, -1.3481655, -1.3481655, 0.45113559]
+        expected = [-1.73287, -1.73287,  0.45114, -0.48635, -0.48635, -0.27791,
+                    np.nan,  1.52444, -1.34817, -1.34817]
         theta5 = ability_mle(self.set_five, self.regression_difficulty, self.regression_discrimination)
-        np.testing.assert_array_almost_equal(theta5, expected,decimal=5)
+        np.testing.assert_array_almost_equal(theta5, expected, decimal=5)
 
     def test_ability_map(self):
         """Testing Maximum a posteriori estimates."""
         # Full discrimination
         theta1 = ability_map(self.set_one, self.difficulty, self.discrimination)
-        self.assertAlmostEqual(_rmse(theta1, self.expected_theta), 0.437, places=3)
+        self.assertAlmostEqual(_rmse(theta1, self.expected_theta), 0.412, places=3)
         
         # Single discrimination
         theta2 = ability_map(self.set_two, self.difficulty, self.discrimination_single)
-        self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.419, places=3)
+        self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.412, places=3)
 
         # Skewed distribution
         options = {'distribution': self.skew_expected_theta_func}
         theta3 = ability_map(self.set_three, self.difficulty, self.discrimination,
                              options)
-        self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.506, places=3)
+        self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.436, places=3)
 
         # Missing Values
         theta4 = ability_map(self.set_four, self.difficulty, self.discrimination)
-        self.assertAlmostEqual(_rmse(theta4, self.expected_theta), 0.462, places=3)
+        self.assertAlmostEqual(_rmse(theta4, self.expected_theta), 0.429, places=3)
 
         # Regression
-        expected = [-0.75820877, -0.26554781,  0.27579622, -1.17914526, -0.04986583,
-                     1.04563432, -0.51614533, -0.63534464, -0.63534464,  0.27579622]
+        expected = [-0.75821, -0.75821,  0.2758 , -0.26555, -0.26555, -0.15639,
+                    1.53448,  0.95394, -0.63534, -0.63534]
 
         theta5 = ability_map(self.set_five, self.regression_difficulty, self.regression_discrimination)
         np.testing.assert_array_almost_equal(theta5, expected,decimal=5)
@@ -116,34 +116,35 @@ class TestAbilityEstimates(unittest.TestCase):
         """Testing Expected a posteriori estimates."""
         # Full discrimination
         theta1 = ability_eap(self.set_one, self.difficulty, self.discrimination)
-        self.assertAlmostEqual(_rmse(theta1, self.expected_theta), 0.436, places=3)
+        self.assertAlmostEqual(_rmse(theta1, self.expected_theta), 0.411, places=3)
          
         # Single discrimination
         theta2 = ability_eap(self.set_two, self.difficulty, self.discrimination_single)
-        self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.418, places=3)
+        self.assertAlmostEqual(_rmse(theta2, self.expected_theta), 0.411, places=3)
 
         # Skewed distribution
         options = {'distribution': self.skew_expected_theta_func}
         theta3 = ability_eap(self.set_three, self.difficulty, self.discrimination,
                              options)
-        self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.501, places=3)
+        self.assertAlmostEqual(_rmse(theta3, self.expected_skew), 0.436, places=3)
 
         # Missing Values
         theta4 = ability_eap(self.set_four, self.difficulty, self.discrimination)
-        self.assertAlmostEqual(_rmse(theta4, self.expected_theta), 0.462, places=3)
+        self.assertAlmostEqual(_rmse(theta4, self.expected_theta), 0.429, places=3)
 
         # Regression
-        expected = [-0.81893966, -0.31526459,  0.24361885, -1.2459348,  -0.09338352,
-                     1.05603316, -0.57198605, -0.69371833, -0.69371833,  0.24361885]
+        expected = [-0.818932, -0.818932,  0.243619, -0.315264, -0.315264, -0.20308 ,
+                    1.58863 ,  0.957627, -0.693715, -0.693715]
 
         theta5 = ability_eap(self.set_five, self.regression_difficulty, self.regression_discrimination)
         np.testing.assert_allclose(theta5, expected, atol=1e-3, rtol=1e-3)
 
     def test_ability_eap_abstract(self):
         """Testing eap computation."""
-        np.random.seed(1002124)
-        partial_int = np.random.randn(1000, 41)
-        weight = np.random.randn(41)
+        rng = np.random.default_rng(21357489413518)
+    
+        partial_int = rng.standard_normal((1000, 41))
+        weight = rng.standard_normal(41)
         theta = np.linspace(-3, 3, 41)
 
         result = _ability_eap_abstract(partial_int, weight, theta)

@@ -65,7 +65,7 @@ pip install girth --upgrade
 
 From Source
 ```
-python setup.py install --prefix=path/to/your/installation
+pip install . -t $PYTHONPATH --upgrade
 ```
 
 ## Dependencies

@@ -49,7 +49,7 @@ def create_item_parameters(analysis_dict):
     else:
         pdf = scipy_stats_string_to_functions(analysis_dict['Difficulty_pdf'],
                                               analysis_dict['Difficulty_pdf_args'])
-        difficulty = pdf.rvs(size=analysis_dict['Difficulty_count'], ,
+        difficulty = pdf.rvs(size=analysis_dict['Difficulty_count'],
                              random_state=rng)
 
     if analysis_dict['Type'].lower() == "polytomous":

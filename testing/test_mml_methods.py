@@ -17,34 +17,37 @@ class TestMMLRaschMethods(unittest.TestCase):
 
     def setUp(self):
         """Setup synthetic data for tests."""
-        np.random.seed(3)
+        rng = np.random.default_rng(5578134322131629)
+
         difficulty = np.linspace(-1.5, 1.5, 5)
         discrimination = 1.12
-        thetas = np.random.randn(600)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
         self.data = syn_data
         self.discrimination = discrimination
-
+    
     def test_rasch_regression_mml(self):
         """Testing rasch separate methods."""
         syn_data = self.data.copy()
         output = rasch_mml(syn_data, self.discrimination)['Difficulty']
-        expected_output = np.array([-1.324751, -0.814625, -0.082224,  0.658678,  1.470566])
+        expected_output = np.array([-1.438482, -0.723603,  0.029875,  0.666719,  1.406826])
 
         np.testing.assert_allclose(expected_output, output, atol=1e-3, rtol=1e-3)
 
+    
     def test_rasch_close(self):
         """Testing rasch converging methods."""
-        np.random.seed(333)
+        rng = np.random.default_rng(49843215977321216489)
+        
         difficulty = np.linspace(-1.25, 1.25, 5)
         discrimination = 0.87
-        thetas = np.random.randn(2000)
+        thetas = rng.standard_normal(2000)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = rasch_mml(syn_data, discrimination)['Difficulty']
-        np.testing.assert_array_almost_equal(difficulty, output, decimal=1)
+        np.testing.assert_allclose(difficulty, output, atol=.1)
 
 
 class TestMMLOnePLMethods(unittest.TestCase):
@@ -55,34 +58,37 @@ class TestMMLOnePLMethods(unittest.TestCase):
 
     def setUp(self):
         """Setup synthetic data for tests."""
-        np.random.seed(873)
+        rng = np.random.default_rng(8851224983218942)
+
         difficulty = np.linspace(-1.5, 1.5, 5)
         discrimination = 1.843
-        thetas = np.random.randn(600)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
         self.data = syn_data
         self.discrimination = discrimination
-
+    
     def test_onepl_regression_mml(self):
         """Testing onepl separate methods."""
         syn_data = self.data.copy()
         output = onepl_mml(syn_data)
         
-        expected_output = np.array([-1.376502, -0.648995, -0.039338,  0.77919 ,  1.386173])
+        expected_output = np.array([-1.336955, -0.785015,  0.028052,  
+                                    0.699433,  1.539387])
 
-        self.assertAlmostEqual(output['Discrimination'], 1.901730570, places=4)
+        self.assertAlmostEqual(output['Discrimination'], 1.90677, places=4)
         np.testing.assert_allclose(expected_output, output['Difficulty'], 
                                    atol= 1e-3, rtol=1e-3)
-
+    
     def test_onepl_close(self):
         """Testing onepl converging methods."""
-        np.random.seed(843)
+        rng = np.random.default_rng(3215964845415)
+        
         difficulty = np.linspace(-1.25, 1.25, 10)
         discrimination = 0.87
-        thetas = np.random.randn(1000)
+        thetas = rng.standard_normal(1000)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = onepl_mml(syn_data)
         self.assertLess(np.abs(output['Discrimination'] - discrimination).max(), 0.1)
@@ -97,37 +103,40 @@ class TestMMLTwoPLMethods(unittest.TestCase):
 
     def setUp(self):
         """Setup synthetic data for tests."""
-        np.random.seed(247)
+        rng = np.random.default_rng(3215964845415)
+
         difficulty = np.linspace(-1.5, 1.5, 5)
-        discrimination = np.random.rand(5) + 0.5
-        thetas = np.random.randn(600)
+        discrimination = rng.uniform(0, 1, 5) + 0.5
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
         self.data = syn_data
         self.discrimination = discrimination
-
+    
     def test_twopl_regression_mml(self):
         """Testing twopl separate methods."""
         syn_data = self.data.copy()
         output = twopl_mml(syn_data)
 
-        expected_discrimination = np.array([0.99981316, 1.86369226, 1.35526711, 
-                                            0.52935723, 0.90899136])
-        expected_output = np.array([-1.315087, -0.648258, -0.079815,  0.774052,  1.66791])
+        expected_discrimination = np.array([0.990038, 0.528739, 0.599066, 
+                                            0.827415, 0.625773])
+        expected_output = np.array([-1.509518, -0.985841,  0.108493,  
+                                    1.011885,  1.456912])
 
         np.testing.assert_allclose(
             expected_discrimination, output['Discrimination'], atol = 1e-4, rtol=1e-5)
         np.testing.assert_allclose(expected_output, output['Difficulty'], 
                                    atol = 1e-3, rtol=1e-3)
-
+    
     def test_twopl_close(self):
         """Testing twopl converging methods."""
-        np.random.seed(43)
+        rng = np.random.default_rng(54564132132146548)
+
         difficulty = np.linspace(-1.25, 1.25, 10)
-        discrimination = 0.5 + np.random.rand(10)
-        thetas = np.random.randn(2000)
+        discrimination = 0.5 + rng.uniform(0, 1, 10)
+        thetas = rng.standard_normal(2000)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = twopl_mml(syn_data)
         self.assertLess(np.abs(output['Discrimination'] - discrimination).mean(), 0.1)
@@ -136,29 +145,27 @@ class TestMMLTwoPLMethods(unittest.TestCase):
 
 class TestMMLGradedResponseModel(unittest.TestCase):
     """Tests the marginal maximum likelihood for GRM."""
-
+    
     def test_graded_large_participant(self):
         """Regression Testing graded response model with large N."""
-        np.random.seed(1944)
-        difficulty = np.sort(np.random.randn(5, 4), axis=1)
-        discrimination = np.random.rand(5) + 0.5
-        thetas = np.random.randn(600)
+        rng = np.random.default_rng(37591254953128)
+        
+        difficulty = np.sort(rng.standard_normal((5, 4)), axis=1)
+        discrimination = 0.5 + rng.uniform(0, 1, 5)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
-                                                   thetas)
+                                                   thetas, seed=rng)
 
         estimated_parameters = grm_mml(syn_data, {"use_LUT": False})
 
         # Regression test
-        expected_discrimination = np.array([0.582914, 1.38349 , 0.879928, 1.173225, 1.471951])
+        expected_discrimination = np.array([0.618059, 0.85724 , 0.933731, 0.783617, 0.768444])
 
-        expectected_difficulty = np.array([[-1.23881672, -0.5340817,  0.06170343,  1.23881201],
-                                           [-1.09279868, -0.76747967,
-                                               0.44660955,  1.28909032],
-                                           [-0.16828803,  0.23943693,
-                                               0.76140209,  1.24435541],
-                                           [-2.02935022, -0.70214267, -
-                                               0.23281603,  1.27521818],
-                                           [-1.47758497, -0.9050062,  0.0698804,  0.71286592]])
+        expectected_difficulty = np.array([[-0.79897775, -0.59202128,  0.49595011,  1.59808004],
+                                           [-1.03595851, -0.19882228, -0.00903988,  0.33531401],
+                                           [-0.8862972,  -0.45312044,  0.46180153,  2.47818242],
+                                           [-1.12156704, -0.27140501,  0.21297667,  0.84264451],
+                                           [-1.84418695, -1.66922269, -0.34500204,  0.29536871]])
 
         np.testing.assert_allclose(
             estimated_parameters['Discrimination'], expected_discrimination, 
@@ -166,27 +173,27 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         np.testing.assert_allclose(
             estimated_parameters['Difficulty'], expectected_difficulty,
             atol = 1e-3, rtol=1e-3)
-
+    
     def test_graded_small_participant(self):
         """Regression Testing graded response model with small N."""
-        np.random.seed(87)
-        difficulty = np.sort(np.random.randn(5, 4), axis=1)
-        discrimination = np.random.rand(5) + 0.5
-        thetas = np.random.randn(101)
+        rng = np.random.default_rng(5378912)
+        
+        difficulty = np.sort(rng.standard_normal((5, 4)), axis=1)
+        discrimination = 0.5 + rng.uniform(0, 1, 5)
+        thetas = rng.standard_normal(101)
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
-                                                   thetas)
+                                                   thetas, seed=rng)
 
         estimated_parameters = grm_mml(syn_data)
 
         # Regression test
-        expected_discrimination = np.array([1.724843, 0.393598, 0.828646, 0.937709, 1.567619])
+        expected_discrimination = np.array([1.395028, 1.362249, 1.245826, 1.062985, 0.353289])
 
-        expectected_difficulty = np.array([
-                                    [-0.1571773,   0.22757906,  0.33440129,  0.59312807],
-                                    [ 1.22120566,  1.33164642,  2.26644668,  3.51066062],
-                                    [-1.25491225, -1.06215245, -0.70060057,  0.87804437],
-                                    [-1.26594612, -0.37869587,  2.2565641,       np.nan],
-                                    [-1.36972366, -0.66190223, -0.50312446,      np.nan]])
+        expectected_difficulty = np.array([[-2.87402313, -0.74836181,  1.40010846,  2.06246307],
+                                           [-0.17760531,  0.94242998,  1.68052614,  np.nan],
+                                           [-1.56364887, -0.66169962, -0.484627,   -0.06228502],
+                                           [-0.39390175,  0.16104483,  1.15843314,  np.nan],
+                                           [-2.50886987, -2.37244682, -1.59729314,  0.05772045]])
 
         np.testing.assert_allclose(
             estimated_parameters['Discrimination'], expected_discrimination, 
@@ -194,33 +201,33 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         np.testing.assert_allclose(
             estimated_parameters['Difficulty'], expectected_difficulty, 
             atol = 1e-3, rtol=1e-3)
-
+    
     def test_graded_response_model_close(self):
         """Regression Testing graded response model with large N."""
-        np.random.seed(6322)
-        difficulty = np.sort(np.random.randn(10, 4), axis=1)
-        discrimination = np.random.rand(10) + 0.5
-        thetas = np.random.randn(1000)
+        rng = np.random.default_rng(32425613463421)
+        difficulty = np.sort(rng.standard_normal((10, 4)), axis=1)
+        discrimination = 0.5 + rng.uniform(0, 1, 10) + 0.5
+        thetas = rng.standard_normal(1000)
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
-                                                   thetas)
+                                                   thetas, seed=rng)
 
         estimated_parameters = grm_mml(syn_data, {"use_LUT": False})
 
         rmse = np.sqrt(
             np.square(estimated_parameters['Discrimination'] - discrimination).mean())
-        self.assertLess(rmse, .0966)
+        self.assertLess(rmse, .1)
 
         rmse = np.sqrt(np.square(estimated_parameters['Difficulty'] - difficulty).mean())
-        self.assertLess(rmse, .1591)
-
+        self.assertLess(rmse, .1)
+    
     def test_graded_response_LUT_vs_NOLUT(self):
         """Testing LUT give answer close to NO_LUT."""
-        np.random.seed(489413)
-        difficulty = np.sort(np.random.randn(5, 4), axis=1)
-        discrimination = np.random.rand(5) + 0.5
-        thetas = np.random.randn(600)
+        rng = np.random.default_rng(23015798234751908)
+        difficulty = np.sort(rng.standard_normal((5, 4)), axis=1)
+        discrimination = 0.5 + rng.uniform(0, 1, 5)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
-                                                   thetas)
+                                                   thetas, seed=rng)
 
         estimated_parameters_NOLUT = grm_mml(syn_data, {"use_LUT": False})
         estimated_parameters_LUT = grm_mml(syn_data, {"use_LUT": True})
@@ -232,13 +239,14 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         np.testing.assert_allclose(estimated_parameters_LUT['Discrimination'],
                                    estimated_parameters_NOLUT['Discrimination'], 
                                    atol=1e-3, rtol=1e-3)
-
+    
+    
     def test_graded_response_latent_distribution_estimate(self):
         """Testing LUT give answer close to NO_LUT."""
-        np.random.seed(11546)
-        difficulty = np.sort(np.random.randn(20, 4), axis=1)
-        discrimination = np.random.rand(20) + 0.75
-        thetas = np.random.randn(1000)
+        rng = np.random.default_rng(984215958742346782)
+        difficulty = np.sort(rng.standard_normal((20, 4)), axis=1)
+        discrimination = 0.75 + rng.uniform(0, 1, 20)
+        thetas = rng.standard_normal(1000)
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
                                                    thetas)
 
@@ -262,10 +270,10 @@ class TestMMLPartialCreditModel(unittest.TestCase):
 
     @classmethod
     def setUp(self):
-        np.random.seed(1944)
-        self.difficulty = np.random.randn(10, 4)
-        self.discrimination = np.random.rand(10) + 0.5
-        thetas = np.random.randn(1000)
+        rng = np.random.default_rng(893476329804797)
+        self.difficulty = rng.standard_normal((10, 4))
+        self.discrimination = 0.5 + rng.uniform(0, 1, 10)
+        thetas = rng.standard_normal(1000)
         thetas_smol = thetas[:500].copy()
 
         self.discrimination_smol = self.discrimination[:5].copy()
@@ -275,20 +283,20 @@ class TestMMLPartialCreditModel(unittest.TestCase):
                                                              self.discrimination_smol,
                                                              thetas_smol,
                                                              model='PCM',
-                                                             seed=546)
+                                                             seed=45270983475)
 
         self.syn_data_larg = create_synthetic_irt_polytomous(self.difficulty,
                                                              self.discrimination,
                                                              thetas,
                                                              model='PCM',
-                                                             seed=546)
+                                                             seed=45270983475)
 
         self.syn_data_mixed = create_synthetic_irt_polytomous(self.difficulty_smol[:, 1:],
                                                               self.discrimination_smol,
                                                               thetas,
                                                               model='PCm',
-                                                              seed=543)
-
+                                                              seed=45270983475)
+    
     def test_pcm_gets_better(self):
         """Testing mml partial credit model improves with parameters."""
         output_smol = pcm_mml(self.syn_data_smol)
@@ -301,49 +309,54 @@ class TestMMLPartialCreditModel(unittest.TestCase):
         rmse_large = rmse(output_large['Discrimination'][:5], self.discrimination_smol)
 
         self.assertLess(rmse_large, rmse_smol)
-        self.assertAlmostEqual(rmse_large, 0.0728439345, places=4)
+        self.assertAlmostEqual(rmse_large, 0.047146750, places=4)
 
         # Regression Tests
-        expected_discr = np.array([0.81237, 0.98594, 1.15784, 
-                                   0.54352, 1.07744, 0.53615, 1.04752,
-                                   0.82479, 1.13313, 0.52348])
-        expected_diff = np.array(
-                            [[-0.36228655,  1.12552716, -0.8683124,  -0.05670265],
-                            [-0.74530574,  0.50813067, -1.3035864,   1.54851965],
-                            [-0.37363133,  0.22108749,  1.49891726,  0.82861256],
-                            [ 0.61968191, -1.62910971, -0.1741578,  -0.64065034],
-                            [-0.7778711,  -1.53569334,  0.20636619,  0.74253886],
-                            [ 0.34621761, -1.9338782,  1.02446975, -0.60102526],
-                            [-1.05718863, -0.99201518,  0.78186304,  1.02658717],
-                            [ 0.34289683,  0.60301358,  1.80654666, -1.16526188],
-                            [ 0.83154823, -2.08790263,  0.72526695, -1.12897981],
-                            [-0.22679954, -1.18577072,  1.94080517, -0.45182054]])
+        expected_discr = np.array([0.580641, 0.933542, 0.545533, 
+                                   1.384329, 1.002218, 1.289025,
+                                   0.666627, 0.935574, 1.075436, 0.805632])
+
+        expected_diff = np.array([
+            [-0.73888022,  0.48658471,  0.54432479, -0.20845413],
+            [-1.60420276,  1.51068354,  0.40853116,  0.96107097],
+            [ 0.74859512, -0.8266682,  -0.3281444,  -0.59730418],
+            [-1.26196949,  1.21638843,  0.81767559,  0.14749641],
+            [-1.25641728, -1.91429535,  0.29183112,  1.42147402],
+            [ 0.10975361,  0.37555775, -0.61898549, -0.64545493],
+            [-0.09936281, -0.81053536,  2.57210188, -0.15291919],
+            [ 1.82337828, -3.48583283, -0.46336348, -0.61231518],
+            [-0.52381878, -0.04939606,  1.46079265, -0.97823618],
+            [ 0.14933984,  1.50334098,  0.07215466,  0.34340747]            
+        ])
 
         np.testing.assert_allclose(
             expected_discr, output_large['Discrimination'], atol=1e-3, rtol=1e-3)
         np.testing.assert_allclose(
             expected_diff, output_large['Difficulty'], atol=1e-3, rtol=1e-3)
-
+    
     def test_pcm_mixed_difficulty_length(self):
         """Testing response set with different difficulty lengths."""
         syn_data = self.syn_data_larg.copy()
         syn_data[:5, :] = self.syn_data_mixed
 
-        expected_diff = np.array([[ 1.41437467, -1.03972326, -0.03385356,      np.nan],
-                                  [ 0.39334941, -1.14674155,  1.43811448,      np.nan],
-                                  [ 0.13997558,  1.48476978,  0.91178314,      np.nan],
-                                  [-2.15131714, -0.38478815, -0.18543023,      np.nan],
-                                  [-1.41427106,  0.0185614,   0.74579592,      np.nan],
-                                  [ 0.44808276, -2.07073615,  1.08686984, -0.71594868],
-                                  [-1.05742444, -1.02596807,  0.78562506,  1.02584723],
-                                  [ 0.28810824,  0.5646581,   1.74534348, -1.05365121],
-                                  [ 0.72990561, -2.03026853,  0.65491416, -1.05760536],
-                                  [-0.2213386,  -1.21817327,  1.96700887, -0.48493213]])
+        expected_diff = np.array([
+            [ 0.21026932,  0.52425421, -0.18010127, np.nan],
+            [ 1.41313701,  0.4436859,   0.93681588, np.nan],
+            [-0.42425069, -0.59080182, -0.53292842, np.nan],
+            [ 1.27658341,  0.89566005,  0.01640591, np.nan],
+            [-2.06755279,  0.30266522,  1.411641,   np.nan],
+            [ 0.12881731,  0.38916135, -0.63986058, -0.67991199],
+            [-0.10296058, -0.81505543,  2.57057425, -0.15957945],
+            [ 1.79151261, -3.46598156, -0.46742849, -0.60743497],
+            [-0.533436,  -0.05599013,  1.43555693, -0.94565827],
+            [ 0.13935706,  1.48691241,  0.07553486,  0.34733299]
+        ])
 
-        expected_discr = np.array([0.67902894, 1.20353141, 1.20042395, 0.52139593, 1.30484326,
-                                   0.49529043, 1.01706525, 0.86600196, 1.19555753, 0.51229351])
-
+        expected_discr = np.array([0.58303313, 0.98298398, 0.5275932, 1.33180649, 
+                                   0.99874869, 1.25343601, 0.66599838, 0.94446462, 
+                                   1.09705009, 0.81375833])
         output = pcm_mml(syn_data)
+
         np.testing.assert_allclose(
             expected_diff, output['Difficulty'], atol=1e-3, rtol=1e-3)
         np.testing.assert_allclose(
@@ -354,20 +367,20 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
     """Tests the marginal maximum likelihood for GUM."""
 
     # Smoke / Regression Tests
-    @unittest.skip("CI Issue")
+    
     def test_unfolding_run(self):
         """Testing the unfolding model runs."""
-        np.random.seed(555)
-        difficulty = -(np.random.rand(10, 2) * 1.5)
-        delta = 0.5 * np.random.rand(10, 1)
-        discrimination = np.random.rand(10) + 0.5
-        thetas = np.random.randn(200)
+        rng = np.random.default_rng(73424353456772)
+        difficulty = -rng.uniform(0, 1.5, (10, 2))
+        delta = rng.uniform(0, 0.5, (10, 1))
+        discrimination = rng.uniform(0, 1, 10) + 0.5
+        thetas = rng.standard_normal(300)
 
         betas = np.c_[difficulty, np.zeros((10, 1)), -difficulty[:, ::-1]]
         betas += delta
         syn_data = create_synthetic_irt_polytomous(betas, discrimination,
                                                    thetas, model='GUM',
-                                                   seed=546)
+                                                   seed=rng)
         delta_sign = (0, 1)
         result = gum_mml(syn_data, delta_sign=delta_sign, options={'max_iteration': 100})
 
@@ -378,23 +391,23 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
         rmse_tau = np.sqrt(np.square(difficulty - 
                                      result['Tau']).mean())
 
-        self.assertAlmostEqual(rmse_discrimination, 0.371009140, places=4)
-        self.assertAlmostEqual(rmse_delta, 0.89384171, places=4)
-        self.assertAlmostEqual(rmse_tau, 0.6406073, places=4)
+        self.assertAlmostEqual(rmse_discrimination, 0.329984238, places=4)
+        self.assertAlmostEqual(rmse_delta, 0.54465562, places=4)
+        self.assertAlmostEqual(rmse_tau, 0.1778829854, places=4)
 
     def test_unfolding_specify_negative_ndx(self):
         """Testing specifying a negative index."""
-        np.random.seed(11215)
-        difficulty = -(np.random.rand(10, 2) * 1.5)
-        delta = 0.5 * np.random.rand(10, 1)
-        discrimination = np.random.rand(10) + 0.5
-        thetas = np.random.randn(200)
+        rng = np.random.default_rng(34572348572012334)
+        difficulty = -rng.uniform(0, 1.5, (10, 2))
+        delta = rng.uniform(0, 0.5, (10, 1))
+        discrimination = rng.uniform(0, 1, 10) + 0.5
+        thetas = rng.standard_normal(300)
 
         betas = np.c_[difficulty, np.zeros((10, 1)), -difficulty[:, ::-1]]
         betas += delta
         syn_data = create_synthetic_irt_polytomous(betas, discrimination,
                                                    thetas, model='GUM',
-                                                   seed=546)
+                                                   seed=rng)
 
         delta_sign = (2, np.sign(delta[2]))
         result = gum_mml(syn_data, delta_sign=delta_sign, 

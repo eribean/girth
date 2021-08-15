@@ -6,6 +6,9 @@ from scipy.special import expit
 from girth import INVALID_RESPONSE
 
 
+__all__ = ["condition_polytomous_response"]
+
+
 def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
     """ Recodes polytomous responses into linear indices.
 

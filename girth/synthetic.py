@@ -3,6 +3,10 @@ import numpy as np
 from girth import irt_evaluation
 
 
+__all__ = ["create_correlated_abilities", "create_synthetic_irt_dichotomous",
+           "create_synthetic_mirt_dichotomous", "create_synthetic_irt_polytomous"]
+
+
 def create_correlated_abilities(correlation_matrix, n_participants, seed=None):
     """ Creates correlated ability parameters based on an input correlation matrix.
 

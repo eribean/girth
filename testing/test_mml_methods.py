@@ -392,8 +392,8 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
                                      result['Tau']).mean())
 
         self.assertAlmostEqual(rmse_discrimination, 0.329984238, places=4)
-        self.assertAlmostEqual(rmse_delta, 0.54465562, places=4)
-        self.assertAlmostEqual(rmse_tau, 0.1778829854, places=4)
+        self.assertAlmostEqual(rmse_delta, 0.54465562, places=3)
+        self.assertAlmostEqual(rmse_tau, 0.1778829854, places=3)
 
     def test_unfolding_specify_negative_ndx(self):
         """Testing specifying a negative index."""

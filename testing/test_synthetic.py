@@ -16,77 +16,77 @@ class TestSynthetic(unittest.TestCase):
 
     def test_synthetic_irt_creation(self):
         """Testing the creation of synthetic data."""
-        seed = 31
+        rng = np.random.default_rng(47509238720938742)
 
         # Regression test
         expected = np.array([[False, False, False, False,  True,  True],
-                             [False, False,  True,  True,  True,  True],
-                             [False, False, False,  True,  True,  True]])
+                             [False, False, False, False,  True,  True],
+                             [False, False, False, False,  True,  True]])
 
         value = create_synthetic_irt_dichotomous(np.array([1.2, -0.2, 1.3]),
                                                  1.31, np.linspace(-6, 6, 6),
-                                                 seed=seed)
+                                                 seed=rng)
 
         np.testing.assert_array_equal(expected, value)
-
 
     def test_synthetic_mirt_creation(self):
         """Testing the creation of synthetic data."""
-        seed = 164
-        np.random.seed(seed-1)
+        rng = np.random.default_rng(34948676782349528709)
+
         # Regression test
-        expected = np.array([[False, False, False, False, False, False],
-                             [ True, False, False,  True, False,  True],
-                             [ True,  True, False, False, False, False],
-                             [ True,  True,  True,  True, False,  True],
-                             [ True,  True,  True,  True,  True,  True]])
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0],
+            [1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1]            
+        ])
 
         n_factors = 3
         n_items = 5
         n_people = 6
-        discrimination = np.random.randn(n_items, n_factors)
+        discrimination = rng.standard_normal((n_items, n_factors))
         difficulty = np.linspace(-5, 5, n_items)
-        thetas = np.random.randn(n_factors, n_people)
+        thetas = rng.standard_normal((n_factors, n_people))
         value = create_synthetic_mirt_dichotomous(difficulty, discrimination,
-                                                  thetas, seed)
+                                                  thetas, seed=rng)
 
         np.testing.assert_array_equal(expected, value)
-
 
     def test_synthetic_mirt_creation_single(self):
         """Testing the creation of synthetic data, common discrimination."""
-        seed = 546
-        np.random.seed(seed-1)
+        rng = np.random.default_rng(3847520938201012)
+
         # Regression test
-        expected = np.array([[False, False, False, False, False, False],
-                             [False, False, False, False, False, False],
-                             [False, False, False,  True,  True,  True],
-                             [False,  True,  True,  True,  True,  True],
-                             [ True,  True,  True,  True,  True,  True]])
+        expected = np.array([
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 0],
+            [0, 0, 1, 1, 1, 0],
+            [1, 1, 1, 1, 1, 0]
+        ])
 
         n_factors = 3
         n_items = 5
         n_people = 6
-        discrimination = np.random.randn(1, n_factors)
+        discrimination = rng.standard_normal((1, n_factors))
         difficulty = np.linspace(-5, 5, n_items)
-        thetas = np.random.randn(n_factors, n_people)
+        thetas = rng.standard_normal((n_factors, n_people))
         value = create_synthetic_mirt_dichotomous(difficulty, discrimination,
-                                                  thetas, seed)
-
+                                                  thetas, seed=rng)
         np.testing.assert_array_equal(expected, value)
-
 
     def test_correlated_abilities(self):
         """Testing the creation of correlated abilities."""
-        np.random.seed(120)
+        rng = np.random.default_rng(4798265398472900)
         n_participants = 1000
         rho = 0.73
         correlation_matrix = np.array([[1, rho], [rho, 1]])
 
-        output = create_correlated_abilities(correlation_matrix, n_participants)
+        output = create_correlated_abilities(correlation_matrix, n_participants, seed=rng)
         output_corr = np.corrcoef(output)
 
-        np.testing.assert_almost_equal(output_corr, correlation_matrix, decimal=1)
+        np.testing.assert_allclose(output_corr, correlation_matrix, atol=.01)
 
 
 class TestPolytomousSynthetic(unittest.TestCase):
@@ -120,12 +120,11 @@ class TestPolytomousSynthetic(unittest.TestCase):
 
         self.assertEqual(output, 2)
 
-
     def test_check_difficulty_parameters(self):
         """Testing the validity check of polytomous difficulty."""
-        np.random.seed(513)
+        rng = np.random.default_rng(897520827369876429)
         n_size = 5
-        difficulty = np.random.rand(5, n_size)
+        difficulty = rng.uniform(0, 1, (5, n_size))
 
         # PCM
         result = _check_difficulty_parameters(np.sort(difficulty, axis=1), 'grm')
@@ -147,10 +146,9 @@ class TestPolytomousSynthetic(unittest.TestCase):
         with self.assertRaises(AssertionError):
             _check_difficulty_parameters(difficulty[:, :-1], 'gum')
 
-        difficulty[:, 0] = np.random.permutation(difficulty[:, 0])
+        difficulty[:, 0] = rng.permutation(difficulty[:, 0])
         with self.assertRaises(AssertionError):
             _check_difficulty_parameters(difficulty, 'gum')
-
 
     def test_graded_function(self):
         """Testing the graded response model computation"""
@@ -173,7 +171,6 @@ class TestPolytomousSynthetic(unittest.TestCase):
         np.testing.assert_array_almost_equal(output[2], last_position - second_position)
         np.testing.assert_array_almost_equal(output[3], 1 - last_position)
         
-
     def test_credit_function(self):
         """Testing the partial credit computation"""
         # Create basic data
@@ -198,10 +195,8 @@ class TestPolytomousSynthetic(unittest.TestCase):
         np.testing.assert_array_almost_equal(output[2], third_position / normalizing)
         np.testing.assert_array_almost_equal(output[3], last_position / normalizing)
 
-
     def test_unfolding_function(self):
         """Testing the graded unfolding model computation."""
-        np.random.seed(831)
         offset = 0.3
         difficulties = np.array([-1.3, -.7, -.3, 0, .3, .7, 1.3])
         discrimination = 0.871
@@ -237,13 +232,12 @@ class TestPolytomousSynthetic(unittest.TestCase):
         np.testing.assert_array_almost_equal(output[2] + output[-3], third_position / normalizing)
         np.testing.assert_array_almost_equal(output[3] + output[-4], last_position / normalizing)
 
-
     def test_create_polytomous_data_fail(self):
         """Testing synthetic polytomous function fails with 1 level"""
-        np.random.seed(808)
+        rng = np.random.default_rng(7489232987377923752)
         difficulty = np.array([[1.0]])
-        bad_graded_difficulty = np.random.rand(4, 5)
-        even_gum_difficulty = np.random.rand(4, 4)
+        bad_graded_difficulty = rng.uniform(0, 1, (4, 5))
+        even_gum_difficulty = rng.uniform(0, 1, (4, 4))
 
         with self.assertRaises(AssertionError):
             create_synthetic_irt_polytomous(difficulty, difficulty, difficulty)
@@ -254,79 +248,83 @@ class TestPolytomousSynthetic(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             create_synthetic_irt_polytomous(bad_graded_difficulty, 1.2,
-                                            np.random.randn(100))
+                                            rng.standard_normal(100))
         
         with self.assertRaises(AssertionError):
             create_synthetic_irt_polytomous(even_gum_difficulty, 1.2,
-                                            np.random.randn(100),
+                                            rng.standard_normal(100),
                                             model="gum")
 
         # Test for skew symmetric fail
         with self.assertRaises(AssertionError):
             create_synthetic_irt_polytomous(bad_graded_difficulty, 1.2,
-                                            np.random.randn(100),
+                                            rng.standard_normal(100),
                                             model="gum")
-
 
     def test_check_polytomous_discrimination(self):
         """Smoke tests if a single value for discrimination passes"""
+        rng = np.random.default_rng(4839283940298347)
         difficulty = np.array([[1.0, 2., 3.]])
         discrimination = 3
 
         # Simple Smoke tests
-        create_synthetic_irt_polytomous(difficulty, discrimination, difficulty)
+        create_synthetic_irt_polytomous(difficulty, discrimination, difficulty, seed=rng)
         create_synthetic_irt_polytomous(difficulty, np.array([discrimination]), 
-                                        difficulty)
-
+                                        difficulty, seed=rng)
 
     def test_check_polytomous_regression(self):
         """Regression testing graded and credit polytomous functions"""
-        seed = 876
-        np.random.seed(seed)
+        rng = np.random.default_rng(42135265745345)
         difficulty_gum = np.array([np.linspace(-1.2, 1.2, 5),
                                    np.linspace(-.8, .8, 5),
                                    np.linspace(-1.7, 1.7, 5),
                                    np.linspace(-1.0, 1.0, 5)])
-        difficulty_pcm = np.random.randn(5, 4)
+        difficulty_pcm = rng.standard_normal((5, 4))
         difficulty = np.sort(difficulty_pcm, axis=1)
         discrimination = 1.23
-        thetas = np.random.randn(8)
+        thetas = rng.standard_normal(8)
 
         # Regression Tests
         poly_data_graded = create_synthetic_irt_polytomous(difficulty, 
                                                            discrimination,
                                                            thetas,
                                                            model='grm',
-                                                           seed=seed)
+                                                           seed=rng)
 
         poly_data_credit = create_synthetic_irt_polytomous(difficulty_pcm, 
                                                            discrimination,
                                                            thetas,
                                                            model='pcm',
-                                                           seed=seed)
+                                                           seed=rng)
 
         poly_data_gum = create_synthetic_irt_polytomous(difficulty_gum, 
                                                         discrimination,
                                                         thetas,
                                                         model='gum',
-                                                        seed=seed)
+                                                        seed=rng)
 
-        expected_graded = np.array([[5, 2, 2, 5, 2, 2, 5, 5],
-                                    [5, 5, 1, 5, 5, 1, 2, 1],
-                                    [5, 5, 1, 3, 2, 1, 5, 1],
-                                    [3, 5, 3, 5, 4, 1, 4, 1],
-                                    [5, 5, 3, 4, 3, 3, 5, 2]])
+        expected_graded = np.array([
+            [1, 2, 3, 4, 1, 2, 4, 1],
+            [5, 3, 2, 1, 1, 1, 3, 1],
+            [5, 2, 5, 5, 5, 2, 2, 2],
+            [4, 5, 5, 3, 4, 1, 4, 1],
+            [2, 3, 3, 1, 3, 1, 2, 1]           
+        ])
 
-        expected_partial = np.array([[5, 5, 2, 5, 2, 1, 5, 3],
-                                     [5, 5, 1, 5, 4, 1, 4, 1],
-                                     [5, 5, 1, 3, 1, 1, 5, 1],
-                                     [5, 5, 1, 5, 4, 1, 5, 1],
-                                     [5, 5, 2, 5, 4, 2, 5, 2]])
+        expected_partial = np.array([
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [3, 4, 5, 1, 4, 1, 3, 1],
+            [5, 5, 4, 4, 4, 3, 5, 3],
+            [3, 3, 2, 3, 3, 2, 1, 1],
+            [1, 3, 5, 2, 5, 1, 1, 1]           
+        ])
 
-        expected_unfold = np.array([[2, 1, 2, 2, 2, 2, 2, 3],
-                                    [2, 2, 1, 2, 3, 1, 1, 1],
-                                    [2, 3, 2, 2, 3, 1, 2, 1],
-                                    [1, 3, 3, 3, 3, 1, 1, 1]])
+        expected_unfold = np.array([
+            [3, 3, 1, 2, 2, 3, 3, 1],
+            [2, 3, 2, 3, 2, 2, 3, 1],
+            [2, 3, 3, 2, 3, 1, 3, 1],
+            [3, 3, 1, 2, 2, 1, 3, 1]            
+        ])
 
         np.testing.assert_array_equal(poly_data_graded, expected_graded)
         np.testing.assert_array_equal(poly_data_credit, expected_partial)

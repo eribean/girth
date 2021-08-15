@@ -30,7 +30,7 @@ def create_item_parameters(analysis_dict):
         Returns:
             Iterator that yields a synthetic dataset 
     """
-    np.random.seed(analysis_dict['Seed'])
+    rng = np.random.default_rng(analysis_dict['Seed'])
 
     # Create the discrimination parameters
     if analysis_dict['Discrimination_fixed'] is not None:
@@ -39,7 +39,8 @@ def create_item_parameters(analysis_dict):
     else:
         pdf = scipy_stats_string_to_functions(analysis_dict['Discrimination_pdf'],
                                               analysis_dict['Discrimination_pdf_args'])
-        discrimination = pdf.rvs(size=analysis_dict['Discrimination_count'])
+        discrimination = pdf.rvs(size=analysis_dict['Discrimination_count'], 
+                                 random_state=rng)
 
     # Create the difficulty parameters
     if analysis_dict['Difficulty_fixed'] is not None:
@@ -48,7 +49,8 @@ def create_item_parameters(analysis_dict):
     else:
         pdf = scipy_stats_string_to_functions(analysis_dict['Difficulty_pdf'],
                                               analysis_dict['Difficulty_pdf_args'])
-        difficulty = pdf.rvs(size=analysis_dict['Difficulty_count'])
+        difficulty = pdf.rvs(size=analysis_dict['Difficulty_count'], ,
+                             random_state=rng)
 
     if analysis_dict['Type'].lower() == "polytomous":
         poly_type = {'graded': 'grm', 'credit': 'pcm', 

@@ -251,9 +251,9 @@ def irt_evaluation(difficulty, discrimination, thetas):
         discrimination = np.full_like(difficulty, discrimination,
                                       dtype='float')
 
-    kernel = difficulty[:, None] - thetas
+    kernel = thetas - difficulty[:, None]
     kernel *= discrimination[:, None]
-    return 1.0 / (1 + np.exp(kernel))
+    return expit(kernel)
 
 
 def _get_quadrature_points(n, a, b):

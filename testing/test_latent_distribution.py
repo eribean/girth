@@ -10,7 +10,8 @@ class TestLatentDistribution(unittest.TestCase):
 
     def test_parameter_constraints(self):
         """Testing parameter identification constraints."""
-        current_parameters = np.random.randn(10)
+        rng = np.random.default_rng(4468552749542)
+        current_parameters = rng.standard_normal(10)
         sample_space = np.linspace(-4, 4, 10)
         delta_sample = sample_space[5] - sample_space[4]
 
@@ -27,6 +28,7 @@ class TestLatentDistribution(unittest.TestCase):
 
     def test_resample(self):
         """Testing cubic spline resample method."""
+        rng = np.random.default_rng(481354842)
         cs_test = glad.CubicSplinePDF({'number_of_samples': 7, 
                                        'quadrature_bounds': (-4.5, 4.5)})
 
@@ -34,7 +36,7 @@ class TestLatentDistribution(unittest.TestCase):
             glad.resample(cs_test, 7)
 
         # Smoke Test
-        cs_test.update_coefficients(np.random.rand(7))
+        cs_test.update_coefficients(rng.uniform(0, 1, 7))
 
         # Test Upsample
         output_up = glad.resample(cs_test, 9)
@@ -57,6 +59,7 @@ class TestLatentDistribution(unittest.TestCase):
     def test_cubic_spline_class(self):
         """Testing the CubicSpline class."""
         # Test the cubic spline static call
+        rng = np.random.default_rng(55585622788431489)
         y_test = glad.CubicSplinePDF.cubic_spline([-2, -1, 0., 1, 2])
         np.testing.assert_allclose(y_test, [0, 1/6, 2/3, 1/6, 0],
                                    atol=1e-6)
@@ -65,11 +68,11 @@ class TestLatentDistribution(unittest.TestCase):
                                             'quadrature_bounds': (-4.5, 4.5)})
 
         # Test Update Coefficients
-        new_coefficients = np.random.rand(9)
+        new_coefficients = rng.uniform(0, 1, 9)
         with self.assertRaises(AssertionError):
            cubic_spline.update_coefficients(new_coefficients)
         
-        new_coefficients = np.random.rand(7)
+        new_coefficients = rng.uniform(0, 1, 7)
         cubic_spline.update_coefficients(new_coefficients)
         np.testing.assert_array_equal(new_coefficients, 
                                       cubic_spline.coefficients[2:-2])
@@ -129,8 +132,8 @@ class TestLatentDistribution(unittest.TestCase):
 
 
         # Create a dummy distribution and integration
-        np.random.seed(66871)
-        coeffs = np.random.rand(9)
+        rng = np.random.default_rng(46482159)
+        coeffs = rng.uniform(0, 1, 9)
         cs_dist = glad.CubicSplinePDF({'number_of_samples': 9, 
                                        'quadrature_bounds': [-4.5, 4.5]})
         cs_dist.update_coefficients(coeffs)
@@ -141,13 +144,13 @@ class TestLatentDistribution(unittest.TestCase):
                                    atol= 1e-5, rtol=1e-5)
 
         # dummy integration method (smoke-test to make sure it runs)
-        unweighted_integration = np.random.rand(1000,
-                                    latent_pdf.quadrature_locations.size)
+        unweighted_integration = rng.uniform(0, 1, size=((1000,
+                                    latent_pdf.quadrature_locations.size)))
 
         dist_x_weights = latent_pdf(unweighted_integration, 1)
         np.testing.assert_allclose(latent_pdf.cubic_splines[0].coefficients[2:-2],
-                                   [0., 0.057376, 0.264267, 0.313561, 0.350573, 0.014223, 0.], 
-                                   atol=1e-4)
+                                   [0., .0237295, .277484783, .47578,
+                                    .121056, .10194, 0.], atol=1e-4)
         # test aic / bic call
         aic, bic = latent_pdf.compute_metrics(unweighted_integration, 
                                               dist_x_weights, 4)

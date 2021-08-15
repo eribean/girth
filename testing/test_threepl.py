@@ -18,29 +18,28 @@ class TestMMLThreePLMethods(unittest.TestCase):
 
     def setUp(self):
         """Setup synthetic data for tests."""
-        np.random.seed(846)
+        rng = np.random.default_rng(783162340587963094862)
         difficulty = np.linspace(-1.5, 1.5, 5)
-        discrimination = np.random.rand(5) + 0.5
-        thetas = np.random.randn(600)
-        guessing = np.random.rand(5) * .3
+        discrimination = rng.uniform(0.5, 1.5, 5)
+        thetas = rng.standard_normal(600)
+        guessing = rng.uniform(0, .3, 5)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas, guessing=guessing)
+                                                    thetas, guessing=guessing, seed=rng)
         self.data = syn_data
         self.guessing = guessing
 
-    def test_twopl_regression_mml(self):
-        """Testing twopl separate methods."""
+    def test_threepl_regression_mml(self):
+        """Testing threepl separate methods."""
         syn_data = self.data.copy()
         output = threepl_mml(syn_data)
 
-        expected_discrimination = np.array([0.595478, 0.539002, 1.03748 , 4., 4.])
-        expected_output = np.array([-0.235392, -1.996236,  0.09334 ,  0.932623,  1.432708])
-        expected_guess = np.array([3.300000e-01, 5.572645e-08, 2.432607e-01, 3.274185e-01,
-                                   1.818037e-01])
+        expected_discrimination = np.array([0.500858, 0.896211, 0.673024, 0.474641, 1.148911])
+        expected_difficulty = np.array([-2.522691, -1.291617, -0.2958  , -0.355891,  1.186779])
+        expected_guess = np.array([0, 0, 0, 0, .18262])
 
         np.testing.assert_allclose(
             expected_discrimination, output['Discrimination'], rtol=1e-2, atol=1e-2)
-        np.testing.assert_allclose(expected_output, output['Difficulty'], rtol=1e-2, atol=1e-2)
+        np.testing.assert_allclose(expected_difficulty, output['Difficulty'], rtol=1e-2, atol=1e-2)
         np.testing.assert_allclose(expected_guess, output['Guessing'], rtol=1e-2, atol=1e-2)
 
 
@@ -49,13 +48,14 @@ class TestAbilityEstimates3PL(unittest.TestCase):
 
     def setUp(self):
         """Setup synthetic data for tests."""
-        np.random.seed(45184)
+        rng = np.random.default_rng(342543289078524332)
+        
         difficulty = np.linspace(-1.5, 1.5, 10)
-        discrimination = np.random.rand(10) + 0.5
-        thetas = np.random.randn(1000)
-        guessing = np.random.rand(10) * .25
+        discrimination = rng.uniform(0.5, 1.5, 10)
+        thetas = rng.standard_normal(1000)
+        guessing = rng.uniform(0, .25, 10)
         syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination,
-                                                    thetas, guessing=guessing)
+                                                    thetas, guessing=guessing, seed=rng)
 
         self.data = syn_data
         self.guessing = guessing
@@ -75,10 +75,10 @@ class TestAbilityEstimates3PL(unittest.TestCase):
         minimum = np.nanmin(recovered_theta)
         maximum = np.nanmax(recovered_theta)
 
-        self.assertAlmostEqual(mean, -0.088980088, places=3)
-        self.assertAlmostEqual(std, 1.572094414, places=3)
+        self.assertAlmostEqual(mean, -0.04757676, places=3)
+        self.assertAlmostEqual(std, 1.54440249, places=3)
         self.assertAlmostEqual(minimum, -5.999995, places=3)
-        self.assertAlmostEqual(maximum, 3.2975309, places=3)
+        self.assertAlmostEqual(maximum, 3.2913410, places=3)
 
     def test_ability_map(self):
         """Testing Maximum A Posteriori."""
@@ -93,10 +93,10 @@ class TestAbilityEstimates3PL(unittest.TestCase):
         minimum = np.nanmin(recovered_theta)
         maximum = np.nanmax(recovered_theta)
 
-        self.assertAlmostEqual(mean, 0.0348392, places=3)
-        self.assertAlmostEqual(std,0.71308818659, places=3)
-        self.assertAlmostEqual(minimum, -1.7259849459, places=3)
-        self.assertAlmostEqual(maximum, 1.64162059967, places=3)
+        self.assertAlmostEqual(mean, -0.02026042, places=3)
+        self.assertAlmostEqual(std, 0.6800486, places=3)
+        self.assertAlmostEqual(minimum, -1.8349905, places=3)
+        self.assertAlmostEqual(maximum, 1.431140027, places=3)
 
     def test_ability_eap(self):
         """Testing Expected A Posteriori."""
@@ -111,10 +111,10 @@ class TestAbilityEstimates3PL(unittest.TestCase):
         minimum = np.nanmin(recovered_theta)
         maximum = np.nanmax(recovered_theta)
 
-        self.assertAlmostEqual(mean, 0.004648932, places=3)
-        self.assertAlmostEqual(std, 0.732529437, places=3)
-        self.assertAlmostEqual(minimum, -1.7761348, places=3)
-        self.assertAlmostEqual(maximum, 1.67935964, places=3)
+        self.assertAlmostEqual(mean, -0.024376, places=3)
+        self.assertAlmostEqual(std, 0.7086291, places=3)
+        self.assertAlmostEqual(minimum, -1.8949730, places=3)
+        self.assertAlmostEqual(maximum, 1.47836656, places=3)
 
 
 if __name__ == '__main__':

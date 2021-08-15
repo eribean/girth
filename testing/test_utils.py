@@ -65,11 +65,11 @@ class TestUtilitiesMethods(unittest.TestCase):
         """Tests the integration quadrature function."""
 
         # Set seed for repeatability
-        np.random.seed(154)
+        rng = np.random.default_rng(3948057128)
 
         discrimination = 1.32
         difficulty = .67
-        response = np.random.randint(low=0, high=2, size=(1, 10))
+        response = rng.integers(0, 2, (1, 10))
 
         quad_points, _ = _get_quadrature_points(61, -6, 6)
 
@@ -83,9 +83,10 @@ class TestUtilitiesMethods(unittest.TestCase):
 
     def test_trim_response_set(self):
         """Testing trim of all yes/no values."""
-        np.random.seed(439)
-        dataset = np.random.rand(10, 300)
-        counts = np.random.rand(300)
+        rng = np.random.default_rng(43672982039847)
+
+        dataset = rng.uniform(0, 1, (10, 300))
+        counts = rng.uniform(0, 1, 300)
 
         # Pass through
         new_set, new_counts = trim_response_set_and_counts(dataset, counts)
@@ -110,14 +111,11 @@ class TestUtilitiesMethods(unittest.TestCase):
         dataset = np.ones((10, 300), dtype=int)
         dataset[0] = -1
         dataset[0, 0] = INVALID_RESPONSE
-        counts = np.random.randint(0, 10, 300)
+        counts = rng.integers(0, 10, 300)
         new_set, new_counts = trim_response_set_and_counts(dataset, counts)
         self.assertEqual(new_set.shape[1], dataset.shape[1] - 1)
         np.testing.assert_array_equal(dataset[:, 1:], new_set)
         np.testing.assert_array_equal(counts[1:], new_counts)
-
-
-
 
 
     def test_get_true_false_counts(self):
@@ -150,7 +148,9 @@ class TestUtilitiesMethods(unittest.TestCase):
 
     def test_mml_approx(self):
         """Testing approximation of rasch model with normal distribution."""
-        dataset = np.random.randint(0, 2, (3, 100))
+        rng = np.random.default_rng(2258768432489)
+
+        dataset = rng.integers(0, 2, (3, 100))
         discrimination = 2.31
         result = mml_approx(dataset, discrimination)
 
@@ -168,9 +168,10 @@ class TestUtilitiesMethods(unittest.TestCase):
 
     def test_tag_missing_values(self):
         """Testing the tagging missing values."""
-        np.random.seed(148549)
-        synthetic_data = np.random.randint(1, 6, (20, 650))
-        mask = np.random.rand(*synthetic_data.shape) < .15
+        rng = np.random.default_rng(34563629082345)
+        
+        synthetic_data = rng.integers(1, 6, (20, 650))
+        mask = rng.uniform(0, 1, synthetic_data.shape) < .15
         synthetic_data[mask] = 5555
         
         updated_data = tag_missing_data(synthetic_data, list(range(1, 6)))
@@ -185,8 +186,9 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_condition_polytomous_response(self):
         """Testing polytomous response conditioning."""
-        dataset = np.random.randint(1, 6, (15, 100))
-        dataset[7] = np.random.randint(1, 3, (1, 100))
+        rng = np.random.default_rng(46897029384702)
+        dataset = rng.integers(1, 6, (15, 100))
+        dataset[7] = rng.integers(1, 3, (1, 100))
         output = condition_polytomous_response(dataset, trim_ends=False)
 
         self.assertTupleEqual(output[0].shape, dataset.shape)
@@ -231,8 +233,9 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_solve_for_constants(self):
         """Testing solving for boundary constants."""
-        np.random.seed(73)
-        dataset = np.random.randint(0, 4, (1, 100))
+        rng = np.random.default_rng(982098319872973)
+        dataset = rng.integers(0, 4, (1, 100))
+    
         _, counts = np.unique(dataset, return_counts=True)
 
         output = _solve_for_constants(dataset)
@@ -255,7 +258,6 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_solve_for_constants_single_value(self):
         """Testing constants for a single value."""
-        np.random.seed(11273)
         dataset = np.zeros((2, 100))
         dataset[1] = 4
 
@@ -266,14 +268,15 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_integral_equations(self):
         """Tests solving for integral given a ratio."""
-        np.random.seed(786)
-        theta = np.random.randn(50000)
+        rng = np.random.default_rng(7894198132189)
+        
+        theta = rng.standard_normal(50000)
         discrimination = 1.43
         difficulty = np.array([-.4, .1, .5])
 
         # Compare against dichotomous data
         syn_data = create_synthetic_irt_dichotomous(
-            difficulty, discrimination, theta)
+            difficulty, discrimination, theta, seed=rng)
         n0 = np.count_nonzero(syn_data == 0, axis=1)
         n1 = np.count_nonzero(syn_data == 1, axis=1)
         ratio = n1 / (n1 + n0)
@@ -286,8 +289,9 @@ class TestPolytomousUtilities(unittest.TestCase):
 
     def test_graded_partial_integral(self):
         """Testing the partial integral in the graded model."""
+        rng = np.random.default_rng(4568902384702)
         theta, _ = _get_quadrature_points(61, -5, 5)
-        responses = np.random.randint(0, 3, (10, 100))
+        responses = rng.integers(0, 3, (10, 100))
         betas = np.array([-10000, -.3, 0.1, 1.2])
         betas_roll = np.roll(betas, -1)
         betas_roll[-1] = 10000

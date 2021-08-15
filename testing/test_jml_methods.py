@@ -16,54 +16,54 @@ class TestJointMaximum(unittest.TestCase):
 
     def test_joint_regression_rasch(self):
         """Testing joint maximum rasch model."""
-        np.random.seed(91)
+        rng = np.random.default_rng(77953183513228)
         difficuly = np.linspace(-1.5, 1.5, 5)
         discrimination = 1
-        thetas = np.random.randn(600)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = rasch_jml(syn_data)['Difficulty']
-        expected_output = np.array([-1.61394095, -0.88286827,
-                                     0.04830973,  0.77146166,  1.95939084])
+        expected_output = np.array([-1.947492, -0.801259,  0.053089,  
+                                    1.098387,  1.938692])
 
-        np.testing.assert_allclose(expected_output, output)
+        np.testing.assert_allclose(expected_output, output, atol=1e-6)
 
 
     def test_joint_regression_onepl(self):
         """Testing joint maximum onepl model."""
-        np.random.seed(118)
+        rng = np.random.default_rng(79465412498218)
         difficuly = np.linspace(-1.5, 1.5, 5)
         discrimination = 1.34
-        thetas = np.random.randn(600)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = onepl_jml(syn_data)
-        expected_output = np.array([-1.70585219, -1.03551581,
-                                    -0.09329877,  0.92320069,  1.77063402])
+        expected_output = np.array([-1.830353, -0.740702,  0.116478,  
+                                     0.845492,  1.594863])
 
         np.testing.assert_allclose(expected_output, output['Difficulty'], 1e-3)
-        self.assertAlmostEqual(1.5316042, output['Discrimination'])
+        self.assertAlmostEqual(1.553676352, output['Discrimination'])
 
 
     def test_joint_regression_twopl(self):
         """Testing joint maximum twopl model."""
-        np.random.seed(138)
+        rng = np.random.default_rng(7432843158)
         difficuly = np.linspace(-1.5, 1.5, 5)
-        discrimination = 0.5 + np.random.rand(5)
-        thetas = np.random.randn(600)
+        discrimination = 0.5 + rng.uniform(0, 1, 5)
+        thetas = rng.standard_normal(600)
         syn_data = create_synthetic_irt_dichotomous(difficuly, discrimination,
-                                                    thetas)
+                                                    thetas, seed=rng)
 
         output = twopl_jml(syn_data)
 
         # Expected Outputs
-        alphas = np.array([0.29202081, 4., 0.91621924, 
-                           4., 0.27536785])
+        alphas = np.array([4., 0.25    , 0.25,
+                           4., 1.279453])
 
-        betas = np.array([-6., -0.39644246, -0.00862153,
-                          0.3869096, 6.])
+        betas = np.array([-0.714757, -2.817987,  0.363446,  
+                          0.27692 ,  1.219496])
 
         np.testing.assert_allclose(alphas, output['Discrimination'], rtol=1e-3)
         np.testing.assert_allclose(betas, output['Difficulty'], rtol=1e-3)
@@ -84,47 +84,48 @@ class TestPolytomousJMLMethods(unittest.TestCase):
 
     def test_graded_jml_regression(self):
         """Testing joint maximum grm model."""
-        np.random.seed(1022)
-        difficulty = np.sort(np.random.randn(5, 3), axis=1)
-        discrimination = 0.5 + np.random.rand(5)
-        thetas = np.random.randn(50) 
+        rng = np.random.default_rng(794423824483)
+
+        difficulty = np.sort(rng.standard_normal((5, 3)), axis=1)
+        discrimination = 0.5 + rng.uniform(0, 1, 5)
+        thetas = rng.standard_normal(50)
 
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
-                                                   thetas)
+                                                   thetas, seed=rng)
 
         output = grm_jml(syn_data)
 
         # Expected Outputs (Basically a smoke test)
-        alphas = np.array([4., 0.79558366, 0.25, 4., 1.84876057])
+        alphas = np.array([4., 4., 0.25, 0.77995, 1.196129])
 
-        betas = np.array([[-0.06567396,  0.00834646,  0.04343122],
-                          [-1.72554323, -1.56602067, -0.87385678],
-                          [-3.30647782,  1.86102210,      np.nan],
-                          [-0.47923614,  0.31797999,  0.89676892],
-                          [-0.67769087,  0.49737400,      np.nan]])
+        betas = np.array([[-0.17792238,  0.24824511,  0.28731164],
+                          [0.19936216,  0.23620655,  0.31278439],
+                          [-2.55652279,  1.9247382,   3.01879088],
+                          [-2.04153357, -0.66666598,  np.nan],
+                          [-0.89040827, -0.14637313,  0.01385897]])
 
         np.testing.assert_allclose(alphas, output['Discrimination'], rtol=1e-3)
         np.testing.assert_allclose(betas, output['Difficulty'], rtol=1e-3)
 
     def test_partial_credit_jml_regression(self):
         """Testing joint maximum partial credit model."""
-        np.random.seed(3)
-        difficulty = np.random.randn(5, 3)
-        discrimination = 0.5 + np.random.rand(5)
-        thetas = np.random.randn(50) 
+        rng = np.random.default_rng(794423824483)
+        difficulty = rng.standard_normal((5, 3))
+        discrimination = 0.5 + rng.uniform(0, 1, 5)
+        thetas = rng.standard_normal(50)
 
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
-                                                   thetas, model='pcm')
+                                                   thetas, model='pcm', seed=rng)
        
         output = pcm_jml(syn_data)
 
         # Expected Outputs (Basically a smoke test)
-        alphas = np.array([0.41826845, 4., 0.356021, 0.429537, 4.])
-        betas = [[ 6.,         -1.83001497,  0.57618739],
-                 [-1.34063642, -0.36478753,  0.3783893 ],
-                 [ 3.32581876, -1.63421762,  0.93340153],
-                 [ 2.57971531, -3.65201053,  1.80513887],
-                 [ 0.55722782,  1.01035442,  0.74398655]]
+        alphas = np.array([0.825756, 4.      , 0.307507, 0.634488, 1.824519])
+        betas = [[ 0.50703512, -0.54701056,  0.33005929],
+                 [-0.35882868,  0.18148919,  0.45435675],
+                 [-1.57347383,  2.00685349,  3.70221183],
+                 [ 0.36730398, -2.06545728, -2.85900132],
+                 [-0.36114401, -0.10069452, -0.46412294]]
 
         np.testing.assert_allclose(alphas, output['Discrimination'], rtol=1e-3)
         np.testing.assert_allclose(betas, output['Difficulty'], rtol=1e-3)

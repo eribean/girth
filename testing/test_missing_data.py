@@ -136,7 +136,7 @@ class TestMissingPolytomous(unittest.TestCase):
         result_missing = grm_jml(syn_data_missing)
         difference_rmse = _rmse(result_all_good['Difficulty'].ravel(), 
                                 result_missing['Difficulty'].ravel())
-        self.assertAlmostEqual(difference_rmse, 0.17731254, 4)
+        self.assertAlmostEqual(difference_rmse, 0.17731254, delta=.002)
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
         self.assertAlmostEqual(difference_rmse, 0.290744, 4)
 

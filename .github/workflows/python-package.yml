@@ -38,8 +38,9 @@ jobs:
     - name: Run Unittests
       run: |
         pip install pytest-cov
+        pip install pytest-xdist
         pip install . --upgrade
-        pytest --cov=girth
+        pytest --cov=girth -n 2
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

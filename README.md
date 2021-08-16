@@ -120,6 +120,8 @@ GIRTH does not use typical hessian based optimization routines and, therefore, *
 has limited support for standard errors. Confidence Intervals based on bootstrapping are
 supported but take longer to run. Missing Data is supported in the bootstrap function as well.
 
+The bootstrap does not support the 3PL IRT Model or the GGUM.
+
 ```python
 from girth import twopl_mml, standard_errors_bootstrap
 

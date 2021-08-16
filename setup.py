@@ -1,4 +1,4 @@
-from setuptools import setup, convert_path
+from setuptools import setup, convert_path # pylint: disable=cyclic-import
 
 # read the contents of your README file
 from os import path

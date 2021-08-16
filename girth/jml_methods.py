@@ -80,7 +80,7 @@ def rasch_jml(dataset, discrimination=1, options=None):
         difficulty: (1d array) estimates of item difficulties
 
     Options:
-        * max_iterations: int
+        * max_iteration: int
     """
     options = validate_estimation_options(options)
 

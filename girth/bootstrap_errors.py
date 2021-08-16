@@ -56,7 +56,7 @@ Returns:
         Use partial for irt_models that take a discrimination parameter:
         irt_model = partial(rasch_mml, discrimination=1.2)
         
-        Graded Unfolding Model is not currently supported
+        !!Graded Unfolding Model and 3PL models are not currently supported!!
     """
     options = validate_estimation_options(options)
     
@@ -64,6 +64,8 @@ Returns:
 
     if solution is None:
         solution = irt_model(dataset, options=options)
+        
+    difficulty_shape = solution['Difficulty'].shape
 
     # Parallel Random Number Generators
     rngs = [np.random.default_rng(s) for s in seq.spawn(n_processors)]
@@ -71,52 +73,49 @@ Returns:
     bootstrap_chunks = np.array_split(np.arange(bootstrap_iterations, dtype=int), 
                                       n_processors)
 
-    map_func = starmap
-    if n_processors > 1:
-        map_func = Pool(processes=n_processors).starmap
-
     # Run the bootstrap data
-    results = map_func(_bootstrap_func, zip(repeat(dataset), repeat(irt_model),
-                                            repeat(options), bootstrap_chunks, rngs))
+    if n_processors > 1:
+        with Pool(processes=n_processors) as pool:
+            results = pool.starmap(_bootstrap_func, zip(repeat(dataset), repeat(irt_model),
+                                                        repeat(options), bootstrap_chunks, rngs))
+    else:
+        results = starmap(_bootstrap_func, zip(repeat(dataset), repeat(irt_model),
+                                               repeat(options), bootstrap_chunks, rngs))
     results = list(results)
 
     # Unmap the results to compute the metrics
     discrimination_list = []
     difficulty_list = []
-    ability_list = []
-    pdf_list = []
     
     # Unmap the results
     for result in results:
         for sub_result in result:
-            difficulty_list.append(sub_result['Difficulty'])
+            difficulty_list.append(sub_result['Difficulty'].ravel())
             discrimination_list.append(sub_result['Discrimination'])
-            ability_list.append(sub_result['Ability'])
     
     # Concatenate the samples
     discrimination_bootstrap = np.vstack(discrimination_list)
     difficulty_bootstrap = np.vstack(difficulty_list)
-    ability_bootstrap = np.vstack(ability_list)
     
     # Percentiles
     discrimination_ci = [np.percentile(discrimination_bootstrap, 2.5, axis=0), 
                          np.percentile(discrimination_bootstrap, 97.5, axis=0)]
-    difficulty_ci = [np.percentile(difficulty_bootstrap, 2.5, axis=0), 
-                     np.percentile(difficulty_bootstrap, 97.5, axis=0)]
+    difficulty_ci = [np.percentile(difficulty_bootstrap, 2.5, axis=0).reshape(difficulty_shape), 
+                     np.percentile(difficulty_bootstrap, 97.5, axis=0).reshape(difficulty_shape)]
     
     # Standard Errors
     discrimination_se = np.nanstd(discrimination_bootstrap, axis=0, ddof=1)
-    difficulty_se = np.nanstd(difficulty_bootstrap, axis=0, ddof=1)
+    difficulty_se = np.nanstd(difficulty_bootstrap, axis=0, ddof=1).reshape(difficulty_shape)
     
     # Bias
     discrimination_bias = (np.nanmean(discrimination_bootstrap, axis=0) - 
                            solution['Discrimination'])
     
     difficulty_bias = (np.nanmean(difficulty_bootstrap, axis=0) - 
-                       solution['Difficulty'])
-    
+                       solution['Difficulty'].ravel()).reshape(difficulty_shape)
     
     return {
+        "Solution": solution,
         "95th CI": {
             "Discrimination": discrimination_ci,
             "Difficulty": difficulty_ci},

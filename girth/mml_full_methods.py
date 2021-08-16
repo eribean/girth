@@ -10,6 +10,9 @@ from girth.polytomous_utils import (condition_polytomous_response,
 from girth.ability_methods import _ability_eap_abstract
 
 
+__all__ = ["pcm_mml", "gum_mml"]
+
+
 def pcm_mml(dataset, options=None):
     """Estimate parameters for partial credit model.
 

@@ -248,7 +248,7 @@ class TestMMLGradedResponseModel(unittest.TestCase):
         discrimination = 0.75 + rng.uniform(0, 1, 20)
         thetas = rng.standard_normal(1000)
         syn_data = create_synthetic_irt_polytomous(difficulty, discrimination,
-                                                   thetas)
+                                                   thetas, seed=rng)
 
         estimated_parameters_ED = grm_mml(syn_data, {"use_LUT": True, 
                                                      "estimate_distribution": True,

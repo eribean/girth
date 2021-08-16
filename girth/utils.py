@@ -10,6 +10,12 @@ from girth import _array_LUT
 INVALID_RESPONSE = -99999
 
 
+__all__ = ["validate_estimation_options", "irt_evaluation", 
+           "trim_response_set_and_counts", "convert_responses_to_kernel_sign",
+           "get_true_false_counts", "mml_approx", "create_beta_LUT", 
+           "_compute_partial_integral", "tag_missing_data", "INVALID_RESPONSE"]
+
+
 def default_options():
     """ Dictionary of options used in Girth.
 

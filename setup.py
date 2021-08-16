@@ -1,4 +1,4 @@
-from setuptools import setup, convert_path
+from setuptools import setup, convert_path # pylint: disable=cyclic-import
 
 # read the contents of your README file
 from os import path
@@ -12,7 +12,7 @@ if __name__ == '__main__':
         packages=['girth', 'girth.performance', 'girth.three_pl'],
         package_dir={'girth': 'girth',
                      'girth.performance':convert_path('./performance')},
-        version="0.4.1",
+        version="0.5.0",
         license="MIT",
         description="A python package for Item Response Theory.",
         long_description=long_description.replace('<ins>','').replace('</ins>',''),

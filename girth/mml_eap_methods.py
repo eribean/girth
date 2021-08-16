@@ -10,6 +10,9 @@ from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constan
 from girth.ability_methods import _ability_eap_abstract
 
 
+__all__ = ["twopl_mml_eap", "grm_mml_eap"]
+
+
 def twopl_mml_eap(dataset, options=None):
     """Estimate parameters for a two parameter logistic model.
 

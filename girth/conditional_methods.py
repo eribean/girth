@@ -6,6 +6,9 @@ from girth import (trim_response_set_and_counts,
                    validate_estimation_options)
 
 
+__all__ = ["rasch_conditional"]
+
+
 def _symmetric_functions(betas):
     """Computes the symmetric functions based on the betas
 

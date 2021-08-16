@@ -5,6 +5,9 @@ from girth import validate_estimation_options
 from girth.utils import _get_quadrature_points
 
 
+__all__ = ["LatentPDF", "CubicSplinePDF"]
+
+
 def _parameter_constraints(current_parameters, sample_space):
     """Constraints placed on parameters for model indentification."""
     constraints = np.zeros((3,))

@@ -7,6 +7,9 @@ from girth import (condition_polytomous_response,
                    validate_estimation_options)
 
 
+__all__ = ["rasch_jml", "onepl_jml", "twopl_jml", "grm_jml", "pcm_jml"]
+
+
 def _jml_abstract(dataset, _item_min_func,
                   discrimination=1, max_iter=25):
     """ Defines common framework for joint maximum likelihood
@@ -77,7 +80,7 @@ def rasch_jml(dataset, discrimination=1, options=None):
         difficulty: (1d array) estimates of item difficulties
 
     Options:
-        * max_iterations: int
+        * max_iteration: int
     """
     options = validate_estimation_options(options)
 

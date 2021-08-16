@@ -115,6 +115,25 @@ tagged_data = tag_missing_data(my_data, [0, 1])
 results = twopl_mml(tagged_data)
 ```
 
+### Standard Errors
+GIRTH does not use typical hessian based optimization routines and, therefore, *currently* 
+has limited support for standard errors. Confidence Intervals based on bootstrapping are
+supported but take longer to run. Missing Data is supported in the bootstrap function as well.
+
+The bootstrap does not support the 3PL IRT Model or the GGUM.
+
+```python
+from girth import twopl_mml, standard_errors_bootstrap
+
+# import data (you supply this function)
+my_data = import_data(filename)
+
+results = standard_errors_bootstrap(my_data, twopl_mml, n_processors=4,
+                                    bootstrap_iterations=1000)
+
+print(results['95th CI']['Discrimination'])                                    
+```
+
 ## Unittests
 
 **pytest** with coverage.py module

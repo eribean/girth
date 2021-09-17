@@ -13,6 +13,8 @@ Girth is a python package for estimating item response theory (IRT) parameters. 
 
 Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean/girth_mcmc). It provides markov chain and variational inference estimation methods.
 
+## Unidimensional Models
+
 **Dichotomous Models**
 1. Rasch Model
    * Joint Maximum Likelihood
@@ -41,21 +43,32 @@ Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean
 
 **Ablity Estimation**
 1. Dichotomous
-   * Marginal Likelihood Estimation
+   * Maximum Likelihood Estimation
    * Maximum a Posteriori Estimation
    * Expected a Posteriori Estimation
 2. Polytomous
    * Expected a Posteriori Estimation
 
-**Supported Synthetic Data Generation**
+## Multidimensional Models
+
+1. Two Parameter Logistic Models
+   * Marginal Maximum Likelihood
+2. Graded Response Model
+   * Marginal Maximum Likelihood
+
+## Supported Synthetic Data Generation
+
+**Unidimensional**
 1. Rasch / 1PL Models Dichotomous Models
 2. 2 PL Dichotomous Models
 3. 3 PL Dichotomous Models
 4. Graded Response Model Polytomous
 5. Partial Credit Model Polytomous
 6. Graded Unfolding Model Polytomous
-7. Multidimensional Dichotomous Models
 
+**Multidimensional**
+1. Two Parameters Logisitic Models Dichotomous
+2. Graded Response Models Polytomous
 
 ## Installation
 Via pip

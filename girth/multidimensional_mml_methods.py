@@ -223,7 +223,7 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
 
         if np.abs(previous_discrimination - discrimination).max() < 1e-3:
             break
-                
+
     # Recompute partial int for later calculations
     partial_int = np.ones((responses.shape[1], theta.shape[1]))
     for item_ndx in range(n_items):
@@ -240,10 +240,9 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
         output_betas[ndx, :end_ndx-start_ndx-1] = betas[start_ndx+1:end_ndx]
     
     # Compute statistics for final iteration
-#     null_metrics = latent_pdf.compute_metrics(partial_int, latent_pdf.null_distribution * 
-#                                              latent_pdf.weights, 0)
-#     full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
-#                                              latent_pdf.n_points-3)
+    full_metrics = latent_pdf.compute_metrics(partial_int, distribution_x_weight,
+                                             latent_pdf.n_points-3)
+    otpt = np.sum(partial_int * distribution_x_weight, axis=1)
 
     # Ability estimates
     # eap_abilities = _ability_eap_abstract(partial_int, distribution_x_weight, theta)
@@ -251,4 +250,8 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
     return {'Discrimination': discrimination[start_indices, :],
             'Difficulty': output_betas,
             'Ability': None,
-            'LatentPDF': latent_pdf}
+            'LatentPDF': latent_pdf,            
+            'AIC': full_metrics[0],
+            'BIC': full_metrics[1],
+            'LL': np.log(otpt).sum()
+           }

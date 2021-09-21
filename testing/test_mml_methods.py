@@ -462,9 +462,9 @@ class TestMultiDimensionalIRT(unittest.TestCase):
         expected_difficulty = np.array([-2.74171551, -0.92506653, 0.03592453,  
                                         0.96030869, 1.49056813])
 
-        np.testing.assert_allclose(expected_LL, results['LL'])
-        np.testing.assert_allclose(expected_discrimination, results['Discrimination'], atol=1e-4)
-        np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-4)
+        np.testing.assert_allclose(expected_LL, results['LL'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(expected_discrimination, results['Discrimination'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-3, rtol=1e-3)
 
     def test_multidimensional_grm(self):
         """Testing Multidimensional GRM Model."""
@@ -499,9 +499,9 @@ class TestMultiDimensionalIRT(unittest.TestCase):
             [ 0.12291629, -0.22732149, -0.63694442],
             [ 1.00906448, -1.30930484, -1.34350456]])
 
-        np.testing.assert_allclose(expected_LL, results['LL'])
-        np.testing.assert_allclose(expected_discrimination, results['Discrimination'], atol=1e-4)
-        np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-4)
+        np.testing.assert_allclose(expected_LL, results['LL'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(expected_discrimination, results['Discrimination'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-3, rtol=1e-3)
 
         with self.assertRaises(AssertionError):
             multidimensional_grm_mml(syn_data, 1)

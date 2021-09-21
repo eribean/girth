@@ -159,7 +159,6 @@ difficulty = np.linspace(-1.5, 1, 20)
 
 syn_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
 
-
 # Solve for parameters
 estimates = multidimensional_twopl_mml(syn_data, 2, {'quadrature_n': 21})
 

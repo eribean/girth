@@ -447,7 +447,7 @@ class TestMultiDimensionalIRT(unittest.TestCase):
         
         results = multidimensional_twopl_mml(syn_data, 2, 
                                             {'quadrature_n': 15,
-                                             'max_iteration':500})
+                                             'max_iteration': 750})
 
         # Regression Tests
         expected_discrimination = np.array([
@@ -463,7 +463,8 @@ class TestMultiDimensionalIRT(unittest.TestCase):
                                         0.96030869, 1.49056813])
 
         np.testing.assert_allclose(expected_LL, results['LL'], atol=1e-3, rtol=1e-3)
-        np.testing.assert_allclose(expected_discrimination, results['Discrimination'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(np.abs(expected_discrimination), 
+                                   np.abs(results['Discrimination']), atol=1e-3, rtol=1e-3)
         np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-3, rtol=1e-3)
 
     def test_multidimensional_grm(self):
@@ -500,7 +501,8 @@ class TestMultiDimensionalIRT(unittest.TestCase):
             [ 1.00906448, -1.30930484, -1.34350456]])
 
         np.testing.assert_allclose(expected_LL, results['LL'], atol=1e-3, rtol=1e-3)
-        np.testing.assert_allclose(expected_discrimination, results['Discrimination'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(np.abs(expected_discrimination), 
+                                   np.abs(results['Discrimination']), atol=1e-3, rtol=1e-3)
         np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-3, rtol=1e-3)
 
         with self.assertRaises(AssertionError):

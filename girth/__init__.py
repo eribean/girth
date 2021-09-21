@@ -6,6 +6,7 @@ from .latent_ability_distribution import *
 from .mml_methods import *
 from .mml_full_methods import *
 from .mml_eap_methods import *
+from .multidimensional_mml_methods import *
 from .conditional_methods import *
 from .jml_methods import *
 from .ability_methods import *

@@ -15,7 +15,7 @@ class TestMMLEAPMethods(unittest.TestCase):
     
     def test_2pl_mml_eap_method(self):
         """Testing the 2PL EAP/MML Method."""
-        rng = np.random.default_rng(68213328964)
+        rng = np.random.default_rng(498134161633318511141265412)
 
         n_items = 5
         n_people = 150
@@ -28,11 +28,11 @@ class TestMMLEAPMethods(unittest.TestCase):
         result = twopl_mml_eap(syn_data, {'hyper_quadrature_n': 21})
 
         # Smoke Tests / Regression Tests
-        expected_difficulty = np.array([-0.388077, -0.620283,  0.512279,  
-                                       0.413742, -0.99742])
-        expected_discrimination = np.array([1.653249, 0.934447, 2.077619, 
-                                            1.033233, 1.43353])
-        expected_rayleigh_scale = 0.942502691
+        expected_difficulty = np.array([-2.46188484,  0.1742868 ,  0.39955514,
+                                        0.26342169, -0.48505039])
+        expected_discrimination = np.array([1.0578002 , 1.53611834, 0.85715942, 
+                                            0.81414815, 1.87899111])
+        expected_rayleigh_scale = 0.84603275509
 
         np.testing.assert_allclose(result['Difficulty'], expected_difficulty, 
                                    atol=1e-3, rtol=1e-3)
@@ -42,7 +42,7 @@ class TestMMLEAPMethods(unittest.TestCase):
     
     def test_2pl_mml_eap_method_csirt(self):
         """Testing the 2PL EAP/MML Method with CSIRT."""
-        rng = np.random.default_rng(55584684359412)
+        rng = np.random.default_rng(2443562564766554184345564)
 
         n_items = 10
         n_people = 300
@@ -55,15 +55,15 @@ class TestMMLEAPMethods(unittest.TestCase):
         result = twopl_mml_eap(syn_data, {'estimate_distribution': True})
 
         # Smoke Tests / Regression Tests
-        expected_difficulty = np.array([0.164805, -0.847592,  0.702926,  
-                                        1.680903,  1.668845, -0.505642,
-                                        -0.041614,  2.329605, -0.426624, 
-                                        0.487625])
-        expected_discrimination = np.array([1.880526, 1.261701, 2.02081, 
-                                            0.613751, 0.927996, 1.551378,
-                                            1.323135, 0.962349, 1.048494, 
-                                            0.853246])
-        expected_rayleigh_scale = 0.814573286388
+        expected_difficulty = np.array([2.23559897, 0.29362425, 1.38100264,  
+                                        0.08279119,  0.08444424, 1.18819404, 
+                                        -1.07454426,  0.39896597,  1.8653525 , -1.84060226])
+
+        expected_discrimination = np.array([1.50841056, 0.99998227, 0.83592715, 
+                                            0.66005477, 1.4747552, 0.77039347, 1.05569968, 
+                                            0.87996685, 0.65185882, 0.58027912])
+
+        expected_rayleigh_scale = 0.6113984943713622
 
         np.testing.assert_allclose(result['Difficulty'], expected_difficulty, 
                                    atol=1e-3, rtol=1e-3)
@@ -73,7 +73,7 @@ class TestMMLEAPMethods(unittest.TestCase):
 
     def test_grm_mml_eap_method(self):
         """Testing the GRM EAP/MML Method."""
-        rng = np.random.default_rng(49831588423129843218)
+        rng = np.random.default_rng(236472098334423445254346234514216354152)
 
         n_items = 10
         n_people = 300
@@ -85,21 +85,24 @@ class TestMMLEAPMethods(unittest.TestCase):
                                                    thetas, seed=rng)
 
         result = grm_mml_eap(syn_data, {'hyper_quadrature_n': 21})
+
         # Smoke Tests / Regression Tests
-        expected_difficulty = np.array([[-.823933242, -.681746823,  .709577506],
-                                        [-1.19660316, -.591194824,  .238794870],
-                                        [-1.57623244,  1.02585861,  1.31222183],
-                                        [-1.26761219,   0.000,  1.00491272],
-                                        [-.976097754,  .504520875,  .696167966],
-                                        [-.101893742,  .866864508,  1.03823366],
-                                        [-.0342219350,  .148527684,  1.04351431],
-                                        [-.0793099062,  .697370885,  2.10740616],
-                                        [-2.36175151, -1.23090629,  .457447133],
-                                        [-1.90991042,  .0161508466,  2.24006109]])
-        expected_discrimination = np.array([1.54167 , 0.679827, 1.730017, 
-                                            0.604388, 2.163533, 1.168009,
-                                            1.837987, 1.370698, 1.050023, 0.99699])
-        expected_rayleigh_scale = 0.9128964575265555
+        expected_difficulty = np.array([
+            [-3.82592436e-01, -3.32902099e-02,  1.17205422e+00],
+            [ 7.16137937e-01,  2.28463703e+00,  2.39706723e+00],
+            [-9.57180145e-01,  8.92447121e-01,  1.66519245e+00],
+            [-6.59495671e-01, -1.26141755e-01,  2.10861683e-01],
+            [ 3.92071879e-01,  1.16292199e+00,  1.50486048e+00],
+            [-4.73496122e-01, -1.61617298e-02,  7.64450828e-01],
+            [-1.35482731e+00, -3.79201843e-01,  1.77660394e+00],
+            [-1.89738605e-05,  1.30368580e-01,  7.61251849e-01],
+            [-9.37302462e-01,  7.30546564e-01,  1.13065092e+00],
+            [-7.32189206e-01, -3.28669948e-01,  9.13926636e-01]])
+            
+        expected_discrimination = np.array([1.96220993, 1.17821202, 0.76327225, 
+                                            2.27400557, 1.51836504, 0.99894561, 
+                                            1.62168688, 0.82284504, 1.51384642, 1.40226151])
+        expected_rayleigh_scale = 0.91585679394
 
         np.testing.assert_allclose(result['Difficulty'], expected_difficulty, 
                                    atol=1e-3, rtol=1e-3)

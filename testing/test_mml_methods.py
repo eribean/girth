@@ -8,6 +8,10 @@ from girth import rasch_mml, onepl_mml, twopl_mml
 from girth import create_synthetic_irt_polytomous
 from girth import grm_mml, pcm_mml, gum_mml
 
+from girth import create_synthetic_mirt_dichotomous
+from girth import multidimensional_grm_mml, multidimensional_twopl_mml
+from girth.multidimensional_mml_methods import _build_einsum_string
+
 
 class TestMMLRaschMethods(unittest.TestCase):
 
@@ -415,6 +419,95 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
 
         self.assertEqual(np.sign(result['Delta'][2]), delta_sign[1])
         self.assertNotEqual(np.sign(result['Delta'][2]), -delta_sign[1])
+
+
+class TestMultiDimensionalIRT(unittest.TestCase):
+    """Test fixture for multidimensional IRT."""
+    
+    def test_einsum_string(self):
+        """Test building the einsum string."""
+        einString = _build_einsum_string(2)
+        self.assertEqual(einString, "a, b -> ab")
+
+        einString = _build_einsum_string(5)
+        self.assertEqual(einString, "a, b, c, d, e -> abcde")
+        
+        with self.assertRaises(ValueError):
+            _build_einsum_string(12)
+
+    def test_multidimensional_2pl(self):
+        """Testing Multidimensional 2PL Model."""
+        rng = np.random.default_rng(93209819094946739803948765)
+        difficulty = np.linspace(-1.5, 1.5, 5)
+        discrimination = rng.uniform(-2, 2, (5, 2))
+        thetas = rng.standard_normal((2, 500))
+        syn_data = create_synthetic_mirt_dichotomous(difficulty, 
+                                                     discrimination, 
+                                                     thetas, seed=rng)
+        
+        results = multidimensional_twopl_mml(syn_data, 2, 
+                                            {'quadrature_n': 15,
+                                             'max_iteration': 750})
+
+        # Regression Tests
+        expected_discrimination = np.array([
+            [-1.85670663,  2.72354644],
+            [-1.33970775, -0.14605692],
+            [ 0.78865943,  1.48472356],
+            [ 1.29734554,  1.26802896],
+            [ 0.56405506,  0.        ]])
+        
+        expected_LL = -1448.7247702457792
+
+        expected_difficulty = np.array([-2.74171551, -0.92506653, 0.03592453,  
+                                        0.96030869, 1.49056813])
+
+        np.testing.assert_allclose(expected_LL, results['LL'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(np.abs(expected_discrimination), 
+                                   np.abs(results['Discrimination']), atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-3, rtol=1e-3)
+
+    def test_multidimensional_grm(self):
+        """Testing Multidimensional GRM Model."""
+        rng = np.random.default_rng(93209819094946739803948765)
+        difficulty = -1*np.sort(rng.uniform(-1.5, 1.5, (5, 3)), axis=1)
+        discrimination = rng.uniform(-2, 2, (5, 3))
+        thetas = rng.standard_normal((3, 500))
+
+        syn_data = create_synthetic_irt_polytomous(difficulty, 
+                                                   discrimination, 
+                                                   thetas, model='grm_md',
+                                                   seed=rng)
+        
+        results = multidimensional_grm_mml(syn_data, 3, 
+                                            {'quadrature_n': 15,
+                                             'max_iteration': 10})
+
+        # Regression Tests
+        expected_discrimination = np.array([
+            [-1.09835568, -1.28947079, -2.34486106],
+            [-1.03379657, -2.06350004, -0.38485667],
+            [-2.41051063,  2.09253819,  0.18879694],
+            [ 0.53951431,  0.74297555,  0.        ],
+            [ 2.51349768,  0.        ,  0.        ]])
+        
+        expected_LL = -2696.852894303332
+
+        expected_difficulty = np.array([
+            [ 2.42581536,  1.18280897, -0.14802899],
+            [ 0.59854883,  0.48006261, -0.68823203],
+            [ 0.56426239, -0.45650437, -0.89701715],
+            [ 0.12291629, -0.22732149, -0.63694442],
+            [ 1.00906448, -1.30930484, -1.34350456]])
+
+        np.testing.assert_allclose(expected_LL, results['LL'], atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(np.abs(expected_discrimination), 
+                                   np.abs(results['Discrimination']), atol=1e-3, rtol=1e-3)
+        np.testing.assert_allclose(expected_difficulty, results['Difficulty'], atol=1e-3, rtol=1e-3)
+
+        with self.assertRaises(AssertionError):
+            multidimensional_grm_mml(syn_data, 1)
+
 
 if __name__ == '__main__':
     unittest.main()

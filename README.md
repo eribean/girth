@@ -13,7 +13,10 @@ Girth is a python package for estimating item response theory (IRT) parameters. 
 
 Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean/girth_mcmc). It provides markov chain and variational inference estimation methods.
 
-**Dichotomous Models**
+## Unidimensional Models
+
+### Dichotomous Models
+
 1. Rasch Model
    * Joint Maximum Likelihood
    * Conditional Likelihood
@@ -25,10 +28,11 @@ Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean
    * Joint Maximum Likelihood
    * Marginal Maximum Likelihood
    * Mixed Expected A Prior / Marginal Maximum Likelihood
-3. Three Parameter Logistic Models
+4. Three Parameter Logistic Models
    * Marginal Maximum Likelihood (No Optimization and Minimal Support)
 
-**Polytomous Models**
+### Polytomous Models
+
 1. Graded Response Model
    * Joint Maximum Likelihood
    * Marginal Maximum Likelihood
@@ -39,36 +43,54 @@ Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean
 3. Graded Unfolding Model
    * Marginal Maximum Likelihood
 
-**Ablity Estimation**
+### Ablity Estimation
+
 1. Dichotomous
-   * Marginal Likelihood Estimation
+   * Maximum Likelihood Estimation
    * Maximum a Posteriori Estimation
    * Expected a Posteriori Estimation
 2. Polytomous
    * Expected a Posteriori Estimation
 
-**Supported Synthetic Data Generation**
+## Multidimensional Models
+
+1. Two Parameter Logistic Models
+   * Marginal Maximum Likelihood
+2. Graded Response Model
+   * Marginal Maximum Likelihood
+
+## Supported Synthetic Data Generation
+
+### Unidimensional
+
 1. Rasch / 1PL Models Dichotomous Models
 2. 2 PL Dichotomous Models
 3. 3 PL Dichotomous Models
 4. Graded Response Model Polytomous
 5. Partial Credit Model Polytomous
 6. Graded Unfolding Model Polytomous
-7. Multidimensional Dichotomous Models
 
+### Multidimensional
+
+1. Two Parameters Logisitic Models Dichotomous
+2. Graded Response Models Polytomous
 
 ## Installation
+
 Via pip
-```
+
+```console
 pip install girth --upgrade
 ```
 
 From Source
-```
+
+```console
 pip install . -t $PYTHONPATH --upgrade
 ```
 
 ## Dependencies
+
 We recommend the anaconda environment which can be installed
 [here](https://www.anaconda.com/distribution/)
 
@@ -78,6 +100,7 @@ We recommend the anaconda environment which can be installed
 * Numba
 
 ## Usage
+
 ```python
 import numpy as np
 
@@ -100,7 +123,9 @@ difficulty_estimates = estimates['Difficulty']
 ```
 
 ### Missing Data
+
 Missing data is supported with the `tag_missing_data` function.
+
 ```python
 from girth import tag_missing_data
 from girth import twopl_mml
@@ -115,7 +140,35 @@ tagged_data = tag_missing_data(my_data, [0, 1])
 results = twopl_mml(tagged_data)
 ```
 
+### Multidimensional Estimation
+
+GIRTH supports multidimensional estimation but these estimation methods suffer
+from the curse of dimensionality, using more than 3 factors takes a considerable amount
+of time
+
+```python
+import numpy as np
+
+from girth import create_synthetic_mirt_dichotomous
+from girth import multidimensional_twopl_mml
+
+# Create Synthetic Data
+discrimination = np.random.uniform(-2, 2, (20, 2))
+thetas = np.random.randn(2, 1000)
+difficulty = np.linspace(-1.5, 1, 20)
+
+syn_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
+
+# Solve for parameters
+estimates = multidimensional_twopl_mml(syn_data, 2, {'quadrature_n': 21})
+
+# Unpack estimates
+discrimination_estimates = estimates['Discrimination']
+difficulty_estimates = estimates['Difficulty']
+```
+
 ### Standard Errors
+
 GIRTH does not use typical hessian based optimization routines and, therefore, *currently* 
 has limited support for standard errors. Confidence Intervals based on bootstrapping are
 supported but take longer to run. Missing Data is supported in the bootstrap function as well.
@@ -137,12 +190,14 @@ print(results['95th CI']['Discrimination'])
 ## Unittests
 
 **pytest** with coverage.py module
-```
+
+```console
 pytest --cov=girth --cov-report term
 ```
 
 **nose** with coverage.py module
-```
+
+```console
 nosetests --with-coverage --cover-package=girth testing/
 ```
 

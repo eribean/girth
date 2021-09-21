@@ -9,6 +9,7 @@ from girth import create_correlated_abilities
 
 from girth.synthetic import (_my_digitize, _credit_func, 
                              _graded_func, _unfold_func,
+                             _graded_func_md,
                              _check_difficulty_parameters)
 
 class TestSynthetic(unittest.TestCase):
@@ -170,6 +171,28 @@ class TestPolytomousSynthetic(unittest.TestCase):
         np.testing.assert_array_almost_equal(output[1], second_position - first_position)
         np.testing.assert_array_almost_equal(output[2], last_position - second_position)
         np.testing.assert_array_almost_equal(output[3], 1 - last_position)
+
+    def test_graded_function_md(self):
+        """Testing the multidimensional graded response model computation"""
+        # Create basic data
+        difficulties = np.array([-2.3, .3, 1.2])
+        discrimination = np.array([0.78, -0.99])
+        thetas = np.vstack((np.linspace(-3, 3, 100),
+                            np.linspace(-2, 2, 100)))
+
+        # Initialize output variable and call data
+        output = np.zeros((difficulties.size + 1, thetas.shape[1]))
+        _graded_func_md(difficulties, discrimination, thetas, output)
+
+        # Compare to hand computations
+        first_position = 1.0 / (1.0 + np.exp(discrimination @ thetas + difficulties[0]))
+        second_position = 1.0 / (1.0 + np.exp(discrimination @ thetas + difficulties[1]))
+        last_position = 1.0 / (1.0 + np.exp(discrimination @ thetas + difficulties[2]))
+
+        np.testing.assert_array_almost_equal(output[0], first_position)
+        np.testing.assert_array_almost_equal(output[1], second_position - first_position)
+        np.testing.assert_array_almost_equal(output[2], last_position - second_position)
+        np.testing.assert_array_almost_equal(output[3], 1 - last_position)        
         
     def test_credit_function(self):
         """Testing the partial credit computation"""

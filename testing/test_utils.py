@@ -15,7 +15,7 @@ from girth.utils import (_get_quadrature_points, default_options,
                         _compute_partial_integral)
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral,
-                                    _unfold_partial_integral)
+                                    _unfold_partial_integral, _graded_partial_integral_md)
 from girth.synthetic import _unfold_func
 
 
@@ -329,6 +329,51 @@ class TestPolytomousUtilities(unittest.TestCase):
         with np.testing.assert_raises(AssertionError):
             for ndx in [0, 2, 3, 4, 5, 6, 8, 9]:
                 np.testing.assert_equal(output[ndx], np.ones(61,))
+
+    def test_graded_partial_integral_multidimensional(self):
+        """Testing the partial integral in the multidimensional graded model."""
+        rng = np.random.default_rng(191357149648463519849811516)
+        theta, _ = _get_quadrature_points(61, -5, 5)
+        theta = np.vstack((theta, theta))
+        responses = rng.integers(0, 3, (10, 100))
+        betas = np.array([10000, -.3, 0.1, 1.2])
+        betas_roll = np.roll(betas, -1)
+        betas_roll[-1] = -10000
+        invalid_response_mask = np.zeros_like(responses, dtype='bool')
+
+        output = np.ones((responses.shape[1], theta.shape[1]))
+        for ndx in range(responses.shape[0]):
+            output *= _graded_partial_integral_md(theta, betas, betas_roll,
+                                                  np.array([[1, 1]]), responses[ndx],
+                                                  invalid_response_mask[ndx])
+
+        # Compare to hand calculations
+        hand_calc = list()
+        for ndx in range(responses.shape[1]):
+            left_betas = betas[responses[:, ndx]]
+            right_betas = betas_roll[responses[:, ndx]]
+            probability = (1.0 / (1.0 + np.exp(-left_betas[:, None] - theta.sum(0))) -
+                           1.0 / (1.0 + np.exp(-right_betas[:, None] - theta.sum(0))))
+            hand_calc.append(probability.prod(0))
+
+        hand_calc = np.asarray(hand_calc)
+
+        np.testing.assert_array_equal(hand_calc, output)
+
+        # Test invalid response
+        invalid_response_mask[0, 1] = True
+        invalid_response_mask[0, 7] = True
+        output = _graded_partial_integral_md(theta, betas, betas_roll,
+                                            np.array([[1, 1]]), responses[0],
+                                            invalid_response_mask[0])
+        
+        np.testing.assert_equal(output[1], np.ones(61,))
+        np.testing.assert_equal(output[7], np.ones(61,))
+
+        with np.testing.assert_raises(AssertionError):
+            for ndx in [0, 2, 3, 4, 5, 6, 8, 9]:
+                np.testing.assert_equal(output[ndx], np.ones(61,))
+
 
     def test_credit_partial_integration(self):
         """Testing the partial integral in the graded model."""

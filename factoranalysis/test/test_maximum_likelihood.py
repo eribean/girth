@@ -29,7 +29,8 @@ class TestMaximumLikelihood(unittest.TestCase):
 
         initial_guess = np.ones((10,)) *.5
         loadings_paf, _, variance = mlfa(cor_matrix2, 3, initial_guess=initial_guess)
-
+        _ = mlfa(cor_matrix2, 3)
+        
         # Remove any rotation
         rotation = procrustes_rotation(loadings, loadings_paf)
         updated_loadings = loadings_paf @ rotation

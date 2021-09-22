@@ -245,7 +245,7 @@ We recommend the anaconda environment which can be installed
 **pytest** with coverage.py module
 
 ```sh
-pytest --cov=girth --cov=common --cov=factoranalysis --cov-report term
+pytest --cov=girth --cov-report term
 ```
 
 # Contact

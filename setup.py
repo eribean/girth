@@ -9,9 +9,8 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth', 'girth.performance', 'girth.three_pl'],
-        package_dir={'girth': 'girth',
-                     'girth.performance':convert_path('./performance')},
+        packages=['girth', 'girth.three_pl'],
+        package_dir={'girth': 'girth'},
         version="0.6.0",
         license="MIT",
         description="A python package for Item Response Theory.",

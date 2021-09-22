@@ -94,7 +94,7 @@ pip install . -t $PYTHONPATH --upgrade
 We recommend the anaconda environment which can be installed
 [here](https://www.anaconda.com/distribution/)
 
-* Python 3.7  
+* Python &ge; 3.8
 * Numpy  
 * Scipy
 * Numba
@@ -193,12 +193,6 @@ print(results['95th CI']['Discrimination'])
 
 ```console
 pytest --cov=girth --cov-report term
-```
-
-**nose** with coverage.py module
-
-```console
-nosetests --with-coverage --cover-package=girth testing/
 ```
 
 ## Contact

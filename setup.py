@@ -9,9 +9,11 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth', 'girth.three_pl'],
-        package_dir={'girth': 'girth'},
-        version="0.6.0",
+        packages=['girth', 'girth.three_pl', 'girth.factoranalysis', 'girth.common'],
+        package_dir={'girth': 'girth',
+                     'girth.common': convert_path('./common'),
+                     'girth.factoranalysis': convert_path('./factoranalysis')},
+        version="0.7.0",
         license="MIT",
         description="A python package for Item Response Theory.",
         long_description=long_description.replace('<ins>','').replace('</ins>',''),
@@ -26,7 +28,6 @@ if __name__ == '__main__':
             'Intended Audience :: Science/Research',
             'Topic :: Scientific/Engineering', 
             'License :: OSI Approved :: MIT License',          
-            'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9'
         ]

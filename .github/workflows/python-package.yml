@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
         pip install pytest-cov
         pip install pytest-xdist
         pip install . --upgrade
-        pytest --cov=girth -n 2
+        pytest --cov=girth --cov=common --cov=factoranalysis -n 2
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

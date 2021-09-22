@@ -13,6 +13,10 @@ Girth is a python package for estimating item response theory (IRT) parameters. 
 
 Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean/girth_mcmc). It provides markov chain and variational inference estimation methods.
 
+Need general statistical support? Download my other project [RyStats](https://github.com/eribean/RyStats) which implements commonly used statistical functions. These functions are also implemented in an interactive webapp [GoFactr.com](https://gofactr.com) without the need to download or install software.
+
+# Item Response Theory
+
 ## Unidimensional Models
 
 ### Dichotomous Models
@@ -75,31 +79,11 @@ Interested in Bayesian Models? Check out [girth_mcmc](https://github.com/eribean
 1. Two Parameters Logisitic Models Dichotomous
 2. Graded Response Models Polytomous
 
-## Installation
+# Usage
 
-Via pip
+## Standard Estimation
 
-```console
-pip install girth --upgrade
-```
-
-From Source
-
-```console
-pip install . -t $PYTHONPATH --upgrade
-```
-
-## Dependencies
-
-We recommend the anaconda environment which can be installed
-[here](https://www.anaconda.com/distribution/)
-
-* Python &ge; 3.8
-* Numpy  
-* Scipy
-* Numba
-
-## Usage
+To run girth with unidimensional models.
 
 ```python
 import numpy as np
@@ -187,20 +171,91 @@ results = standard_errors_bootstrap(my_data, twopl_mml, n_processors=4,
 print(results['95th CI']['Discrimination'])                                    
 ```
 
+# Factor Analysis
+
+Factor analysis is another common method for latent variable exploration and estimation. These tools are helpful for understanding dimensionality or finding initial estimates of item parameters.
+
+## Factor Analysis Extraction Methods
+
+1. Principal Component Analysis
+2. Principal Axis Factor
+3. Minimum Rank Factor Analysis
+4. Maximum Likelihood Factor Analysis
+
+### Example
+
+```python
+import girth.factoranalysis as gfa
+
+# Assume you have converted data into correlation matrix
+n_factors = 3
+results = gfa.maximum_likelihood_factor_analysis(corrleation, n_factors)
+
+print(results)
+```
+
+## Polychoric Correlation Estimation
+
+When collected data is ordinal, Pearson's correlation will provide biased estimates of the correlation. Polychoric correlations estimate the correlation given that the data is ordinal and normally distributed.
+
+```python
+import girth
+import girth.factoranalysis as gfa
+import girth.common as gcm
+
+discrimination = np.random.uniform(-2, 2, (20, 2))
+thetas = np.random.randn(2, 1000)
+difficulty = np.linspace(-1.5, 1, 20)
+
+syn_data = girth.create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
+
+polychoric_corr = gcm.polychoric_correlation(syn_data, start_val=0, stop_val=1)
+
+results_fa = gfa.maximum_likelihood_factor_analysis(polychoric_corr, 2)
+```
+
+# Support
+
+## Installation
+
+Via pip
+
+```sh
+pip install girth --upgrade
+```
+
+From Source
+
+```sh
+pip install . -t $PYTHONPATH --upgrade
+```
+
+## Dependencies
+
+We recommend the anaconda environment which can be installed
+[here](https://www.anaconda.com/distribution/)
+
+* Python &ge; 3.8
+* Numpy  
+* Scipy
+* Numba
+
 ## Unittests
 
 **pytest** with coverage.py module
 
-```console
-pytest --cov=girth --cov-report term
+```sh
+pytest --cov=girth --cov=common --cov=factoranalysis --cov-report term
 ```
 
-## Contact
+# Contact
+
+Please contact me with any questions or feature requests. Thank you!
 
 Ryan Sanchez  
 ryan.sanchez@gofactr.com
 
-## License
+# License
 
 MIT License
 

@@ -10,7 +10,7 @@ if __name__ == '__main__':
     setup(
         name="girth", 
         packages=['girth', 'girth.three_pl', 'girth.factoranalysis', 'girth.common'],
-        package_dir={'girth': 'girth',
+        package_dir={'girth': convert_path('./src'),
                      'girth.common': convert_path('./common'),
                      'girth.factoranalysis': convert_path('./factoranalysis')},
         version="0.7.0",

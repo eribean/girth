@@ -70,6 +70,16 @@ def condition_polytomous_response(dataset, trim_ends=True, _reference=1.0):
     return the_output, betas_length, valid_response_mask
 
 
+def _build_einsum_string(n_factors):
+    """Builds a string for computing a tensor product."""
+    if n_factors > 10:
+        raise ValueError("Number of factors must be less than 10.")
+
+    values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'][:n_factors]
+
+    return ", ".join(values) + " -> " + "".join(values)
+    
+
 def _solve_for_constants(item_responses):
     """Computes the ratios needed for grm difficulty estimates."""
     value, counts = np.unique(item_responses, return_counts=True)

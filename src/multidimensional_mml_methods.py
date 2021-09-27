@@ -9,21 +9,11 @@ from girth import (condition_polytomous_response,
 from girth.utils import create_beta_LUT, INVALID_RESPONSE
 from girth.latent_ability_distribution import LatentPDF
 from girth.polytomous_utils import (_graded_partial_integral_md, _solve_for_constants,
-                                    _solve_integral_equations, 
+                                    _solve_integral_equations, _build_einsum_string,
                                     _solve_integral_equations_LUT)
 
 
 __all__ = ["multidimensional_twopl_mml", "multidimensional_grm_mml"]
-
-
-def _build_einsum_string(n_factors):
-    """Builds a string for computing a tensor product."""
-    if n_factors > 10:
-        raise ValueError("Number of factors must be less than 10.")
-
-    values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'][:n_factors]
-
-    return ", ".join(values) + " -> " + "".join(values)
 
 
 def multidimensional_twopl_mml(dataset, n_factors, options=None):

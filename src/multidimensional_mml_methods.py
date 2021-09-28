@@ -8,22 +8,13 @@ from girth import (condition_polytomous_response,
 
 from girth.utils import create_beta_LUT, INVALID_RESPONSE
 from girth.latent_ability_distribution import LatentPDF
+from girth import multidimensional_ability_eap
 from girth.polytomous_utils import (_graded_partial_integral_md, _solve_for_constants,
-                                    _solve_integral_equations, 
+                                    _solve_integral_equations, _build_einsum_string,
                                     _solve_integral_equations_LUT)
 
 
 __all__ = ["multidimensional_twopl_mml", "multidimensional_grm_mml"]
-
-
-def _build_einsum_string(n_factors):
-    """Builds a string for computing a tensor product."""
-    if n_factors > 10:
-        raise ValueError("Number of factors must be less than 10.")
-
-    values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'][:n_factors]
-
-    return ", ".join(values) + " -> " + "".join(values)
 
 
 def multidimensional_twopl_mml(dataset, n_factors, options=None):
@@ -244,12 +235,15 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
                                              latent_pdf.n_points-3)
     otpt = np.sum(partial_int * distribution_x_weight, axis=1)
 
-    # Ability estimates
-    # eap_abilities = _ability_eap_abstract(partial_int, distribution_x_weight, theta)
+    discrimination = discrimination[start_indices, :]
 
-    return {'Discrimination': discrimination[start_indices, :],
+    # Ability estimates
+    eap_abilities = multidimensional_ability_eap(dataset, output_betas, 
+                                                 discrimination, options)
+
+    return {'Discrimination': discrimination,
             'Difficulty': output_betas,
-            'Ability': None,
+            'Ability': eap_abilities,
             'LatentPDF': latent_pdf,            
             'AIC': full_metrics[0],
             'BIC': full_metrics[1],

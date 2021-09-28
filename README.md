@@ -63,6 +63,15 @@ Need general statistical support? Download my other project [RyStats](https://gi
 2. Graded Response Model
    * Marginal Maximum Likelihood
 
+### Ablity Estimation
+
+1. Dichotomous
+   * Maximum a Posteriori Estimation
+   * Expected a Posteriori Estimation
+2. Polytomous
+   * Maximum a Posteriori Estimation
+   * Expected a Posteriori Estimation
+
 ## Supported Synthetic Data Generation
 
 ### Unidimensional

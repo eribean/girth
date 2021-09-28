@@ -15,7 +15,8 @@ from girth.utils import (_get_quadrature_points, default_options,
                         _compute_partial_integral)
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral,
-                                    _unfold_partial_integral, _graded_partial_integral_md)
+                                    _unfold_partial_integral, _graded_partial_integral_md,
+                                    _build_einsum_string)
 from girth.synthetic import _unfold_func
 
 
@@ -183,6 +184,17 @@ class TestUtilitiesMethods(unittest.TestCase):
 
 class TestPolytomousUtilities(unittest.TestCase):
     """Tests the polytomous utilities"""
+
+    def test_einsum_string(self):
+        """Test building the einsum string."""
+        einString = _build_einsum_string(2)
+        self.assertEqual(einString, "a, b -> ab")
+
+        einString = _build_einsum_string(5)
+        self.assertEqual(einString, "a, b, c, d, e -> abcde")
+        
+        with self.assertRaises(ValueError):
+            _build_einsum_string(12)
 
     def test_condition_polytomous_response(self):
         """Testing polytomous response conditioning."""

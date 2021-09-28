@@ -8,6 +8,7 @@ from girth import (condition_polytomous_response,
 
 from girth.utils import create_beta_LUT, INVALID_RESPONSE
 from girth.latent_ability_distribution import LatentPDF
+from girth import multidimensional_ability_eap
 from girth.polytomous_utils import (_graded_partial_integral_md, _solve_for_constants,
                                     _solve_integral_equations, _build_einsum_string,
                                     _solve_integral_equations_LUT)
@@ -234,12 +235,15 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
                                              latent_pdf.n_points-3)
     otpt = np.sum(partial_int * distribution_x_weight, axis=1)
 
-    # Ability estimates
-    # eap_abilities = _ability_eap_abstract(partial_int, distribution_x_weight, theta)
+    discrimination = discrimination[start_indices, :]
 
-    return {'Discrimination': discrimination[start_indices, :],
+    # Ability estimates
+    eap_abilities = multidimensional_ability_eap(dataset, output_betas, 
+                                                 discrimination, options)
+
+    return {'Discrimination': discrimination,
             'Difficulty': output_betas,
-            'Ability': None,
+            'Ability': eap_abilities,
             'LatentPDF': latent_pdf,            
             'AIC': full_metrics[0],
             'BIC': full_metrics[1],

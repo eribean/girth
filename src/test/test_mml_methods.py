@@ -423,17 +423,7 @@ class TestMMLGradedUnfoldingModel(unittest.TestCase):
 
 class TestMultiDimensionalIRT(unittest.TestCase):
     """Test fixture for multidimensional IRT."""
-    
-    def test_einsum_string(self):
-        """Test building the einsum string."""
-        einString = _build_einsum_string(2)
-        self.assertEqual(einString, "a, b -> ab")
 
-        einString = _build_einsum_string(5)
-        self.assertEqual(einString, "a, b, c, d, e -> abcde")
-        
-        with self.assertRaises(ValueError):
-            _build_einsum_string(12)
 
     def test_multidimensional_2pl(self):
         """Testing Multidimensional 2PL Model."""

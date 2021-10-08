@@ -82,6 +82,15 @@ class TestCommonFunctions(unittest.TestCase):
 
         np.testing.assert_equal(result, dataset)
 
+    def test_reverse_score_fail(self):
+        """Testing reverse score function."""
+        dataset = np.array([
+            [1, 2, 3, 4, 5, INVALID_RESPONSE]
+        ])
+
+        with self.assertRaises(AssertionError):
+            reverse_score(dataset, np.array([True, False]), 5)
+
     def test_cronbach_alpha(self):
         """Testing cronbach alpha."""
         rng = np.random.default_rng(435616365426513465612613263218)

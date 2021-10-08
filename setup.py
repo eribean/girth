@@ -13,7 +13,6 @@ if __name__ == '__main__':
                   'girth.classical', 'girth.common'],
         package_dir={'girth': convert_path('./src'),
                      'girth.common': convert_path('./common'),
-                     'girth.classical_test': convert_path('./classical'),
                      'girth.factoranalysis': convert_path('./factoranalysis')},
         version="0.7.2",
         license="MIT",

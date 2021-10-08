@@ -24,7 +24,8 @@ def cronbach_alpha(data):
     valid_mask = data != INVALID_RESPONSE
     
     item_variance = np.var(data, axis=1, ddof=1, where=valid_mask).sum()
-    people_variance = np.sum(data, axis=0, where=valid_mask).var(ddof=1)
+    people_variance = (n_items * n_items
+                       * np.mean(data, axis=0, where=valid_mask).var(ddof=1))
     
     return (n_items / (n_items - 1) 
             * (1 - item_variance / people_variance))

@@ -1,1 +1,1 @@
-from .dichotomous_ctt import *
+from .ctt_statistics import *

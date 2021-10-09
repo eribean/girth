@@ -9,7 +9,8 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth', 'girth.three_pl', 'girth.classical', 
+        packages=['girth', 'girth.three_pl', 'girth.classical',
+                  'girth.multidimensional',
                   'girth.factoranalysis', 'girth.common'],
         package_dir={'girth': convert_path('./src'),
                      'girth.common': convert_path('./common'),

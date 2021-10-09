@@ -36,6 +36,9 @@ def default_options():
                                using cubic splines
         number_of_samples: [int] number of samples to use when
                            estimating distribuion, must be > 5
+        initial_guess: [boolean] seed the convergence with an initial guess
+                       Default = True
+        num_processors: [int] number of cores to use. Default=1
     """
     return {"max_iteration": 25,
             "distribution": gaussian(0, 1).pdf,
@@ -44,7 +47,9 @@ def default_options():
             "hyper_quadrature_n": 41,
             "use_LUT": True,
             "estimate_distribution": False,
-            "number_of_samples": 9
+            "number_of_samples": 9,
+            "initial_guess": True,
+            "num_processors": 1
             }
 
 
@@ -74,6 +79,10 @@ def validate_estimation_options(options_dict=None):
                     lambda x: isinstance(x, bool),
                 "number_of_samples": 
                     lambda x: isinstance(x, int) and x >= 5,
+                "initial_guess":
+                    lambda x: isinstance(x, bool),
+                "num_processors":
+                    lambda x: isinstance(x, int)
                 }
     
     # A complete options dictionary

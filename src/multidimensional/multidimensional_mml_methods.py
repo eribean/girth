@@ -8,7 +8,7 @@ from girth import (condition_polytomous_response,
 
 from girth.utils import create_beta_LUT, INVALID_RESPONSE
 from girth.latent_ability_distribution import LatentPDF
-from girth import multidimensional_ability_eap
+from girth.multidimensional import multidimensional_ability_eap, initial_guess_md
 from girth.polytomous_utils import (_graded_partial_integral_md, _solve_for_constants,
                                     _solve_integral_equations, _build_einsum_string,
                                     _solve_integral_equations_LUT)
@@ -41,6 +41,7 @@ def multidimensional_twopl_mml(dataset, n_factors, options=None):
         * max_iteration: int
         * quadrature_bounds: (float, float)
         * quadrature_n: int
+        * initial_guess: boolean
     """    
     results = multidimensional_grm_mml(dataset, n_factors, options)
     results['Difficulty'] = results['Difficulty'].squeeze()
@@ -71,6 +72,7 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
         * max_iteration: int
         * quadrature_bounds: (float, float)
         * quadrature_n: int
+        * initial_guess: boolean
     """
     if n_factors < 2:
         raise AssertionError("Number of factors specified must be greater than 1.")
@@ -111,19 +113,38 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
     cumulative_item_counts = item_counts.cumsum()
     start_indices = np.roll(cumulative_item_counts, 1)
     start_indices[0] = 0
-
-    for ndx in range(n_items):
-        end_ndx = cumulative_item_counts[ndx]
-        start_ndx = start_indices[ndx] + 1
-        betas[start_ndx:end_ndx] = np.linspace(-1, 1,
-                                               item_counts[ndx] - 1)
-    betas_roll = np.roll(betas, -1)
-    betas_roll[cumulative_item_counts-1] = -10000
     
     # Multi-dimensional discrimination
     discrimination = np.zeros((betas.shape[0], n_factors))
-    discrimination[:, 0] = 1.0
+
+    if options['initial_guess']:
+        initial_estimate = initial_guess_md(dataset, n_factors, options)
+        inner_bounds = (.15, 4)
+
+        for ndx in range(n_items):
+            end_ndx = cumulative_item_counts[ndx]
+            start_ndx = start_indices[ndx]
+            discrimination[start_ndx:end_ndx, :] = initial_estimate[ndx]
+            univariate_estimate = np.sqrt(np.square(initial_estimate[ndx]).sum()).clip(.15, 5.99)
+            
+            new_betas = _integral_func(univariate_estimate, integral_counts[ndx],
+                                      dist_x_weight, latent_pdf.quadrature_locations, 
+                                     _interp_func) * -univariate_estimate
+            betas[start_ndx+1:end_ndx] = new_betas
     
+    else:
+        discrimination[:, 0] = 1.0        
+        inner_bounds = (-3, 3)
+
+        for ndx in range(n_items):
+            end_ndx = cumulative_item_counts[ndx]
+            start_ndx = start_indices[ndx] + 1
+            betas[start_ndx:end_ndx] = np.linspace(-1, 1,
+                                                item_counts[ndx] - 1)
+
+    betas_roll = np.roll(betas, -1)
+    betas_roll[cumulative_item_counts-1] = -10000
+
     # Set invalid index to zero, this allows minimal
     # changes for invalid data and it is corrected
     # during integration
@@ -132,9 +153,9 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
     # Set the boundaries for searching
     bounds = [[(-3, 3) for _ in range(n_factors)] 
               for __ in range(n_items)]
-    for ndx1 in range(n_factors-1):
+    for ndx1 in range(n_factors):
         ndx2 = n_items - ndx1 - 1
-        bounds[ndx2][ndx1] = (.15, 4)
+        bounds[ndx2][ndx1] = inner_bounds
         bounds[ndx2][ndx1+1:] = ()
 
     #############
@@ -177,7 +198,7 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
 
             def _local_min_func(estimate):
                 # Solve integrals for diffiulty estimates
-                univariate_estimate = np.sqrt(np.square(estimate).sum()).clip(.15, 6)
+                univariate_estimate = np.sqrt(np.square(estimate).sum()).clip(.15, 5.99)
                 new_betas = _integral_func(univariate_estimate, integral_counts[item_ndx],
                                            dist_x_weight, latent_pdf.quadrature_locations, 
                                            _interp_func) * -univariate_estimate

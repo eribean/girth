@@ -125,12 +125,5 @@ class TestMultiDimensionalIRT(unittest.TestCase):
                 np.testing.assert_allclose(new_discrimination[lower_indicies], 
                                            compare_zero, atol=1e-6)
 
-
-
-
-
-
-
-
 if __name__ == '__main__':
     unittest.main()

@@ -605,7 +605,6 @@ class TestOptions(unittest.TestCase):
         with self.assertRaises(AssertionError):
             validate_estimation_options(test)            
 
-
     def test_population_update(self):
         """Testing update to options."""
         x = np.linspace(-3, 3, 101)

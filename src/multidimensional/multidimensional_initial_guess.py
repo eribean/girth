@@ -67,5 +67,3 @@ def initial_guess_md(dataset, n_factors, options=None):
         estimated_discrimination = _constrained_rotation(estimated_discrimination)
 
     return estimated_discrimination
-
-

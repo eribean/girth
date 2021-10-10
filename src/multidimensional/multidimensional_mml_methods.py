@@ -125,7 +125,7 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
             end_ndx = cumulative_item_counts[ndx]
             start_ndx = start_indices[ndx]
             discrimination[start_ndx:end_ndx, :] = initial_estimate[ndx]
-            univariate_estimate = np.sqrt(np.square(initial_estimate[ndx]).sum()).clip(.15, 6)
+            univariate_estimate = np.sqrt(np.square(initial_estimate[ndx]).sum()).clip(.15, 5.99)
             
             new_betas = _integral_func(univariate_estimate, integral_counts[ndx],
                                       dist_x_weight, latent_pdf.quadrature_locations, 
@@ -198,7 +198,7 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
 
             def _local_min_func(estimate):
                 # Solve integrals for diffiulty estimates
-                univariate_estimate = np.sqrt(np.square(estimate).sum()).clip(.15, 6)
+                univariate_estimate = np.sqrt(np.square(estimate).sum()).clip(.15, 5.99)
                 new_betas = _integral_func(univariate_estimate, integral_counts[item_ndx],
                                            dist_x_weight, latent_pdf.quadrature_locations, 
                                            _interp_func) * -univariate_estimate

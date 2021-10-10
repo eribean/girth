@@ -496,7 +496,7 @@ class TestPolytomousUtilities(unittest.TestCase):
 class TestOptions(unittest.TestCase):
     """Tests default options."""
     def setUp(self):
-        self.expected_length = 8
+        self.expected_length = 10
 
     def test_default_creation(self):
         """Testing the default options."""
@@ -511,6 +511,9 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(output['estimate_distribution'], False)
         self.assertEqual(output['number_of_samples'], 9)
         self.assertTupleEqual(output['quadrature_bounds'], (-4.5, 4.5))
+        self.assertEqual(output['initial_guess'], True)
+        self.assertEqual(output['num_processors'], 1)
+
         result = output['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
@@ -530,6 +533,8 @@ class TestOptions(unittest.TestCase):
         self.assertEqual(result['estimate_distribution'], False)
         self.assertEqual(result['number_of_samples'], 9)
         self.assertTupleEqual(result['quadrature_bounds'], (-4.5, 4.5))
+        self.assertEqual(result['initial_guess'], True)
+        self.assertEqual(result['num_processors'], 1)        
         result = result['distribution'](x)
         np.testing.assert_array_almost_equal(expected,
                                              result, decimal=6)
@@ -591,6 +596,15 @@ class TestOptions(unittest.TestCase):
         test = {'number_of_samples':3}
         with self.assertRaises(AssertionError):
             validate_estimation_options(test)
+
+        test = {'num_processors': '1'}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)            
+
+        test = {'initial_guess': [1, 2, 3]}
+        with self.assertRaises(AssertionError):
+            validate_estimation_options(test)            
+
 
     def test_population_update(self):
         """Testing update to options."""

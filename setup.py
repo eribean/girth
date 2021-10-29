@@ -15,7 +15,7 @@ if __name__ == '__main__':
         package_dir={'girth': convert_path('./src'),
                      'girth.common': convert_path('./common'),
                      'girth.factoranalysis': convert_path('./factoranalysis')},
-        version="0.7.3",
+        version="0.7.5",
         license="MIT",
         description="A python package for Item Response Theory.",
         long_description=long_description.replace('<ins>','').replace('</ins>',''),
@@ -24,7 +24,7 @@ if __name__ == '__main__':
         author_email='ryan.sanchez@gofactr.com',
         url = 'https://eribean.github.io/girth/',
         keywords = ['IRT', 'Psychometrics', 'Item Response Theory'],
-        install_requires = ['numpy', 'scipy', 'numba'],
+        install_requires = ['numpy', 'scipy'],
         classifiers = [
             'Development Status :: 3 - Alpha',
             'Intended Audience :: Science/Research',

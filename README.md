@@ -247,7 +247,6 @@ We recommend the anaconda environment which can be installed
 * Python &ge; 3.8
 * Numpy  
 * Scipy
-* Numba
 
 ## Unittests
 

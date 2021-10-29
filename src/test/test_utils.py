@@ -11,7 +11,7 @@ from girth import (create_synthetic_irt_dichotomous,
                    validate_estimation_options, condition_polytomous_response,
                    get_true_false_counts, mml_approx)
 from girth.utils import (_get_quadrature_points, default_options, 
-                        create_beta_LUT, tag_missing_data, INVALID_RESPONSE,
+                        tag_missing_data, INVALID_RESPONSE,
                         _compute_partial_integral)
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations, _credit_partial_integral,
@@ -466,31 +466,7 @@ class TestPolytomousUtilities(unittest.TestCase):
             for ndx in [0, 2, 3, 4, 5, 6, 8, 9]:
                 np.testing.assert_equal(result[ndx], np.ones(61,))
 
-    def test_lut_creation(self):
-        """Test the lookup table creation function."""
-        lut_func = create_beta_LUT((0.5, 2, 500), (-3, 3, 500))
 
-        # do two values
-        options = validate_estimation_options(None)
-        quad_start, quad_stop = options['quadrature_bounds']
-        quad_n = options['quadrature_n']
-        
-        theta, weight = _get_quadrature_points(quad_n, quad_start, quad_stop)
-        distribution = options['distribution'](theta)
-
-        alpha1 = 0.89
-        beta1 = 1.76
-
-        p_value1 = ((weight * distribution) / (1.0 + np.exp(-alpha1*(theta - beta1)))).sum()
-        estimated_beta = lut_func(alpha1, p_value1)
-        self.assertAlmostEqual(beta1, estimated_beta, places=4)
-
-        alpha1 = 1.89
-        beta1 = -2.34
-
-        p_value1 = ((weight * distribution) / (1.0 + np.exp(-alpha1*(theta - beta1)))).sum()
-        estimated_beta = lut_func(alpha1, p_value1)
-        self.assertAlmostEqual(beta1, estimated_beta, places=4)
 
 
 class TestOptions(unittest.TestCase):

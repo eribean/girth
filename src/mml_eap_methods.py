@@ -3,7 +3,7 @@ from scipy import stats
 
 from girth import (condition_polytomous_response, validate_estimation_options,
                    convert_responses_to_kernel_sign)
-from girth.utils import create_beta_LUT
+from girth.look_up_table import create_beta_LUT
 from girth.latent_ability_distribution import LatentPDF
 from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
                                     _solve_integral_equations_LUT)

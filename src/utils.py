@@ -1,9 +1,6 @@
 import numpy as np
-from scipy import interpolate
 from scipy.stats import norm as gaussian
 from scipy.special import roots_legendre, expit
-
-from girth import _array_LUT
 
 
 # There is no int nan, so use this as a placeholder
@@ -12,8 +9,8 @@ INVALID_RESPONSE = -99999
 
 __all__ = ["validate_estimation_options", "irt_evaluation", 
            "trim_response_set_and_counts", "convert_responses_to_kernel_sign",
-           "get_true_false_counts", "mml_approx", "create_beta_LUT", 
-           "_compute_partial_integral", "tag_missing_data", "INVALID_RESPONSE"]
+           "get_true_false_counts", "mml_approx", "_compute_partial_integral", 
+           "tag_missing_data", "INVALID_RESPONSE"]
 
 
 def default_options():
@@ -297,57 +294,3 @@ def _get_quadrature_points(n, a, b):
     # Legendre domain is [-1, 1], convert to [a, b]
     scalar = (b - a) * 0.5
     return scalar * (x + 1) + a, scalar * w
-
-
-def create_beta_LUT(alpha, beta, options=None):
-    """Creates a Look Up Table to speed up conversion.
-    
-    Args:
-        alpha: (array-like) [alpha_start, alpha_stop, alpha_n]
-        beta: (array-like) [beta_start, beta_stop, beta_n]
-        options: dictionary with updates to default options
-        
-    Returns:
-        func: function that linear interpolates for 
-              beta given (alpha, p-value)
-        
-    Options:
-        * distribution: callable
-        * quadrature_bounds: (float, float)
-        * quadrature_n: int
-    """
-    options = validate_estimation_options(options)
-    quad_start, quad_stop = options['quadrature_bounds']
-    quad_n = options['quadrature_n']
-    
-    theta, weight = _get_quadrature_points(quad_n, quad_start, quad_stop)
-    distribution = options['distribution'](theta)
-    distribution_x_weight = distribution * weight
-    
-    alpha = np.linspace(*alpha)
-    beta = np.linspace(*beta)
-    
-    # Get the index into the array
-    interp_a = interpolate.interp1d(alpha, 
-                                    np.arange(alpha.size, dtype='float'),
-                                    kind='linear')
-    
-    the_output = np.zeros((alpha.size, beta.size))
-    _array_LUT(alpha, beta, theta, distribution_x_weight, the_output)
-    
-    func_list = list()
-    for values in the_output:
-        func_list.append(interpolate.interp1d(values, beta, kind='linear', 
-                                                 fill_value=(beta[0], beta[-1]), 
-                                                 bounds_error=False))
-    
-    # return function that returns beta value
-    def interpolate_function(alpha_value, p_value):
-        tmp = interp_a(alpha_value)
-        tmpL = int(tmp)
-        tmpH = int(tmp + 1)
-        dx = tmp - tmpL
-        return ((1 - dx) * func_list[tmpL](p_value) + 
-                dx * func_list[tmpH](p_value))        
-    
-    return interpolate_function

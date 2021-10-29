@@ -294,4 +294,3 @@ def _get_quadrature_points(n, a, b):
     # Legendre domain is [-1, 1], convert to [a, b]
     scalar = (b - a) * 0.5
     return scalar * (x + 1) + a, scalar * w
-

@@ -2,8 +2,8 @@
 [![codecov](https://codecov.io/gh/eribean/girth/branch/master/graph/badge.svg?token=M7QW1P6V6X)](https://codecov.io/gh/eribean/girth)
 [![CodeFactor](https://www.codefactor.io/repository/github/eribean/girth/badge)](https://www.codefactor.io/repository/github/eribean/girth)
 [![PyPI version](https://badge.fury.io/py/girth.svg)](https://badge.fury.io/py/girth)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/girth)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/girth?style=flat-square&color=darkgreen)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square&color=darkgreen)](https://opensource.org/licenses/MIT)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory
 

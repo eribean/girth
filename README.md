@@ -4,6 +4,7 @@
 [![PyPI version](https://badge.fury.io/py/girth.svg)](https://badge.fury.io/py/girth)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/girth?style=flat-square&color=darkgreen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square&color=darkgreen)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/244149937.svg)](https://zenodo.org/badge/latestdoi/244149937)
 
 # <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory
 

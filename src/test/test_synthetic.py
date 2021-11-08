@@ -5,7 +5,6 @@ import numpy as np
 from girth import create_synthetic_irt_dichotomous
 from girth import create_synthetic_mirt_dichotomous
 from girth import create_synthetic_irt_polytomous
-from girth import create_correlated_abilities
 
 from girth.synthetic import (_my_digitize, _credit_func, 
                              _graded_func, _unfold_func,
@@ -76,18 +75,6 @@ class TestSynthetic(unittest.TestCase):
         value = create_synthetic_mirt_dichotomous(difficulty, discrimination,
                                                   thetas, seed=rng)
         np.testing.assert_array_equal(expected, value)
-
-    def test_correlated_abilities(self):
-        """Testing the creation of correlated abilities."""
-        rng = np.random.default_rng(4798265398472900)
-        n_participants = 1000
-        rho = 0.73
-        correlation_matrix = np.array([[1, rho], [rho, 1]])
-
-        output = create_correlated_abilities(correlation_matrix, n_participants, seed=rng)
-        output_corr = np.corrcoef(output)
-
-        np.testing.assert_allclose(output_corr, correlation_matrix, atol=.01)
 
 
 class TestPolytomousSynthetic(unittest.TestCase):

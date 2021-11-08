@@ -4,29 +4,8 @@ from scipy.special import expit
 from girth import irt_evaluation
 
 
-__all__ = ["create_correlated_abilities", "create_synthetic_irt_dichotomous",
-           "create_synthetic_mirt_dichotomous", "create_synthetic_irt_polytomous"]
-
-
-def create_correlated_abilities(correlation_matrix, n_participants, seed=None):
-    """ Creates correlated ability parameters based on an input correlation matrix.
-
-    This is a helper function for use in synthesizing multi-dimensional data
-    assuming multivariate normal distribution
-
-    Args:
-        correlation_matrix: (2d array) Symmetric matrix defining
-                            the correlation between the abilities
-        n_participants: number of participants to synthesize
-        seed: Random Number Generator seed (None by default)
-
-    Returns:
-        abilities: (2d array) correlated abilities
-    """
-    rng = np.random.default_rng(seed)
-    lower = np.linalg.cholesky(correlation_matrix)
-
-    return lower @ rng.standard_normal((correlation_matrix.shape[0], n_participants))
+__all__ = ["create_synthetic_irt_dichotomous", "create_synthetic_mirt_dichotomous", 
+           "create_synthetic_irt_polytomous"]
 
 
 def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,

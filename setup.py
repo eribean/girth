@@ -9,10 +9,13 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth', 'girth.three_pl', 'girth.classical',
+        packages=['girth', 'girth.classical',
+                  'girth.unidimensional'
                   'girth.multidimensional',
+                  'girth.synthetic',
                   'girth.factoranalysis', 'girth.common'],
-        package_dir={'girth': convert_path('./src'),
+        package_dir={'girth': convert_path('./estimation'),
+                     'girth.synthetic': convert_path('./synthetic'),
                      'girth.common': convert_path('./common'),
                      'girth.factoranalysis': convert_path('./factoranalysis')},
         version="0.7.5",
@@ -23,7 +26,8 @@ if __name__ == '__main__':
         author='Ryan C. Sanchez',
         author_email='ryan.sanchez@gofactr.com',
         url = 'https://eribean.github.io/girth/',
-        keywords = ['IRT', 'Psychometrics', 'Item Response Theory'],
+        keywords = ['IRT', 'Psychometrics', 'Item Response Theory', 
+                    'Computer Adaptive Testing', 'Psychology'],
         install_requires = ['numpy', 'scipy'],
         classifiers = [
             'Development Status :: 3 - Alpha',

@@ -8,6 +8,8 @@ from girth import convert_responses_to_kernel_sign, validate_estimation_options
 from girth.utils import (INVALID_RESPONSE, _get_quadrature_points, 
                          _compute_partial_integral)
 
+from girth.unidimensional.ability_methods_poly import _ability_eap_abstract
+
 
 __all__ = ["ability_mle", "ability_map", "ability_eap"]
 
@@ -101,32 +103,6 @@ def ability_map(dataset, difficulty, discrimination, options=None):
         thetas[ndx] = fminbound(_theta_min, -6, 6)
 
     return thetas
-
-
-def _ability_eap_abstract(partial_int, weight, theta):
-    """Generic function to compute abilities
-
-    Estimates the ability parameters (theta) for models via
-    expected a posterior likelihood estimation.
-
-    Args:
-        partial_int: (2d array) partial integrations over items
-        weight: weighting to apply before summation
-        theta: quadrature evaluation locations
-    
-    Returns:
-        abilities: the estimated latent abilities
-    """
-    local_int = partial_int * weight
-
-    # Compute the denominator
-    denominator = np.sum(local_int, axis=1)
-
-    # compute the numerator
-    local_int *= theta
-    numerator = np.sum(local_int, axis=1)
-
-    return numerator / denominator
 
 
 def ability_eap(dataset, difficulty, discrimination, options=None):

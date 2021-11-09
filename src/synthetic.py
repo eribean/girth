@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.special import expit
 
-from girth import irt_evaluation
-
 
 __all__ = ["create_synthetic_irt_dichotomous", "create_synthetic_irt_polytomous"]
 
@@ -81,21 +79,19 @@ def _graded_func(difficulty, discrimination, thetas, output):
     """
     # This model is based on the difference of standard
     # logistic functions.
+    temp = discrimination * thetas
+    intercept = discrimination * difficulty
 
     # Do first level
-    output[0] = 1.0 - irt_evaluation(np.array([difficulty[0]]),
-                                     discrimination, thetas)
+    output[0] = 1.0 - expit(temp - intercept[0])
 
     for level_ndx in range(1, output.shape[0]-1):
-        right = irt_evaluation(np.array([difficulty[level_ndx]]),
-                               discrimination, thetas)
-        left = irt_evaluation(np.array([difficulty[level_ndx-1]]),
-                              discrimination, thetas)
+        right = expit(temp - intercept[level_ndx])
+        left = expit(temp - intercept[level_ndx-1])
         output[level_ndx] = left - right
 
     # Do last level
-    output[-1] = irt_evaluation(np.array([difficulty[-1]]),
-                                discrimination, thetas)
+    output[-1] = expit(temp - intercept[-1])
 
 
 def _graded_func_md(difficulty, discrimination, thetas, output):

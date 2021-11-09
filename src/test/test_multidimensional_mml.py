@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from girth import create_synthetic_mirt_dichotomous, create_synthetic_irt_polytomous
+from girth import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
 from girth import multidimensional_grm_mml, multidimensional_twopl_mml
 from girth import initial_guess_md
 
@@ -21,7 +21,7 @@ class TestMultiDimensionalIRT(unittest.TestCase):
         discrimination[-1, 0] *= np.sign(discrimination[-1, 0])
         discrimination[-2, -1] *= np.sign(discrimination[-2, -1])
         thetas = rng.standard_normal((2, 1000))
-        syn_data = create_synthetic_mirt_dichotomous(difficulty, 
+        syn_data = create_synthetic_irt_dichotomous(difficulty, 
                                                      discrimination, 
                                                      thetas, seed=rng)
         
@@ -85,7 +85,7 @@ class TestMultiDimensionalIRT(unittest.TestCase):
         discrimination[-1, 0] *= np.sign(discrimination[-1, 0])
         discrimination[-2, -1] *= np.sign(discrimination[-2, -1])
         thetas = rng.standard_normal((2, 2000))
-        syn_data = create_synthetic_mirt_dichotomous(difficulty, 
+        syn_data = create_synthetic_irt_dichotomous(difficulty, 
                                                      discrimination, 
                                                      thetas, seed=rng)
 

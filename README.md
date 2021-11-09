@@ -143,7 +143,7 @@ of time
 ```python
 import numpy as np
 
-from girth import create_synthetic_mirt_dichotomous
+from girth import create_synthetic_irt_dichotomous
 from girth import multidimensional_twopl_mml
 
 # Create Synthetic Data
@@ -151,7 +151,7 @@ discrimination = np.random.uniform(-2, 2, (20, 2))
 thetas = np.random.randn(2, 1000)
 difficulty = np.linspace(-1.5, 1, 20)
 
-syn_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
+syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination, thetas)
 
 # Solve for parameters
 estimates = multidimensional_twopl_mml(syn_data, 2, {'quadrature_n': 21})
@@ -217,7 +217,7 @@ discrimination = np.random.uniform(-2, 2, (20, 2))
 thetas = np.random.randn(2, 1000)
 difficulty = np.linspace(-1.5, 1, 20)
 
-syn_data = girth.create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
+syn_data = girth.create_synthetic_irt_dichotomous(difficulty, discrimination, thetas)
 
 polychoric_corr = gcm.polychoric_correlation(syn_data, start_val=0, stop_val=1)
 

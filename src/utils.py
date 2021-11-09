@@ -7,9 +7,9 @@ from scipy.special import roots_legendre, expit
 INVALID_RESPONSE = -99999
 
 
-__all__ = ["validate_estimation_options", "irt_evaluation", 
+__all__ = ["validate_estimation_options", "mml_approx",
            "trim_response_set_and_counts", "convert_responses_to_kernel_sign",
-           "get_true_false_counts", "mml_approx", "_compute_partial_integral", 
+           "get_true_false_counts", "_compute_partial_integral", 
            "tag_missing_data", "INVALID_RESPONSE"]
 
 
@@ -239,33 +239,6 @@ def trim_response_set_and_counts(response_sets, counts):
     counts = counts[mask]
 
     return response_sets, counts
-
-
-def irt_evaluation(difficulty, discrimination, thetas):
-    """ Evaluation of unidimensional IRT model.
-
-    Evaluates an IRT model and returns the exact values.  This function
-    supports only unidimemsional models
-
-    Assumes the model
-        P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
-
-    Args:
-        difficulty: (1d array) item difficulty parameters
-        discrimination:  (1d array | number) item discrimination parameters
-        thetas: (1d array) person abilities
-
-    Returns:
-        probabilities: (2d array) evaluation of sigmoid for given inputs
-    """
-    # If discrimination is a scalar, make it an array
-    if np.atleast_1d(discrimination).size == 1:
-        discrimination = np.full_like(difficulty, discrimination,
-                                      dtype='float')
-
-    kernel = thetas - difficulty[:, None]
-    kernel *= discrimination[:, None]
-    return expit(kernel)
 
 
 def _get_quadrature_points(n, a, b):

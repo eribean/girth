@@ -1,8 +1,9 @@
 import numpy as np
 from scipy.optimize import fmin_slsqp, fminbound
+from scipy.special import expit
 
 from girth import (condition_polytomous_response,
-                   convert_responses_to_kernel_sign, irt_evaluation,
+                   convert_responses_to_kernel_sign,
                    mml_approx, trim_response_set_and_counts,
                    validate_estimation_options)
 
@@ -258,9 +259,9 @@ def grm_jml(dataset, options=None):
         #####################
         for ndx in range(n_takers):
             def _theta_min(theta):
-                # Solves for ability parameters (theta)
-                graded_prob = (irt_evaluation(betas, discrimination, theta) -
-                               irt_evaluation(betas_roll, discrimination, theta))
+                # Solves for ability parameters (theta) 
+                graded_prob = (expit(discrimination * (theta - betas)) 
+                               - expit(discrimination * (theta - betas_roll)))
 
                 values = graded_prob[responses[:, ndx]]
                 return -np.log(values[valid_response_mask[:, ndx]] + 1e-313).sum()
@@ -287,8 +288,8 @@ def grm_jml(dataset, options=None):
                 betas[start_ndx+1:end_ndx] = estimates[1:]
                 betas_roll[start_ndx:end_ndx-1] = estimates[1:]
 
-                graded_prob = (irt_evaluation(betas, discrimination, thetas) -
-                               irt_evaluation(betas_roll, discrimination, thetas))
+                graded_prob = (expit(discrimination[:, None] * (thetas[None, :] - betas[:, None]))
+                               - expit(discrimination[:, None] * (thetas[None, :] - betas_roll[:, None])))
 
                 values = np.take_along_axis(
                     graded_prob, responses[None, ndx], axis=0).squeeze()

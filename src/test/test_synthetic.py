@@ -2,9 +2,7 @@ import unittest
 
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous
-from girth import create_synthetic_mirt_dichotomous
-from girth import create_synthetic_irt_polytomous
+from girth import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
 
 from girth.synthetic import (_my_digitize, _credit_func, 
                              _graded_func, _unfold_func,
@@ -48,33 +46,24 @@ class TestSynthetic(unittest.TestCase):
         discrimination = rng.standard_normal((n_items, n_factors))
         difficulty = np.linspace(-5, 5, n_items)
         thetas = rng.standard_normal((n_factors, n_people))
-        value = create_synthetic_mirt_dichotomous(difficulty, discrimination,
-                                                  thetas, seed=rng)
+        value = create_synthetic_irt_dichotomous(difficulty, discrimination,
+                                                 thetas, seed=rng)
 
         np.testing.assert_array_equal(expected, value)
 
-    def test_synthetic_mirt_creation_single(self):
-        """Testing the creation of synthetic data, common discrimination."""
-        rng = np.random.default_rng(3847520938201012)
-
-        # Regression test
-        expected = np.array([
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 1, 1, 0],
-            [0, 0, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 0]
-        ])
-
+    def test_mirt_fails(self):
+        """Testing that multidimensional fails when discrimination is too large."""
+        
         n_factors = 3
         n_items = 5
         n_people = 6
-        discrimination = rng.standard_normal((1, n_factors))
+        discrimination = np.random.randn(*(n_items, n_factors, 3))
         difficulty = np.linspace(-5, 5, n_items)
-        thetas = rng.standard_normal((n_factors, n_people))
-        value = create_synthetic_mirt_dichotomous(difficulty, discrimination,
-                                                  thetas, seed=rng)
-        np.testing.assert_array_equal(expected, value)
+        thetas = np.random.randn(*(n_factors, n_people))
+
+        with self.assertRaises(AssertionError):
+            value = create_synthetic_irt_dichotomous(difficulty, discrimination,
+                                                     thetas)
 
 
 class TestPolytomousSynthetic(unittest.TestCase):

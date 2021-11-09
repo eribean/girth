@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from girth import multidimensional_ability_eap, multidimensional_ability_map
-from girth.synthetic import create_synthetic_mirt_dichotomous, create_synthetic_irt_polytomous
+from girth.synthetic import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
 
 
 class TestMultidimensionalMethods(unittest.TestCase):
@@ -28,8 +28,8 @@ class TestMultidimensionalMethods(unittest.TestCase):
         difficulty = np.linspace(-1.5, 1.5, 10)
         thetas = rng.standard_normal((3, 250))
 
-        syn_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, 
-                                                     thetas, seed=rng)
+        syn_data = create_synthetic_irt_dichotomous(difficulty, discrimination, 
+                                                    thetas, seed=rng)
         
         abilities_eap = multidimensional_ability_eap(syn_data, difficulty, 
                                                      discrimination, {'quadrature_n': 21})

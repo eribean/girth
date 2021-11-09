@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 if __name__ == '__main__':
     setup(
         name="girth", 
-        packages=['girth', 'girth.classical',
+        packages=['girth', 'girth.utilities',
                   'girth.unidimensional'
                   'girth.multidimensional',
                   'girth.synthetic',

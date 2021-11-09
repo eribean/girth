@@ -4,8 +4,7 @@ from scipy.special import expit
 from girth import irt_evaluation
 
 
-__all__ = ["create_synthetic_irt_dichotomous", "create_synthetic_mirt_dichotomous", 
-           "create_synthetic_irt_polytomous"]
+__all__ = ["create_synthetic_irt_dichotomous", "create_synthetic_irt_polytomous"]
 
 
 def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
@@ -15,8 +14,11 @@ def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
     Creates synthetic IRT data to test parameters estimation functions.  
     Only for use with dichotomous outputs
 
-    Assumes the model
-        P(theta) = 1.0 / (1 + exp(discrimination * (theta - difficulty)))
+    Assumes the model for univariate:
+        P(theta) = 1.0 / (1 + exp(-discrimination * (theta - difficulty)))
+
+    and for multivariate
+        P(theta) = 1.0 / (1 + exp(-1 * (discrimination @ theta + intercept)))
 
     Args:
         difficulty: [array] of difficulty parameters
@@ -31,58 +33,29 @@ def create_synthetic_irt_dichotomous(difficulty, discrimination, thetas,
     """
     rng = np.random.default_rng(seed)
 
-    if np.ndim(guessing) < 1:
+    if np.size(discrimination) == 1:
+        discrimination = np.full_like(difficulty, discrimination)
+
+    if np.size(guessing) == 1:
         guessing = np.full_like(difficulty, guessing)
 
-    continuous_output = irt_evaluation(difficulty, discrimination, thetas)
+    if np.ndim(discrimination) == 1:
+        kernel = thetas[None, :] - difficulty[:, None]
+        kernel *= discrimination[:, None]
+
+    elif np.ndim(discrimination) == 2:
+        kernel = discrimination @ thetas
+        kernel += difficulty[:, None]
+    
+    else:
+        raise AssertionError("Discrimination dimensions are not 1 or 2, "
+            f"got {np.ndim(discrimination)}")
+
+    continuous_output = expit(kernel)
 
     # Add guessing parameters
     continuous_output *= (1.0 - guessing[:, None])
     continuous_output += guessing[:, None]
-
-    # convert to binary based on probability
-    random_compare = rng.uniform(size=continuous_output.shape)
-
-    return (random_compare <= continuous_output).astype('int')
-
-
-def create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas,
-                                      seed=None):
-    """ Creates dichotomous multidimensional synthetic IRT data.
-
-    Assumes the model
-        P(theta) = 1.0 / (1 + exp(-1 * (dot(discrimination,theta) + difficulty)))
-
-    Args:
-        difficulty: [array, M] of difficulty parameters
-        discrimination:  [2-D array, MxN] of discrimination parameters
-        thetas: [2-D array, NxP] of person abilities
-        seed: Optional setting to reproduce results
-
-    Returns:
-        synthetic_data: (2d array) realization of possible response given parameters
-
-
-    Example:
-        n_factors = 3
-        n_items = 15
-        n_people = 500
-        difficulty = np.linspace(-2.5, 2.5, n_items)
-        discrimination = np.random.randn(n_items, n_factors)
-        thetas = np.random.randn(n_factors, n_people)
-
-        synthetic_data = create_synthetic_mirt_dichotomous(difficulty, discrimination, thetas)
-    """
-    rng = np.random.default_rng(seed)
-
-    # If the input is just a vector of discriminations
-    if (np.ndim(discrimination) == 1) or (discrimination.shape[0] == 1):
-        discrimination = np.vstack((discrimination,) * difficulty.shape[0])
-
-    # Inline computation of the logistic kernel
-    kernel_terms = discrimination @ thetas
-    kernel_terms += difficulty[:, None]
-    continuous_output = expit(kernel_terms)
 
     # convert to binary based on probability
     random_compare = rng.uniform(size=continuous_output.shape)

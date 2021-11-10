@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from girth.utilities import INVALID_RESPONSE
+from girth import INVALID_RESPONSE
 from girth.common import (entropy, hypersphere, procrustes_rotation, 
                           reverse_score, cronbach_alpha)
 

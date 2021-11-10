@@ -1,12 +1,10 @@
 import numpy as np
 from scipy.optimize import fmin_slsqp
 
-from girth import validate_estimation_options
-from girth.utils import INVALID_RESPONSE 
-from girth.latent_ability_distribution import LatentPDF
-from girth.polytomous_utils import (condition_polytomous_response,
-                                    _unfold_partial_integral)
-from girth.unidimensional.ability_methods_poly import _ability_eap_abstract
+from girth.utilities import (INVALID_RESPONSE, LatentPDF,
+    condition_polytomous_response, validate_estimation_options)
+from girth.unidimensional.polytomous.partial_integrals_poly import _unfold_partial_integral
+from girth.unidimensional.polytomous.ability_estimation_poly import _ability_eap_abstract
 
 
 __all__ = ["gum_mml"]

@@ -2,8 +2,9 @@ import unittest
 
 import numpy as np
 
-from girth.utils import _get_quadrature_points, validate_estimation_options
-from girth.look_up_table import _array_LUT, create_beta_LUT
+from girth.utilities.utils import _get_quadrature_points
+from girth import validate_estimation_options, create_beta_LUT
+from girth.utilities.look_up_table import _array_LUT
 
 
 class LookUpTableTests(unittest.TestCase):

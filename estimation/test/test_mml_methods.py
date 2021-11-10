@@ -2,11 +2,10 @@ import unittest  # pylint: disable=cyclic-import
 
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous
-from girth import rasch_mml, onepl_mml, twopl_mml
-
-from girth import create_synthetic_irt_polytomous
-from girth import grm_mml, pcm_mml, gum_mml
+from girth.synthetic import (create_synthetic_irt_dichotomous, 
+    create_synthetic_irt_polytomous)
+from girth import (rasch_mml, onepl_mml, twopl_mml,
+    grm_mml, pcm_mml, gum_mml)
 
 
 class TestMMLRaschMethods(unittest.TestCase):

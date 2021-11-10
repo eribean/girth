@@ -2,10 +2,10 @@ import numpy as np
 from scipy.optimize import fminbound
 from scipy.special import expit
 
-from girth import (validate_estimation_options,
-                   get_true_false_counts, create_beta_LUT)
-from girth.utils import (_get_quadrature_points, _compute_partial_integral,
-                         INVALID_RESPONSE)
+from girth.utilities import (validate_estimation_options,
+    get_true_false_counts, create_beta_LUT, INVALID_RESPONSE)
+from girth.utilities.utils import _get_quadrature_points    
+from girth.unidimensional.dichotomous.partial_integrals import _compute_partial_integral
 
 
 __all__ = ["rasch_mml", "onepl_mml"]

@@ -2,7 +2,8 @@ import numpy as np
 from scipy import interpolate
 from scipy.special import expit
 
-from girth import validate_estimation_options, _get_quadrature_points
+from girth.utilities.girth_options import validate_estimation_options
+from girth.utilities.utils import _get_quadrature_points
 
 
 __all__ = ["create_beta_LUT"]

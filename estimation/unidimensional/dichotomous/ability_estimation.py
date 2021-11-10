@@ -4,11 +4,12 @@ from scipy import integrate
 from scipy.stats import uniform
 from scipy.stats import norm as gaussian
 from scipy.optimize import fminbound
-from girth import convert_responses_to_kernel_sign, validate_estimation_options
-from girth.utils import (INVALID_RESPONSE, _get_quadrature_points, 
-                         _compute_partial_integral)
 
-from girth.unidimensional.ability_methods_poly import _ability_eap_abstract
+from girth.utilities import (convert_responses_to_kernel_sign, 
+    validate_estimation_options, INVALID_RESPONSE)
+from girth.utilities.utils import _get_quadrature_points
+from girth.unidimensional.dichotomous.partial_integrals import _compute_partial_integral
+from girth.unidimensional.polytomous.ability_estimation_poly import _ability_eap_abstract
 
 
 __all__ = ["ability_mle", "ability_map", "ability_eap"]

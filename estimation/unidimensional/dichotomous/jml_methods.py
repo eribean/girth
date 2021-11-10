@@ -2,9 +2,8 @@ import numpy as np
 from scipy.optimize import fmin_slsqp, fminbound
 from scipy.special import expit
 
-from girth import (convert_responses_to_kernel_sign,
-                   mml_approx, trim_response_set_and_counts,
-                   validate_estimation_options)
+from girth.utilities import (convert_responses_to_kernel_sign,
+    mml_approx, trim_response_set_and_counts, validate_estimation_options)
 
 
 __all__ = ["rasch_jml", "onepl_jml", "twopl_jml"]

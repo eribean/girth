@@ -2,11 +2,12 @@ import numpy as np
 from scipy.optimize import fminbound, fmin_slsqp
 from scipy import integrate
 
-from girth import (validate_estimation_options, get_true_false_counts, 
-                   convert_responses_to_kernel_sign)
-from girth.mml_methods import _mml_abstract
-from girth.utils import _get_quadrature_points
-from girth.three_pl.three_pl_utils import _compute_partial_integral_3pl
+from girth.utilities import (validate_estimation_options, 
+    get_true_false_counts, convert_responses_to_kernel_sign)
+from girth.utilities.utils import _get_quadrature_points
+
+from girth.unidimensional.dichotomous.rasch_mml import _mml_abstract
+from girth.unidimensional.dichotomous.partial_integrals import _compute_partial_integral_3pl
 
 
 def threepl_mml(dataset, options=None):

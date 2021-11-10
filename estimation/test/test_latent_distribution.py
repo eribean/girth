@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from scipy.stats import norm as gaussian
 
-import girth.latent_ability_distribution as glad
+import girth.utilities.latent_ability_distribution as glad
 
 
 class TestLatentDistribution(unittest.TestCase):

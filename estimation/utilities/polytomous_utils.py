@@ -3,7 +3,7 @@ from scipy import integrate
 from scipy.optimize import fminbound
 from scipy.special import expit
 
-from girth import INVALID_RESPONSE
+from girth.utilities.utils import INVALID_RESPONSE
 
 
 __all__ = ["condition_polytomous_response"]

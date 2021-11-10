@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from girth import create_synthetic_irt_polytomous
-from girth.classical import classical_test_statistics
+from girth.synthetic import create_synthetic_irt_polytomous
+from girth import classical_test_statistics
 
 
 class TestClassicalStatistics(unittest.TestCase):

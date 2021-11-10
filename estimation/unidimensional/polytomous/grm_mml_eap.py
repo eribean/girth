@@ -1,12 +1,13 @@
 import numpy as np
 from scipy import stats
 
-from girth import condition_polytomous_response, validate_estimation_options
-from girth.look_up_table import create_beta_LUT
-from girth.latent_ability_distribution import LatentPDF
-from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
-                                    _solve_integral_equations_LUT)
-from girth.ability_methods import _ability_eap_abstract
+from girth.utilities import (create_beta_LUT, 
+    condition_polytomous_response, validate_estimation_options)
+from girth.utilities.latent_ability_distribution import LatentPDF
+from girth.utilities.polytomous_utils import (
+    _solve_for_constants, _solve_integral_equations_LUT)
+from girth.unidimensional.polytomous.ability_estimation_poly import _ability_eap_abstract
+from girth.unidimensional.polytomous.partial_integrals_poly import _graded_partial_integral
 
 
 __all__ = ["grm_mml_eap"]

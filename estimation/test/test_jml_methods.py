@@ -2,10 +2,10 @@ import unittest
 
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous
-from girth import create_synthetic_irt_polytomous
+from girth.synthetic import (create_synthetic_irt_dichotomous,
+    create_synthetic_irt_polytomous)
 from girth import rasch_jml, onepl_jml, twopl_jml, grm_jml, pcm_jml
-from girth.jml_methods import _jml_inequality
+from girth.unidimensional.polytomous.grm_jml import _jml_inequality
 
 
 class TestJointMaximum(unittest.TestCase):

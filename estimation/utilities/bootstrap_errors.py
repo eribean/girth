@@ -5,7 +5,7 @@ from functools import partial
 
 import numpy as np
 
-from girth import validate_estimation_options
+from girth.utilities import validate_estimation_options
 
 
 __all__ = ["standard_errors_bootstrap"]

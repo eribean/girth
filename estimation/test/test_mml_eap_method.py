@@ -3,11 +3,9 @@ import unittest  # pylint: disable=cyclic-import
 import numpy as np
 from scipy import stats
 
-from girth import create_synthetic_irt_dichotomous
-from girth import twopl_mml_eap
-
-from girth import create_synthetic_irt_polytomous
-from girth import grm_mml_eap
+from girth.synthetic import (create_synthetic_irt_dichotomous, 
+    create_synthetic_irt_polytomous)
+from girth import twopl_mml_eap, grm_mml_eap
 
 
 class TestMMLEAPMethods(unittest.TestCase):

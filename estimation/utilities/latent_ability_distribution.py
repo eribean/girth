@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.optimize import fmin_slsqp
 
-from girth import validate_estimation_options
-from girth.utils import _get_quadrature_points
+from girth.utilities.girth_options import validate_estimation_options
+from girth.utilities.utils import _get_quadrature_points
 
 
 __all__ = ["LatentPDF", "CubicSplinePDF"]

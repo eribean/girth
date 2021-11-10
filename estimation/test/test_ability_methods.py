@@ -3,12 +3,10 @@ import unittest # pylint: disable=cyclic-import
 import numpy as np
 from scipy.stats import skewnorm
 
-from girth.ability_methods import _ability_eap_abstract
-from girth import (ability_eap, ability_map, 
-                   ability_mle)
-
-from girth import create_synthetic_irt_dichotomous
-from girth.utils import INVALID_RESPONSE                
+from girth import (
+    ability_eap, ability_map, ability_mle, INVALID_RESPONSE)
+from girth.unidimensional.polytomous.ability_estimation_poly import _ability_eap_abstract
+from girth.synthetic import create_synthetic_irt_dichotomous
 
 
 def _rmse(expected, result):

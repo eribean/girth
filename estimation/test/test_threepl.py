@@ -2,10 +2,9 @@ import unittest  # pylint: disable=cyclic-import
 
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous
-from girth.three_pl import (threepl_mml, 
-                            ability_3pl_eap, ability_3pl_map,
-                            ability_3pl_mle)
+from girth.synthetic import create_synthetic_irt_dichotomous
+from girth import (threepl_mml,ability_3pl_eap, ability_3pl_map,
+    ability_3pl_mle)
 
 
 class TestMMLThreePLMethods(unittest.TestCase):

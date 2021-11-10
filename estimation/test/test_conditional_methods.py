@@ -2,9 +2,9 @@ import unittest
 
 import numpy as np
 
+from girth.synthetic import create_synthetic_irt_dichotomous
 from girth import rasch_conditional
-from girth import create_synthetic_irt_dichotomous
-from girth.conditional_methods import _symmetric_functions
+from girth.unidimensional.dichotomous.rasch_conditional import _symmetric_functions
 
 
 class TestConditionalRasch(unittest.TestCase):

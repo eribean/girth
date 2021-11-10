@@ -2,12 +2,14 @@ import unittest
 
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
-from girth import multidimensional_grm_mml, multidimensional_twopl_mml
-from girth import initial_guess_md
+from girth.synthetic import (create_synthetic_irt_dichotomous,
+    create_synthetic_irt_polytomous)
+from girth import (multidimensional_grm_mml, multidimensional_twopl_mml, 
+    initial_guess_md)
 
 from girth.multidimensional.multidimensional_mml_methods import _build_einsum_string
 from girth.multidimensional.multidimensional_initial_guess import _constrained_rotation
+
 
 class TestMultiDimensionalIRT(unittest.TestCase):
     """Test fixture for multidimensional IRT."""

@@ -2,8 +2,8 @@ import numpy as np
 
 from scipy.optimize import fminbound
 
-from girth import (trim_response_set_and_counts,
-                   validate_estimation_options)
+from girth.utilities import (
+    trim_response_set_and_counts, validate_estimation_options)
 
 
 __all__ = ["rasch_conditional"]

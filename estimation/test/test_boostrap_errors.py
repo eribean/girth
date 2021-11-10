@@ -2,10 +2,11 @@ import unittest
 
 import numpy as np
 
-from girth import standard_errors_bootstrap
 from girth.synthetic import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
-from girth import (jml_methods, mml_methods, mml_eap_methods, mml_full_methods,
-                   conditional_methods)
+from girth import (rasch_jml, onepl_jml, twopl_jml, grm_jml, pcm_jml,
+    rasch_mml, onepl_mml, twopl_mml, twopl_mml_eap, grm_mml_eap, pcm_mml,
+    grm_mml, rasch_conditional, standard_errors_bootstrap)
+
 
 def _contains_keys(results, identifier):
     """Checks for standard keys in bootstrap result."""
@@ -41,18 +42,18 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_dichotomous(self.difficulty, self.discrimination, 
                                                    self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, jml_methods.rasch_jml, n_processors=1,
+        result = standard_errors_bootstrap(dataset, rasch_jml, n_processors=1,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertEqual(result['Standard Errors']['Discrimination'][0], 0)
         _contains_keys(result, 'Rasch JML')
 
-        result = standard_errors_bootstrap(dataset, jml_methods.onepl_jml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, onepl_jml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         _contains_keys(result, '1PL JML')
 
-        result = standard_errors_bootstrap(dataset, jml_methods.twopl_jml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, twopl_jml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         _contains_keys(result, '2PL JML')
@@ -64,7 +65,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_polytomous(self.difficulty_poly, self.discrimination, 
                                                   self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, jml_methods.grm_jml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, grm_jml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertTupleEqual(result['95th CI']['Difficulty'][0].shape, 
@@ -74,7 +75,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_polytomous(self.difficulty_poly, self.discrimination, 
                                                   self.theta, seed=rng, model='pcm')
 
-        result = standard_errors_bootstrap(dataset, jml_methods.pcm_jml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, pcm_jml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertTupleEqual(result['95th CI']['Difficulty'][0].shape, 
@@ -87,7 +88,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_dichotomous(self.difficulty, self.discrimination, 
                                                    self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, conditional_methods.rasch_conditional, 
+        result = standard_errors_bootstrap(dataset, rasch_conditional, 
                                            n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
@@ -100,18 +101,18 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_dichotomous(self.difficulty, self.discrimination, 
                                                    self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, mml_methods.rasch_mml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, rasch_mml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertEqual(result['Standard Errors']['Discrimination'][0], 0)
         _contains_keys(result, 'Rasch MML')
 
-        result = standard_errors_bootstrap(dataset, mml_methods.onepl_mml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, onepl_mml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         _contains_keys(result, '1PL MML')
 
-        result = standard_errors_bootstrap(dataset, mml_methods.twopl_mml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, twopl_mml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         _contains_keys(result, '2PL MML')
@@ -123,7 +124,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_polytomous(self.difficulty_poly, self.discrimination, 
                                                   self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, mml_methods.grm_mml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, grm_mml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertTupleEqual(result['95th CI']['Difficulty'][0].shape, 
@@ -133,7 +134,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_polytomous(self.difficulty_poly, self.discrimination, 
                                                   self.theta, seed=rng, model='pcm')
 
-        result = standard_errors_bootstrap(dataset, mml_full_methods.pcm_mml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, pcm_mml, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertTupleEqual(result['95th CI']['Difficulty'][0].shape, 
@@ -146,7 +147,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_dichotomous(self.difficulty, self.discrimination, 
                                                    self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, mml_eap_methods.twopl_mml_eap, n_processors=2,
+        result = standard_errors_bootstrap(dataset, twopl_mml_eap, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         _contains_keys(result, '2PL EAP-MML')        
@@ -154,7 +155,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_polytomous(self.difficulty_poly, self.discrimination, 
                                                   self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, mml_eap_methods.grm_mml_eap, n_processors=2,
+        result = standard_errors_bootstrap(dataset, grm_mml_eap, n_processors=2,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertTupleEqual(result['95th CI']['Difficulty'][0].shape, 

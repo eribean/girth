@@ -7,9 +7,9 @@ from scipy.special import roots_legendre
 INVALID_RESPONSE = -99999
 
 
-__all__ = ["mml_approx",
-           "trim_response_set_and_counts", "convert_responses_to_kernel_sign",
-           "get_true_false_counts", "tag_missing_data", "INVALID_RESPONSE"]
+__all__ = ["mml_approx", "trim_response_set_and_counts", "tag_missing_data",
+            "convert_responses_to_kernel_sign", "get_true_false_counts", 
+            "tag_missing_data", "INVALID_RESPONSE"]
 
 
 def tag_missing_data(dataset, valid_responses):

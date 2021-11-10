@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import stats
 
-from girth import grm_mml_eap
+from girth.unidimensional.polytomous import grm_mml_eap
 
 
 __all__ = ["twopl_mml_eap"]

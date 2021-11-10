@@ -1,12 +1,11 @@
 import numpy as np
 from scipy.optimize import fmin_slsqp
 
-from girth import validate_estimation_options
-from girth.utils import INVALID_RESPONSE 
-from girth.latent_ability_distribution import LatentPDF
-from girth.polytomous_utils import (condition_polytomous_response,
-                                    _credit_partial_integral)
-from girth.ability_methods import _ability_eap_abstract
+from girth.utilities import (condition_polytomous_response,
+    INVALID_RESPONSE, validate_estimation_options)
+from girth.utilities.latent_ability_distribution import LatentPDF
+from girth.unidimensional.polytomous.partial_integrals_poly import _credit_partial_integral
+from girth.unidimensional.polytomous.ability_estimation_poly import _ability_eap_abstract
 
 
 __all__ = ["pcm_mml"]

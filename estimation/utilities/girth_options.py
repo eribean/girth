@@ -1,3 +1,6 @@
+from scipy.stats import norm as gaussian
+
+
 __all__= ['default_options', 'validate_estimation_options']
 
 

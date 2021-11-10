@@ -2,7 +2,7 @@ import numpy as np
 
 from girth import validate_estimation_options
 
-from girth.utils import INVALID_RESPONSE
+from girth.utilities import INVALID_RESPONSE
 from girth.common import polychoric_correlation
 from girth.factoranalysis import maximum_likelihood_factor_analysis as mlfa
 

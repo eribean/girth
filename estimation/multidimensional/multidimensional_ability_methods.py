@@ -4,10 +4,12 @@ import numpy as np
 from scipy.optimize import fmin_slsqp
 from scipy.special import expit
 
-from girth.latent_ability_distribution import LatentPDF
-from girth import (condition_polytomous_response,
-                   validate_estimation_options)
-from girth.polytomous_utils import _graded_partial_integral_md, _build_einsum_string
+
+from girth.utilities import (
+    condition_polytomous_response, validate_estimation_options)
+from girth.utilities.latent_ability_distribution import LatentPDF
+from girth.utilities.polytomous_utils import _build_einsum_string
+from girth.multidimensional.partial_integral_md import _graded_partial_integral_md
 
 
 __all__ = ["multidimensional_ability_map", "multidimensional_ability_eap"]

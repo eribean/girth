@@ -2,8 +2,8 @@ import numpy as np
 from scipy.optimize import fmin_slsqp, fminbound
 from scipy.special import expit
 
-from girth import (condition_polytomous_response,
-                   validate_estimation_options)
+from girth.utilities import (
+    condition_polytomous_response, validate_estimation_options)
 
 
 __all__ = ["grm_jml"]

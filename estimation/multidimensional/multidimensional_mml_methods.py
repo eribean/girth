@@ -6,12 +6,13 @@ from scipy.optimize import fmin_slsqp, fminbound
 from girth import (condition_polytomous_response,create_beta_LUT,
                    validate_estimation_options)
 
-from girth.utils import INVALID_RESPONSE
-from girth.latent_ability_distribution import LatentPDF
+from girth.utilities import INVALID_RESPONSE
+from girth.utilities.latent_ability_distribution import LatentPDF
 from girth.multidimensional import multidimensional_ability_eap, initial_guess_md
-from girth.polytomous_utils import (_graded_partial_integral_md, _solve_for_constants,
-                                    _solve_integral_equations, _build_einsum_string,
-                                    _solve_integral_equations_LUT)
+from girth.utilities.polytomous_utils import (
+    _solve_for_constants,_solve_integral_equations, _build_einsum_string,
+    _solve_integral_equations_LUT)
+from girth.multidimensional.partial_integral_md import _graded_partial_integral_md
 
 
 __all__ = ["multidimensional_twopl_mml", "multidimensional_grm_mml"]

@@ -1,12 +1,13 @@
 import numpy as np
-
 from scipy import integrate
 from scipy.stats import uniform
 from scipy.stats import norm as gaussian
 from scipy.optimize import fminbound
-from girth import convert_responses_to_kernel_sign, validate_estimation_options
-from girth.utils import _get_quadrature_points
-from girth.three_pl.three_pl_utils import _compute_partial_integral_3pl
+
+from girth.utilities import (
+    convert_responses_to_kernel_sign, validate_estimation_options)
+from girth.utilities.utils import _get_quadrature_points
+from girth.unidimensional.dichotomous.partial_integrals import _compute_partial_integral_3pl
 
 
 def ability_3pl_mle(dataset, difficulty, discrimination,

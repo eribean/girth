@@ -2,12 +2,14 @@ import unittest
 
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
+from girth.synthetic import (create_synthetic_irt_dichotomous, 
+                             create_synthetic_irt_polytomous)
 
-from girth.synthetic import (_my_digitize, _credit_func, 
-                             _graded_func, _unfold_func,
-                             _graded_func_md,
-                             _check_difficulty_parameters)
+from girth.synthetic.polytomous import (
+    _my_digitize, _credit_func, _graded_func, 
+    _unfold_func, _graded_func_md,
+    _check_difficulty_parameters)
+
 
 class TestSynthetic(unittest.TestCase):
     """Testing the creation of synthetic irt function."""

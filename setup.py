@@ -10,7 +10,8 @@ if __name__ == '__main__':
     setup(
         name="girth", 
         packages=['girth', 'girth.utilities',
-                  'girth.unidimensional'
+                  'girth.unidimensional.polytomous',
+                  'girth.unidimensional.dichotomous',
                   'girth.multidimensional',
                   'girth.synthetic',
                   'girth.factoranalysis', 'girth.common'],

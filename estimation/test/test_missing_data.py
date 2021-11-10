@@ -2,14 +2,11 @@ import unittest  # pylint: disable=cyclic-import
 
 import numpy as np
 
-from girth import tag_missing_data
-
-from girth import create_synthetic_irt_dichotomous, create_synthetic_irt_polytomous
-from girth import rasch_jml, onepl_jml, twopl_jml
-from girth import rasch_mml, onepl_mml, twopl_mml
-
-from girth import grm_jml, pcm_jml
-from girth import grm_mml_eap, grm_mml, pcm_mml, gum_mml
+from girth.synthetic import (create_synthetic_irt_dichotomous, 
+    create_synthetic_irt_polytomous)
+from girth import (tag_missing_data, rasch_jml, onepl_jml, twopl_jml,
+    rasch_mml, onepl_mml, twopl_mml, grm_jml, pcm_jml,
+    grm_mml_eap, grm_mml, pcm_mml, gum_mml)
 
 
 def _create_missing_data(dataset, rng, threshold):

@@ -1,23 +1,25 @@
 import unittest  # pylint: disable=cyclic-import
 
-
 import numpy as np
 from scipy.special import roots_legendre
 from scipy import integrate, stats
 
-from girth import (create_synthetic_irt_dichotomous,
-                   trim_response_set_and_counts,
-                   convert_responses_to_kernel_sign,
-                   validate_estimation_options, condition_polytomous_response,
-                   get_true_false_counts, mml_approx)
-from girth.utils import (_get_quadrature_points, default_options, 
-                        tag_missing_data, INVALID_RESPONSE,
-                        _compute_partial_integral)
-from girth.polytomous_utils import (_graded_partial_integral, _solve_for_constants,
-                                    _solve_integral_equations, _credit_partial_integral,
-                                    _unfold_partial_integral, _graded_partial_integral_md,
-                                    _build_einsum_string)
-from girth.synthetic import _unfold_func
+from girth.synthetic import create_synthetic_irt_dichotomous
+from girth import (
+    trim_response_set_and_counts, validate_estimation_options, 
+    convert_responses_to_kernel_sign, tag_missing_data, default_options,
+    condition_polytomous_response, get_true_false_counts, mml_approx,
+    INVALID_RESPONSE)
+from girth.utilities.utils import _get_quadrature_points
+from girth.unidimensional.dichotomous.partial_integrals import _compute_partial_integral 
+
+from girth.unidimensional.polytomous.partial_integrals_poly import (
+    _credit_partial_integral, _graded_partial_integral, _unfold_partial_integral
+)
+from girth.multidimensional.partial_integral_md import _graded_partial_integral_md
+from girth.utilities.polytomous_utils import (_solve_for_constants, 
+    _solve_integral_equations, _build_einsum_string)
+from girth.synthetic.polytomous import _unfold_func
 
 
 class TestUtilitiesMethods(unittest.TestCase):

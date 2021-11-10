@@ -1,4 +1,4 @@
-from girth import grm_mml
+from girth.unidimensional.polytomous import grm_mml
 
 
 def twopl_mml(dataset, options=None):

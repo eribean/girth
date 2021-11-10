@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import norm
 
-from girth.utils import INVALID_RESPONSE
+from girth.utilities import INVALID_RESPONSE
 from girth.common import polyserial_correlation, cronbach_alpha
 
 

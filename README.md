@@ -98,7 +98,7 @@ To run girth with unidimensional models.
 ```python
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous
+from girth.synthetic import create_synthetic_irt_dichotomous
 from girth import twopl_mml
 
 # Create Synthetic Data
@@ -121,8 +121,7 @@ difficulty_estimates = estimates['Difficulty']
 Missing data is supported with the `tag_missing_data` function.
 
 ```python
-from girth import tag_missing_data
-from girth import twopl_mml
+from girth import tag_missing_data, twopl_mml
 
 # import data (you supply this function)
 my_data = import_data(filename)
@@ -143,7 +142,7 @@ of time
 ```python
 import numpy as np
 
-from girth import create_synthetic_irt_dichotomous
+from girth.synthetic import create_synthetic_irt_dichotomous
 from girth import multidimensional_twopl_mml
 
 # Create Synthetic Data
@@ -209,7 +208,7 @@ print(results)
 When collected data is ordinal, Pearson's correlation will provide biased estimates of the correlation. Polychoric correlations estimate the correlation given that the data is ordinal and normally distributed.
 
 ```python
-import girth
+import girth.synthetic as gsyn
 import girth.factoranalysis as gfa
 import girth.common as gcm
 
@@ -217,7 +216,7 @@ discrimination = np.random.uniform(-2, 2, (20, 2))
 thetas = np.random.randn(2, 1000)
 difficulty = np.linspace(-1.5, 1, 20)
 
-syn_data = girth.create_synthetic_irt_dichotomous(difficulty, discrimination, thetas)
+syn_data = gsyn.create_synthetic_irt_dichotomous(difficulty, discrimination, thetas)
 
 polychoric_corr = gcm.polychoric_correlation(syn_data, start_val=0, stop_val=1)
 

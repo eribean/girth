@@ -1,6 +1,6 @@
 import numpy as np
 
-from girth.utils import INVALID_RESPONSE
+from girth.utilities.utils import INVALID_RESPONSE
 
 
 __all__ = ['reverse_score']

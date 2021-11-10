@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square&color=darkgreen)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/244149937.svg)](https://zenodo.org/badge/latestdoi/244149937)
 
-# <ins>**G**</ins>eorgia Tech <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory
+# <ins>**G**</ins>IRTH: <ins>**I**</ins>tem <ins>**R**</ins>esponse <ins>**Th**</ins>eory
 
 [![GIRTH](https://eribean.github.io/girth/featured-background_hubf3811d606e709c4b8d3b39f7338865e_285315_960x540_fill_q75_catmullrom_top.jpg)](https://eribean.github.io/girth/)
 

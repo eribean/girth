@@ -19,7 +19,7 @@ if __name__ == '__main__':
                      'girth.synthetic': convert_path('./synthetic'),
                      'girth.common': convert_path('./common'),
                      'girth.factoranalysis': convert_path('./factoranalysis')},
-        version="0.7.5",
+        version="0.8.0",
         license="MIT",
         description="A python package for Item Response Theory.",
         long_description=long_description.replace('<ins>','').replace('</ins>',''),

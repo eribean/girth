@@ -39,9 +39,6 @@ def grm_jml(dataset, options=None):
     invalid_response_mask = ~valid_response_mask    
     n_items, n_takers = responses.shape
 
-    # Set initial parameter estimates to default
-    thetas = np.zeros((n_takers,))
-
     # Initialize difficulty parameters for iterations
     betas = np.full((item_counts.sum(),), -10000.0)
     discrimination = np.ones_like(betas)
@@ -54,9 +51,12 @@ def grm_jml(dataset, options=None):
         start_ndx = start_indices[ndx] + 1
         betas[start_ndx:end_ndx] = np.linspace(-1, 1,
                                                item_counts[ndx] - 1)
+
+    # Set initial parameter estimates to default
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = 10000
-
+    thetas = np.zeros((n_takers,))
+    
     # Set invalid index to zero, this allows minimal
     # changes for invalid data and it is corrected
     # during integration

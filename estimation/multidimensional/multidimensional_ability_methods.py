@@ -43,10 +43,9 @@ def multidimensional_ability_map(dataset, difficulty, discrimination, options=No
     cpr_result = condition_polytomous_response(dataset, trim_ends=False)
     responses, item_counts, valid_response_mask = cpr_result
     invalid_response_mask = ~valid_response_mask
-    
     n_items = responses.shape[0]
-    difficulty = difficulty.reshape(n_items, -1)
 
+    difficulty = difficulty.reshape(n_items, -1)
     abilities = np.zeros((n_factors, dataset.shape[1]))
        
     # Initialize difficulty parameter storage
@@ -129,8 +128,8 @@ def multidimensional_ability_eap(dataset, difficulty, discrimination, options=No
     cpr_result = condition_polytomous_response(dataset, trim_ends=False)
     responses, item_counts, valid_response_mask = cpr_result
     invalid_response_mask = ~valid_response_mask
-    
     n_items = responses.shape[0]
+
     difficulty = difficulty.reshape(n_items, -1)
     
     # Multi-dimensional Quadrature Locations

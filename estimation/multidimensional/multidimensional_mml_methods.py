@@ -83,9 +83,17 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
     cpr_result = condition_polytomous_response(dataset, trim_ends=False)
     responses, item_counts, valid_response_mask = cpr_result
     invalid_response_mask = ~valid_response_mask
-    
     n_items = responses.shape[0]
-    
+
+    # Initialize difficulty parameters for estimation
+    betas = np.full((item_counts.sum(),), 10000.0)
+    cumulative_item_counts = item_counts.cumsum()
+    start_indices = np.roll(cumulative_item_counts, 1)
+    start_indices[0] = 0
+
+    # Multi-dimensional discrimination
+    discrimination = np.zeros((betas.shape[0], n_factors))
+
     # Should we use the LUT
     _integral_func = _solve_integral_equations
     _interp_func = None
@@ -108,15 +116,6 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
     for ndx in range(n_items):
         temp_output = _solve_for_constants(responses[ndx, valid_response_mask[ndx]])
         integral_counts.append(temp_output)
-
-    # Initialize difficulty parameters for estimation
-    betas = np.full((item_counts.sum(),), 10000.0)
-    cumulative_item_counts = item_counts.cumsum()
-    start_indices = np.roll(cumulative_item_counts, 1)
-    start_indices[0] = 0
-    
-    # Multi-dimensional discrimination
-    discrimination = np.zeros((betas.shape[0], n_factors))
 
     if options['initial_guess']:
         initial_estimate = initial_guess_md(dataset, n_factors, options)
@@ -141,7 +140,7 @@ def multidimensional_grm_mml(dataset, n_factors, options=None):
             end_ndx = cumulative_item_counts[ndx]
             start_ndx = start_indices[ndx] + 1
             betas[start_ndx:end_ndx] = np.linspace(-1, 1,
-                                                item_counts[ndx] - 1)
+                                                   item_counts[ndx] - 1)
 
     betas_roll = np.roll(betas, -1)
     betas_roll[cumulative_item_counts-1] = -10000

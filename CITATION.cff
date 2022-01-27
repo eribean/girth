@@ -5,6 +5,6 @@ authors:
   given-names: "Ryan"
   orcid: "https://orcid.org/0000-0003-0931-5335"
 title: "GIRTH: G. Item Response Theory "
-version: 0.7.5
-date-released: 2021-10-29
+version: 0.8.0
+date-released: 2021-11-11
 url: "https://github.com/eribean/girth"

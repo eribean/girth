@@ -18,8 +18,7 @@ class TestRotation(unittest.TestCase):
         real_loadings = np.array([1, 0] * 5 + [0, 1]* 5).reshape(10, 2)
         rotated_loadings = real_loadings @ rotation
 
-        np.random.seed(1496) # For the Basin Hopping Routine
-        loadings, bases = sparsify_loadings(rotated_loadings, 
+        loadings, bases = sparsify_loadings(rotated_loadings, seed=11354684,
                                             orthogonal=True)
 
         np.testing.assert_allclose(loadings, real_loadings, rtol=1e-4, atol=1e-4)
@@ -35,8 +34,8 @@ class TestRotation(unittest.TestCase):
 
         transformed_loadings = real_loadings @ transformation
         
-        np.random.seed(262929) # For the Basin Hopping Routine
-        loadings, bases = sparsify_loadings(transformed_loadings, 
+        # np.random.seed(262929) # For the Basin Hopping Routine
+        loadings, bases = sparsify_loadings(transformed_loadings, seed=1954327,
                                             orthogonal=False, alpha=0.0)
         
         np.testing.assert_allclose(loadings, real_loadings, rtol=1e-4, atol=1e-4)

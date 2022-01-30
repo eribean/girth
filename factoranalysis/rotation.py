@@ -30,7 +30,8 @@ def sparsify_loadings(loadings, initial_guess=None, alpha=0.5,
     """
     n_factors = loadings.shape[1]
     if initial_guess is None:
-        initial_guess = np.random.rand(n_factors * (n_factors - 1)) * 2 * np.pi
+        rng = np.random.default_rng(seed)
+        initial_guess = rng.uniform(0, 2 * np.pi, n_factors * (n_factors - 1))
 
     if orthogonal:
         alpha = 50.

@@ -124,7 +124,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_polytomous(self.difficulty_poly, self.discrimination, 
                                                   self.theta, seed=rng)
 
-        result = standard_errors_bootstrap(dataset, grm_mml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, grm_mml, n_processors=1,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertTupleEqual(result['95th CI']['Difficulty'][0].shape, 
@@ -134,7 +134,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         dataset = create_synthetic_irt_polytomous(self.difficulty_poly, self.discrimination, 
                                                   self.theta, seed=rng, model='pcm')
 
-        result = standard_errors_bootstrap(dataset, pcm_mml, n_processors=2,
+        result = standard_errors_bootstrap(dataset, pcm_mml, n_processors=1,
                                            bootstrap_iterations=self.boot_iter, 
                                            options=self.options)
         self.assertTupleEqual(result['95th CI']['Difficulty'][0].shape, 

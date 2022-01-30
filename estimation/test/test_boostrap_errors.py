@@ -7,7 +7,6 @@ from girth import (rasch_jml, onepl_jml, twopl_jml, grm_jml, pcm_jml,
     rasch_mml, onepl_mml, twopl_mml, twopl_mml_eap, grm_mml_eap, pcm_mml,
     grm_mml, rasch_conditional, standard_errors_bootstrap)
 
-
 def _contains_keys(results, identifier):
     """Checks for standard keys in bootstrap result."""
     for key in ['Standard Errors', '95th CI', 'Bias', 'Solution']:
@@ -35,7 +34,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         self.theta = rng.standard_normal(1000)
         self.options = {'max_iteration': 2}
         self.boot_iter = 10
-
+    
     def test_jml_methods_dichotomous(self):
         """Testing Bootstrap on JML Methods Dichotomous."""
         rng = np.random.default_rng(39485720394875)
@@ -165,4 +164,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    import warnings
+
+    warnings.filterwarnings('ignore')    
     unittest.main()

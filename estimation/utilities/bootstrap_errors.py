@@ -1,4 +1,4 @@
-from multiprocessing import Pool
+from multiprocessing import get_context
 
 from itertools import starmap, repeat
 from functools import partial
@@ -75,7 +75,7 @@ Returns:
 
     # Run the bootstrap data
     if n_processors > 1:
-        with Pool(processes=n_processors) as pool:
+        with get_context("spawn").Pool(processes=n_processors) as pool:
             results = pool.starmap(_bootstrap_func, zip(repeat(dataset), repeat(irt_model),
                                                         repeat(options), bootstrap_chunks, rngs))
     else:

@@ -40,7 +40,7 @@ jobs:
         pip install pytest-cov
         pip install pytest-xdist
         pip install . --upgrade
-        pytest --cov=girth -n 2
+        pytest --cov=girth
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

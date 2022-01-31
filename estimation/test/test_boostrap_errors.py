@@ -39,7 +39,6 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         self.options = {'max_iteration': 2}
         self.boot_iter = 10
     
-    @unittest.skip(reason="Github")
     def test_jml_methods_dichotomous(self):
         """Testing Bootstrap on JML Methods Dichotomous."""
         rng = np.random.default_rng(39485720394875)

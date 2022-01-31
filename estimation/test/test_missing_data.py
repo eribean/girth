@@ -212,7 +212,7 @@ class TestMissingPolytomous(unittest.TestCase):
         result_missing = gum_mml(syn_data_missing)
 
         difference_rmse = _rmse(result_all_good['Delta'], result_missing['Delta'])
-        self.assertAlmostEqual(difference_rmse, 0.0340275, 3)
+        self.assertAlmostEqual(difference_rmse, 0.0340275, 2)
         difference_rmse = _rmse(result_all_good['Discrimination'], result_missing['Discrimination'])
         self.assertAlmostEqual(difference_rmse, 0.0872884, 3)
 

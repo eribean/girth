@@ -39,6 +39,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         self.options = {'max_iteration': 2}
         self.boot_iter = 10
     
+    @unittest.skip(reason="Github")
     def test_jml_methods_dichotomous(self):
         """Testing Bootstrap on JML Methods Dichotomous."""
         rng = np.random.default_rng(39485720394875)
@@ -61,6 +62,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
                                            options=self.options)
         _contains_keys(result, '2PL JML')
 
+    @unittest.skip(reason="Github")
     def test_jml_methods_polytomous(self):
         """Testing Bootstrap on JML Methods Polytomous."""
         rng = np.random.default_rng(8672379287302651089)
@@ -85,6 +87,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
                               self.difficulty_poly.shape)
         _contains_keys(result, 'PCM JML')
 
+    @unittest.skip(reason="Github")
     def test_rasch_conditional(self):
         """Testing rasch conditional methods."""
         rng = np.random.default_rng(426376867989075563)
@@ -98,6 +101,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
         self.assertEqual(result['Standard Errors']['Discrimination'][0], 0)
         _contains_keys(result, 'Rasch MML')
 
+    @unittest.skip(reason="Github")
     def test_mml_methods_dichotomous(self):
         """Testing Bootstrap on MML Methods Dichotomous."""
         rng = np.random.default_rng(8764328976187234)
@@ -120,6 +124,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
                                            options=self.options)
         _contains_keys(result, '2PL MML')
 
+    @unittest.skip(reason="Github")
     def test_mml_methods_polytomous(self):
         """Testing Bootstrap on MML Methods Polytomous."""
         rng = np.random.default_rng(4347621232345345696)
@@ -144,6 +149,7 @@ class TestBootstrapStandardErrors(unittest.TestCase):
                               self.difficulty_poly.shape)
         _contains_keys(result, 'PCM MML')
 
+    @unittest.skip(reason="Github")
     def test_eap_mml_methods(self):
         """Testing Bootstrap on eap methods."""
         rng = np.random.default_rng(66739234876520981)

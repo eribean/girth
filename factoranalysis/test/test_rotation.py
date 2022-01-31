@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from girth.factoranalysis import sparsify_loadings
+from girth.common import procrustes_rotation
 
 
 class TestRotation(unittest.TestCase):
@@ -18,11 +19,14 @@ class TestRotation(unittest.TestCase):
         real_loadings = np.array([1, 0] * 5 + [0, 1]* 5).reshape(10, 2)
         rotated_loadings = real_loadings @ rotation
 
-        loadings, bases = sparsify_loadings(rotated_loadings, seed=11354684,
+        loadings, bases = sparsify_loadings(rotated_loadings, seed=51743549,
                                             orthogonal=True)
 
-        np.testing.assert_allclose(loadings, real_loadings, rtol=1e-4, atol=1e-4)
-        np.testing.assert_allclose(bases, rotation, rtol=1e-4, atol=1e-4)
+        procrust_adjustment = procrustes_rotation(real_loadings, loadings)
+        rotation_determinate = np.linalg.det(procrust_adjustment)
+
+        self.assertAlmostEqual(rotation_determinate, 1.0, 5)
+        np.testing.assert_allclose(bases, rotation @ procrust_adjustment, rtol=1e-4, atol=1e-4)
 
     
     def test_rotation_oblique(self):
@@ -37,9 +41,13 @@ class TestRotation(unittest.TestCase):
         # np.random.seed(262929) # For the Basin Hopping Routine
         loadings, bases = sparsify_loadings(transformed_loadings, seed=1954327,
                                             orthogonal=False, alpha=0.0)
-        
-        np.testing.assert_allclose(loadings, real_loadings, rtol=1e-4, atol=1e-4)
-        np.testing.assert_allclose(bases, transformation, rtol=1e-4, atol=1e-4)
+
+        procrust_adjustment = procrustes_rotation(real_loadings, loadings)
+        rotation_determinate = np.linalg.det(procrust_adjustment)
+
+        self.assertAlmostEqual(rotation_determinate, 1.0, 5)
+        np.testing.assert_allclose(bases, transformation @ procrust_adjustment, 
+                                   rtol=1e-4, atol=1e-4)
 
 
 if __name__ == "__main__":

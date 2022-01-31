@@ -1,4 +1,5 @@
 import unittest
+import warnings   
 
 import numpy as np
 
@@ -18,7 +19,10 @@ def _contains_keys(results, identifier):
         if np.any(results['95th CI'][key][1] < results['95th CI'][key][0]):
             raise AssertionError(f"Confidence Interval Error. {key} " 
                                  f"Error in {identifier}")
-   
+
+
+warnings.filterwarnings('ignore')    
+
 
 class TestBootstrapStandardErrors(unittest.TestCase):
     """Test Fixture for Bootstrap Standard Errors."""

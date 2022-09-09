@@ -97,7 +97,7 @@ def grm_mml_eap(dataset, options=None):
                      'quadrature_bounds': (0.1, 5)}
     hyper_pdf = LatentPDF(hyper_options) 
     hyper_evaluation = np.zeros((hyper_options['quadrature_n'],))
-    base_hyper = (hyper_pdf.weights * hyper_pdf.null_distribution).astype('float128')
+    base_hyper = (hyper_pdf.weights * hyper_pdf.null_distribution).astype(float)
     linear_hyper = base_hyper * hyper_pdf.quadrature_locations
 
     for iteration in range(options['max_iteration']):
